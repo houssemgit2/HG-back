@@ -1,17 +1,17 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn, BaseEntity } from "typeorm";
 import { Remuneration } from "./Remuneration";
 
-@Entity("remuneration_type", { schema: "hg_promo_beta" })
-export class RemunerationType {
-  @PrimaryGeneratedColumn({ type: "int", name: "id" })
+@Entity('remuneration_type', { schema: 'hg_promo_beta' })
+export class RemunerationType extends BaseEntity {
+  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
-  @Column("varchar", { name: "name", length: 256 })
+  @Column('varchar', { name: 'name', length: 256 })
   name: string;
 
   @OneToMany(
     () => Remuneration,
-    remuneration => remuneration.remunerationType
+    remuneration => remuneration.remunerationType,
   )
   remunerations: Remuneration[];
 }

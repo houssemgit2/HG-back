@@ -1,17 +1,17 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn, BaseEntity } from "typeorm";
 import { Brand } from "./Brand";
 
-@Entity("laboratory", { schema: "hg_promo_beta" })
-export class Laboratory {
-  @PrimaryGeneratedColumn({ type: "int", name: "id" })
+@Entity('laboratory', { schema: 'hg_promo_beta' })
+export class Laboratory extends BaseEntity {
+  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
-  @Column("varchar", { name: "name", length: 256 })
+  @Column('varchar', { name: 'name', length: 256 })
   name: string;
 
   @OneToMany(
     () => Brand,
-    brand => brand.laboratory
+    brand => brand.laboratory,
   )
   brands: Brand[];
 }

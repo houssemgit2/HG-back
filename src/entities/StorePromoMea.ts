@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  BaseEntity,
 } from 'typeorm';
 import { RejectionReason } from './RejectionReason';
 import { Store } from './Store';
@@ -14,7 +15,7 @@ import { Promo } from './Promo';
 @Index('store_promo_mea_promo_id_fk', ['promoId'], {})
 @Index('store_promo_mea_rejected_reason_id_fk', ['rejectedReasonId'], {})
 @Entity('store_promo_mea', { schema: 'hg_promo_beta' })
-export class StorePromoMea {
+export class StorePromoMea extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 

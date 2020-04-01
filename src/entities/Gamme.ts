@@ -5,41 +5,42 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
-  PrimaryGeneratedColumn
-} from "typeorm";
-import { Brand } from "./Brand";
-import { Product } from "./Product";
-import { Promo } from "./Promo";
+  PrimaryGeneratedColumn,
+  BaseEntity,
+} from 'typeorm';
+import { Brand } from './Brand';
+import { Product } from './Product';
+import { Promo } from './Promo';
 
-@Index("gamme_brand_id_fk", ["brandId"], {})
-@Entity("gamme", { schema: "hg_promo_beta" })
-export class Gamme {
-  @PrimaryGeneratedColumn({ type: "int", name: "id" })
+@Index('gamme_brand_id_fk', ['brandId'], {})
+@Entity('gamme', { schema: 'hg_promo_beta' })
+export class Gamme extends BaseEntity {
+  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
-  @Column("int", { name: "brand_id" })
+  @Column('int', { name: 'brand_id' })
   brandId: number;
 
-  @Column("varchar", { name: "name", length: 256 })
+  @Column('varchar', { name: 'name', length: 256 })
   name: string;
 
   @ManyToOne(
     () => Brand,
     brand => brand.gammes,
-    { onDelete: "RESTRICT", onUpdate: "RESTRICT" }
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
   )
-  @JoinColumn([{ name: "brand_id", referencedColumnName: "id" }])
+  @JoinColumn([{ name: 'brand_id', referencedColumnName: 'id' }])
   brand: Brand;
 
   @OneToMany(
     () => Product,
-    product => product.gamme
+    product => product.gamme,
   )
   products: Product[];
 
   @OneToMany(
     () => Promo,
-    promo => promo.gamme
+    promo => promo.gamme,
   )
   promos: Promo[];
 }

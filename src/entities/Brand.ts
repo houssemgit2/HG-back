@@ -6,13 +6,14 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  BaseEntity,
 } from 'typeorm';
 import { Laboratory } from './Laboratory';
 import { Gamme } from './Gamme';
 
 @Index('brand_laboratory_id_fk', ['laboratoryId'], {})
 @Entity('brand', { schema: 'hg_promo_beta' })
-export class Brand {
+export class Brand extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 

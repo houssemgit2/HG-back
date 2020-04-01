@@ -4,24 +4,25 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn
-} from "typeorm";
-import { Promo } from "./Promo";
+  PrimaryGeneratedColumn,
+  BaseEntity,
+} from 'typeorm';
+import { Promo } from './Promo';
 
-@Index("emplacement_promo_id_fk", ["promoId"], {})
-@Entity("emplacement", { schema: "hg_promo_beta" })
-export class Emplacement {
-  @PrimaryGeneratedColumn({ type: "int", name: "id" })
+@Index('emplacement_promo_id_fk', ['promoId'], {})
+@Entity('emplacement', { schema: 'hg_promo_beta' })
+export class Emplacement extends BaseEntity {
+  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
-  @Column("int", { name: "promo_id" })
+  @Column('int', { name: 'promo_id' })
   promoId: number;
 
   @ManyToOne(
     () => Promo,
     promo => promo.emplacements,
-    { onDelete: "RESTRICT", onUpdate: "RESTRICT" }
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
   )
-  @JoinColumn([{ name: "promo_id", referencedColumnName: "id" }])
+  @JoinColumn([{ name: 'promo_id', referencedColumnName: 'id' }])
   promo: Promo;
 }
