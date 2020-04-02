@@ -1,7 +1,9 @@
 import { Repository, EntityRepository } from 'typeorm';
 import { User } from '../entities/User';
-import { AuthCredentialDto } from './auth-credential.dto';
+import { AuthCredentialDto } from './dto/auth-credential.dto';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ConflictException } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
   constructor(
@@ -21,18 +23,36 @@ export class UserRepository extends Repository<User> {
       userRoleId,
       address,
     } = authCredentialDto;
+    const exists = await this.findOne({ email });
+    if (exists)
+      throw new ConflictException(`${email} already token by another user`);
+
     const user = new User();
     user.storeId = storeId;
     user.userRoleId = userRoleId;
     user.firstName = firstName;
     user.lastName = lastName;
-    user.password = password;
+    user.salt = await bcrypt.genSalt();
+    user.password = await this.hashPassword(password, user.salt);
     user.email = email;
     user.address = address;
 
-    const found = await user.save();
-    return found;
+    const newUser = await user.save();
+    newUser.transform();
+    return newUser;
   }
 
-  async login(authCredentialDto: AuthCredentialDto) {}
+  async validateUserLogin(authCredentialDto: AuthCredentialDto): Promise<User> {
+    const { email, password } = authCredentialDto;
+    const user = await this.findOne({ email });
+    if (user && (await user.validatePassword(password))) {
+      user.transform();
+      return user;
+    }
+    return null;
+  }
+
+  private async hashPassword(password: string, salt: string): Promise<string> {
+    return bcrypt.hash(password, salt);
+  }
 }

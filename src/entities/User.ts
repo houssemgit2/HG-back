@@ -11,6 +11,7 @@ import {
 import { RefreshToken } from './RefreshToken';
 import { Store } from './Store';
 import { UserRole } from './UserRole';
+import * as bcrypt from 'bcrypt';
 
 @Index('user_store_id_fk', ['storeId'], {})
 @Index('user_user_role_id_fk', ['userRoleId'], {})
@@ -42,6 +43,9 @@ export class User extends BaseEntity {
 
   @Column('varchar', { name: 'address', length: 255 })
   address: string;
+
+  @Column('varchar', { name: 'salt', length: 255 })
+  salt: string;
 
   @Column('datetime', {
     name: 'created_at',
@@ -78,4 +82,13 @@ export class User extends BaseEntity {
   )
   @JoinColumn([{ name: 'user_role_id', referencedColumnName: 'id' }])
   userRole: UserRole;
+
+  async validatePassword(password: string): Promise<boolean> {
+    const hash = await bcrypt.hash(password, this.salt);
+    return hash === this.password;
+  }
+  transform(): void {
+    delete this.password;
+    delete this.salt;
+  }
 }
