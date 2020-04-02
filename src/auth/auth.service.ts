@@ -1,15 +1,10 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthCredentialDto } from './dto/auth-credential.dto';
 import { User } from '../entities/User';
-import { Repository } from 'typeorm';
 import { UserRepository } from './user.repository';
 import { JwtService } from '@nestjs/jwt';
-import { JwtPayload } from '../../dist/auth/jwt-payload.interface';
+import { JwtPayload } from './interface/jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
