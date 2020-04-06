@@ -1,10 +1,16 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthCredentialDto } from './dto/auth-credential.dto';
 import { User } from '../entities/User';
 import { UserRepository } from './user.repository';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './interface/jwt-payload.interface';
+import { nextTick } from 'process';
+import { LoginCredentialDto } from './dto/login-credential.dto';
 
 @Injectable()
 export class AuthService {
@@ -15,24 +21,28 @@ export class AuthService {
   ) {}
 
   async register(authCredentialDto: AuthCredentialDto): Promise<User> {
-    return this.userRepository.register(authCredentialDto);
+    try {
+      return await this.userRepository.register(authCredentialDto);
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
   }
 
   async login(
-    authCredentialDto: AuthCredentialDto,
+    loginCredentialDto: LoginCredentialDto,
   ): Promise<{ accessToken: string }> {
-    const result = await this.userRepository.validateUserLogin(
-      authCredentialDto,
-    );
+    try {
+      const result = await this.userRepository.validateUserLogin(
+        loginCredentialDto,
+      );
 
-    if (!result) throw new UnauthorizedException('Invalid credential');
-    const payload: JwtPayload = { email: authCredentialDto.email };
-    const accessToken = await this.jwtService.sign(payload);
-    return { accessToken };
-  }
-
-  async refresh(authCredentialDto: AuthCredentialDto): Promise<void> {
-    // return this.userRepository.login(authCredentialDto);
+      if (!result) throw new UnauthorizedException('Invalid credential');
+      const payload: JwtPayload = { email: loginCredentialDto.email };
+      const accessToken = await this.jwtService.sign(payload);
+      return { accessToken };
+    } catch (e) {
+      throw new Error(e);
+    }
   }
 
   async resetPwd(authCredentialDto: AuthCredentialDto): Promise<void> {

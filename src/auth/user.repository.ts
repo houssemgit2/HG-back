@@ -4,6 +4,7 @@ import { AuthCredentialDto } from './dto/auth-credential.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConflictException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { LoginCredentialDto } from './dto/login-credential.dto';
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
   constructor(
@@ -54,8 +55,8 @@ export class UserRepository extends Repository<User> {
     user.transform();
     return user;
   }
-  async validateUserLogin(authCredentialDto: AuthCredentialDto): Promise<User> {
-    const { email, password } = authCredentialDto;
+  async validateUserLogin(loginCredentialDto: LoginCredentialDto): Promise<User> {
+    const { email, password } = loginCredentialDto;
     const user = await this.findOne({ email });
     if (user && (await user.validatePassword(password))) {
       user.transform();
