@@ -41,7 +41,19 @@ export class UserRepository extends Repository<User> {
     newUser.transform();
     return newUser;
   }
-
+  async findAll(): Promise<any> {
+    const users = await this.find();
+    users.map(user => {
+      user.transform();
+      console.log(user);
+    });
+    return users;
+  }
+  async findAndTransform(id: number): Promise<User> {
+    const user = await this.findOne({ id });
+    user.transform();
+    return user;
+  }
   async validateUserLogin(authCredentialDto: AuthCredentialDto): Promise<User> {
     const { email, password } = authCredentialDto;
     const user = await this.findOne({ email });

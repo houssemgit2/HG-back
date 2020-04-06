@@ -78,7 +78,7 @@ export class User extends BaseEntity {
   @ManyToOne(
     () => UserRole,
     userRole => userRole.users,
-    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
   )
   @JoinColumn([{ name: 'user_role_id', referencedColumnName: 'id' }])
   userRole: UserRole;
