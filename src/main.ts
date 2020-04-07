@@ -25,11 +25,12 @@ async function bootstrap() {
     .setDescription('HealthyGRoup API')
     .setVersion('2.0')
     .addTag('hg')
+    .addBearerAuth()
     .build();
+
   const document = SwaggerModule.createDocument(
     app,
     options,
-    // , {    include: [StoreModule], }
   );
   SwaggerModule.setup('api', app, document);
 
