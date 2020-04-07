@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
   ForbiddenException,
   Logger,
-  NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthCredentialDto } from './dto/auth-credential.dto';
@@ -49,24 +49,19 @@ export class AuthService {
   }
 
   async resetPwd(resetPwdDto: ResetPwdDto, user: User): Promise<any> {
-    try {
-      const { email } = resetPwdDto;
-      const user = await User.findOne({ where: { email } });
-      if (user.email === email) {
-        const password: string = generator.generate({
-          length: 10,
-          numbers: true,
-          uppercase: false,
-        });
-        this.logger.debug(password);
-        user.password = password;
-        this.logger.debug(user.email);
-        const newUser = await user.save();
-        return newUser;
-      }
-      this.logger.error(`given ${email} is not matched`);
-    } catch (e) {
-      return new NotFoundException(`email is not matched`);
+    const { email } = resetPwdDto;
+    // const user = await User.findOne({ where: { email } });
+    if (user.email === email) {
+      const password: string = generator.generate({
+        length: 10,
+        numbers: true,
+        uppercase: false,
+      });
+      this.logger.debug('updating password');
+      this.userRepository.updatepwd(user, password);
+
+      return { password };
     }
+    throw new BadRequestException(`email is not matched`);
   }
 }

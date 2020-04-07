@@ -57,6 +57,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Reset password' })
   @ApiResponse({ status: 200, description: 'Return new password' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 400, description: 'Email not matched' })
   @Post('reset-password')
   @UseGuards(AuthGuard())
   resetPwd(@Body() resetPwdDto: ResetPwdDto, @Req() req): Promise<void> {
@@ -66,7 +67,7 @@ export class AuthController {
   }
 
   // TODO this role is for development only
-  @ApiOperation({ summary: 'Log in' })
+  @ApiOperation({ summary: 'this user' })
   @ApiResponse({ status: 200, description: 'return the connected user' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @Post('/test')
