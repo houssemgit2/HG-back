@@ -2,14 +2,9 @@ import {
   Controller,
   Post,
   Body,
-  Get,
   UseGuards,
   Req,
   Next,
-  Session,
-  Ip,
-  HttpCode,
-  Redirect,
   Logger,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -17,14 +12,17 @@ import { AuthCredentialDto } from './dto/auth-credential.dto';
 import { AuthService } from './auth.service';
 import { User } from '../entities/User';
 import { AuthGuard } from '@nestjs/passport';
-import { GetUser } from './get-user.decorator';
 import { AdminGard } from 'src/auth/gards/admin.gard';
 import { LoginCredentialDto } from './dto/login-credential.dto';
+import { ResetPwdDto } from './dto/reset-pwd.dto';
+import { ApiBody } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
   private logger = new Logger('/auth/');
+
+  @ApiBody({ type: [AuthCredentialDto] })
   @Post('register')
   async register(@Body() authCredentialDto: AuthCredentialDto): Promise<User> {
     this.logger.verbose(
@@ -34,7 +32,7 @@ export class AuthController {
       return await this.authService.register(authCredentialDto);
     } catch (e) {
       this.logger.error('failed to register new user');
-      throw new InternalServerErrorException('e');
+      throw new InternalServerErrorException(e);
     }
   }
 
@@ -47,8 +45,8 @@ export class AuthController {
   }
 
   @Post('reset-password')
-  resetPwd(@Body() authCredentialDto: AuthCredentialDto): Promise<void> {
-    return this.authService.resetPwd(authCredentialDto);
+  resetPwd(@Body() resetPwdDto: ResetPwdDto): Promise<void> {
+    return this.authService.resetPwd(resetPwdDto);
   }
 
   // TODO this role is for development only
@@ -56,12 +54,6 @@ export class AuthController {
   @Post('/test')
   @UseGuards(AuthGuard())
   test(@Req() req: any) {
-    // console.log(ip);
-    return req.user;
-  }
-  @Post('/test2')
-  @UseGuards(AuthGuard(), AdminGard)
-  test2(@Req() req: any) {
     // console.log(ip);
     return req.user;
   }

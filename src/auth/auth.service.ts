@@ -2,6 +2,7 @@ import {
   Injectable,
   UnauthorizedException,
   InternalServerErrorException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthCredentialDto } from './dto/auth-credential.dto';
@@ -11,6 +12,7 @@ import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './interface/jwt-payload.interface';
 import { nextTick } from 'process';
 import { LoginCredentialDto } from './dto/login-credential.dto';
+import { ResetPwdDto } from './dto/reset-pwd.dto';
 
 @Injectable()
 export class AuthService {
@@ -41,11 +43,11 @@ export class AuthService {
       const accessToken = await this.jwtService.sign(payload);
       return { accessToken };
     } catch (e) {
-      throw new Error(e);
+      throw new ForbiddenException(e);
     }
   }
 
-  async resetPwd(authCredentialDto: AuthCredentialDto): Promise<void> {
+  async resetPwd(resetPwdDto: ResetPwdDto): Promise<void> {
     // return this.userRepository.login(authCredentialDto);
   }
 }
