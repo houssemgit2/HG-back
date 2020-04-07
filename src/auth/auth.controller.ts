@@ -2,14 +2,9 @@ import {
   Controller,
   Post,
   Body,
-  Get,
   UseGuards,
   Req,
   Next,
-  Session,
-  Ip,
-  HttpCode,
-  Redirect,
   Logger,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -17,14 +12,25 @@ import { AuthCredentialDto } from './dto/auth-credential.dto';
 import { AuthService } from './auth.service';
 import { User } from '../entities/User';
 import { AuthGuard } from '@nestjs/passport';
-import { GetUser } from './get-user.decorator';
 import { AdminGard } from 'src/auth/gards/admin.gard';
 import { LoginCredentialDto } from './dto/login-credential.dto';
+import { ResetPwdDto } from './dto/reset-pwd.dto';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
 
+@ApiBearerAuth()
+@ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
   private logger = new Logger('/auth/');
+
+  @ApiOperation({ summary: 'Register new user' })
+  @ApiResponse({ status: 200, description: 'Return the new user paramters' })
   @Post('register')
   async register(@Body() authCredentialDto: AuthCredentialDto): Promise<User> {
     this.logger.verbose(
@@ -34,10 +40,13 @@ export class AuthController {
       return await this.authService.register(authCredentialDto);
     } catch (e) {
       this.logger.error('failed to register new user');
-      throw new InternalServerErrorException('e');
+      throw new InternalServerErrorException(e);
     }
   }
 
+  @ApiOperation({ summary: 'Log in' })
+  @ApiResponse({ status: 200, description: 'Return token' })
+  @ApiResponse({ status: 403, description: 'Incorrect mail or password' })
   @Post('login')
   signIn(
     @Body() loginCredentialDto: LoginCredentialDto,
@@ -45,23 +54,24 @@ export class AuthController {
     this.logger.verbose(`user is connecting... ${loginCredentialDto.email}`);
     return this.authService.login(loginCredentialDto);
   }
-
+  @ApiOperation({ summary: 'Reset password' })
+  @ApiResponse({ status: 200, description: 'Return new password' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
   @Post('reset-password')
-  resetPwd(@Body() authCredentialDto: AuthCredentialDto): Promise<void> {
-    return this.authService.resetPwd(authCredentialDto);
+  @UseGuards(AuthGuard())
+  resetPwd(@Body() resetPwdDto: ResetPwdDto, @Req() req): Promise<void> {
+    const user: User = req.user;
+    this.logger.verbose('reset passowrd');
+    return this.authService.resetPwd(resetPwdDto, user);
   }
 
   // TODO this role is for development only
-
+  @ApiOperation({ summary: 'Log in' })
+  @ApiResponse({ status: 200, description: 'return the connected user' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
   @Post('/test')
   @UseGuards(AuthGuard())
   test(@Req() req: any) {
-    // console.log(ip);
-    return req.user;
-  }
-  @Post('/test2')
-  @UseGuards(AuthGuard(), AdminGard)
-  test2(@Req() req: any) {
     // console.log(ip);
     return req.user;
   }

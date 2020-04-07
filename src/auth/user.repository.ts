@@ -55,7 +55,9 @@ export class UserRepository extends Repository<User> {
     user.transform();
     return user;
   }
-  async validateUserLogin(loginCredentialDto: LoginCredentialDto): Promise<User> {
+  async validateUserLogin(
+    loginCredentialDto: LoginCredentialDto,
+  ): Promise<User> {
     const { email, password } = loginCredentialDto;
     const user = await this.findOne({ email });
     if (user && (await user.validatePassword(password))) {
