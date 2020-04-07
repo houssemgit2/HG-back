@@ -15,14 +15,22 @@ import { AuthGuard } from '@nestjs/passport';
 import { AdminGard } from 'src/auth/gards/admin.gard';
 import { LoginCredentialDto } from './dto/login-credential.dto';
 import { ResetPwdDto } from './dto/reset-pwd.dto';
-import { ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
 
+@ApiBearerAuth()
+@ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
   private logger = new Logger('/auth/');
 
-  @ApiBody({ type: [AuthCredentialDto] })
+  @ApiOperation({ summary: 'Register new user' })
+  @ApiResponse({ status: 200, description: 'Return the new user paramters' })
   @Post('register')
   async register(@Body() authCredentialDto: AuthCredentialDto): Promise<User> {
     this.logger.verbose(
@@ -36,6 +44,9 @@ export class AuthController {
     }
   }
 
+  @ApiOperation({ summary: 'Log in' })
+  @ApiResponse({ status: 200, description: 'Return token' })
+  @ApiResponse({ status: 403, description: 'Incorrect mail or password' })
   @Post('login')
   signIn(
     @Body() loginCredentialDto: LoginCredentialDto,
@@ -43,14 +54,21 @@ export class AuthController {
     this.logger.verbose(`user is connecting... ${loginCredentialDto.email}`);
     return this.authService.login(loginCredentialDto);
   }
-
+  @ApiOperation({ summary: 'Reset password' })
+  @ApiResponse({ status: 200, description: 'Return new password' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
   @Post('reset-password')
-  resetPwd(@Body() resetPwdDto: ResetPwdDto): Promise<void> {
-    return this.authService.resetPwd(resetPwdDto);
+  @UseGuards(AuthGuard())
+  resetPwd(@Body() resetPwdDto: ResetPwdDto, @Req() req): Promise<void> {
+    const user: User = req.user;
+    this.logger.verbose('reset passowrd');
+    return this.authService.resetPwd(resetPwdDto, user);
   }
 
   // TODO this role is for development only
-
+  @ApiOperation({ summary: 'Log in' })
+  @ApiResponse({ status: 200, description: 'return the connected user' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
   @Post('/test')
   @UseGuards(AuthGuard())
   test(@Req() req: any) {
