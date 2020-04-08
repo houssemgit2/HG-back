@@ -8,7 +8,13 @@ import { UserModule } from './user/user.module';
 import { PromoModule } from './promo/promo.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(), AuthModule, StoreModule, UserModule, PromoModule],
+  imports: [
+    TypeOrmModule.forRoot(),
+    AuthModule,
+    StoreModule,
+    UserModule,
+    PromoModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

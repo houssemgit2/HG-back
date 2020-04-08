@@ -2,22 +2,23 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-// import { StoreModule } from './store/store.module';
+import * as helmet from 'helmet';
 
 async function bootstrap() {
   const logger = new Logger('bootstrap_main.ts');
   logger.log('starting the application....');
 
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { cors: true });
 
   // ensuring all endpoints are protected from receiving incorrect data.
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
+      // whitelist: true,
+      // forbidNonWhitelisted: true,
       transform: true,
     }),
   );
+  app.use(helmet());
 
   // swagger initialization
   const options = new DocumentBuilder()
@@ -28,10 +29,7 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
 
-  const document = SwaggerModule.createDocument(
-    app,
-    options,
-  );
+  const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api', app, document);
 
   const port = process.env.PORT;

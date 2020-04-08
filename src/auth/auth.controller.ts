@@ -12,7 +12,6 @@ import { AuthCredentialDto } from './dto/auth-credential.dto';
 import { AuthService } from './auth.service';
 import { User } from '../entities/User';
 import { AuthGuard } from '@nestjs/passport';
-import { AdminGard } from 'src/auth/gards/admin.gard';
 import { LoginCredentialDto } from './dto/login-credential.dto';
 import { ResetPwdDto } from './dto/reset-pwd.dto';
 import {
@@ -21,6 +20,7 @@ import {
   ApiOperation,
   ApiResponse,
 } from '@nestjs/swagger';
+import { IGetUserAuthInfoRequest } from './interface/user.interface';
 
 @ApiBearerAuth()
 @ApiTags('Authentication')
@@ -60,7 +60,10 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Email not matched' })
   @Post('reset-password')
   @UseGuards(AuthGuard())
-  resetPwd(@Body() resetPwdDto: ResetPwdDto, @Req() req): Promise<void> {
+  resetPwd(
+    @Body() resetPwdDto: ResetPwdDto,
+    @Req() req: IGetUserAuthInfoRequest,
+  ): Promise<void> {
     const user: User = req.user;
     this.logger.verbose('reset passowrd');
     return this.authService.resetPwd(resetPwdDto, user);
@@ -72,7 +75,7 @@ export class AuthController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @Post('/test')
   @UseGuards(AuthGuard())
-  test(@Req() req: any) {
+  test(@Req() req: IGetUserAuthInfoRequest) {
     // console.log(ip);
     return req.user;
   }

@@ -71,7 +71,7 @@ export class UserRepository extends Repository<User> {
     const newPwd = await this.hashPassword(password, salt);
     return this.save({ ...user, password: newPwd, salt });
   }
-  private  hashPassword(password: string, salt: string): Promise<string> {
+  private hashPassword(password: string, salt: string): Promise<string> {
     return bcrypt.hash(password, salt);
   }
 }
