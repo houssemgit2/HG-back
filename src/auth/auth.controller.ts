@@ -32,12 +32,12 @@ export class AuthController {
   @ApiOperation({ summary: 'Register new user' })
   @ApiResponse({ status: 200, description: 'Return the new user paramters' })
   @Post('register')
-  async register(@Body() authCredentialDto: UserCredentialDto): Promise<User> {
+  async register(@Body() userCredentialDto: UserCredentialDto): Promise<User> {
     this.logger.verbose(
-      `adding user... ${authCredentialDto.firstName} ${authCredentialDto.lastName}`,
+      `adding user... ${userCredentialDto.firstName} ${userCredentialDto.lastName}`,
     );
     try {
-      return await this.authService.register(authCredentialDto);
+      return await this.authService.register(userCredentialDto);
     } catch (e) {
       this.logger.error('failed to register new user');
       throw new InternalServerErrorException(e);
