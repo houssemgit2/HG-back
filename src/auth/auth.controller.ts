@@ -8,19 +8,19 @@ import {
   Logger,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { AuthCredentialDto } from './dto/auth-credential.dto';
+import { UserCredentialDto } from './dto/user-credential.dto';
 import { AuthService } from './auth.service';
 import { User } from '../entities/User';
 import { AuthGuard } from '@nestjs/passport';
-import { AdminGard } from 'src/auth/gards/admin.gard';
 import { LoginCredentialDto } from './dto/login-credential.dto';
-import { ResetPwdDto } from './dto/reset-pwd.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import {
   ApiTags,
   ApiBearerAuth,
   ApiOperation,
   ApiResponse,
 } from '@nestjs/swagger';
+import { IGetUserAuthInfoRequest } from './interface/user.interface';
 
 @ApiBearerAuth()
 @ApiTags('Authentication')
@@ -32,7 +32,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Register new user' })
   @ApiResponse({ status: 200, description: 'Return the new user paramters' })
   @Post('register')
-  async register(@Body() authCredentialDto: AuthCredentialDto): Promise<User> {
+  async register(@Body() authCredentialDto: UserCredentialDto): Promise<User> {
     this.logger.verbose(
       `adding user... ${authCredentialDto.firstName} ${authCredentialDto.lastName}`,
     );
@@ -57,21 +57,25 @@ export class AuthController {
   @ApiOperation({ summary: 'Reset password' })
   @ApiResponse({ status: 200, description: 'Return new password' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 400, description: 'Email not matched' })
   @Post('reset-password')
   @UseGuards(AuthGuard())
-  resetPwd(@Body() resetPwdDto: ResetPwdDto, @Req() req): Promise<void> {
+  resetPassword(
+    @Body() resetPasswordDto: ResetPasswordDto,
+    @Req() req: IGetUserAuthInfoRequest,
+  ): Promise<void> {
     const user: User = req.user;
     this.logger.verbose('reset passowrd');
-    return this.authService.resetPwd(resetPwdDto, user);
+    return this.authService.resetPassword(resetPasswordDto, user);
   }
 
   // TODO this role is for development only
-  @ApiOperation({ summary: 'Log in' })
+  @ApiOperation({ summary: 'this user' })
   @ApiResponse({ status: 200, description: 'return the connected user' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @Post('/test')
   @UseGuards(AuthGuard())
-  test(@Req() req: any) {
+  test(@Req() req: IGetUserAuthInfoRequest) {
     // console.log(ip);
     return req.user;
   }
