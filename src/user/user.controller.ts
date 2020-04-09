@@ -11,14 +11,14 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { User } from '../entities/User';
 import { UserService } from './user.service';
-import { AdminGard } from '../auth/gards/admin.gard';
+import { AdminGuard } from '../auth/guards/admin.gard';
 
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
 
   @Get()
-  @UseGuards(AuthGuard(), AdminGard)
+  @UseGuards(AuthGuard(), AdminGuard)
   findAll(@Req() req: any) {
     return this.userService.findUsers();
   }

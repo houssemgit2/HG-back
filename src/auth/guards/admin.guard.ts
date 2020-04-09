@@ -9,7 +9,7 @@ import { Logger } from '@nestjs/common';
 export const USER_LOGGER = 'client';
 export const ADMIN = 'admin';
 @Injectable()
-export class AdminGard implements CanActivate {
+export class AdminGuard implements CanActivate {
   logger = new Logger('admin Gard');
 
   canActivate(context: ExecutionContext) {
@@ -19,7 +19,7 @@ export class AdminGard implements CanActivate {
     if (user && user.userRole.name === ADMIN) return true;
     this.logger.error(`you'r not admin`);
     throw new UnauthorizedException(
-      `you'r not alloewd to visit this, checkout`,
+      `you'r not allowed to visit this, checkout`,
     );
   }
 }
