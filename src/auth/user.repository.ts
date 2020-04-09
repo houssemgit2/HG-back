@@ -1,8 +1,8 @@
 import { Repository, EntityRepository } from 'typeorm';
 import { User } from '../entities/User';
-import { AuthCredentialDto } from './dto/auth-credential.dto';
+import { UserCredentialDto } from './dto/user-credential.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ConflictException } from '@nestjs/common';
+import { ConflictException, Logger } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { LoginCredentialDto } from './dto/login-credential.dto';
 @EntityRepository(User)
@@ -13,8 +13,8 @@ export class UserRepository extends Repository<User> {
   ) {
     super();
   }
-
-  async register(authCredentialDto: AuthCredentialDto): Promise<User> {
+  logger = new Logger('USER REPOS');
+  async register(authCredentialDto: UserCredentialDto): Promise<User> {
     const {
       storeId,
       firstName,
@@ -25,6 +25,10 @@ export class UserRepository extends Repository<User> {
       address,
     } = authCredentialDto;
     const exists = await this.findOne({ email });
+    if (!exists)
+      this.logger.setContext(
+        `we didn't find a user with this email:${email}, w're creating a new one ...`,
+      );
     if (exists)
       throw new ConflictException(`${email} already token by another user`);
 
@@ -42,6 +46,7 @@ export class UserRepository extends Repository<User> {
     newUser.transform();
     return newUser;
   }
+
   async findAll(): Promise<any> {
     const users = await this.find();
     users.map(user => {

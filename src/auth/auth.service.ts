@@ -7,13 +7,13 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AuthCredentialDto } from './dto/auth-credential.dto';
+import { UserCredentialDto } from './dto/user-credential.dto';
 import { User } from '../entities/User';
 import { UserRepository } from './user.repository';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './interface/jwt-payload.interface';
 import { LoginCredentialDto } from './dto/login-credential.dto';
-import { ResetPwdDto } from './dto/reset-pwd.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import * as generator from 'generate-password';
 import * as AWS from 'aws-sdk';
 AWS.config.update({ region: 'us-east-1' });
@@ -26,7 +26,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
   logger = new Logger('Authentication :');
-  async register(authCredentialDto: AuthCredentialDto): Promise<User> {
+  async register(authCredentialDto: UserCredentialDto): Promise<User> {
     try {
       return await this.userRepository.register(authCredentialDto);
     } catch (e) {
@@ -51,8 +51,11 @@ export class AuthService {
     }
   }
 
-  async resetPwd(resetPwdDto: ResetPwdDto, user: User): Promise<any> {
-    const { email } = resetPwdDto;
+  async resetPassword(
+    resetPasswordDto: ResetPasswordDto,
+    user: User,
+  ): Promise<any> {
+    const { email } = resetPasswordDto;
     // const user = await User.findOne({ where: { email } });
     if (user.email !== email)
       throw new BadRequestException(`email is not matched`);
