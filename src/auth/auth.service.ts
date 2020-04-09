@@ -26,9 +26,9 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
   logger = new Logger('Authentication :');
-  async register(authCredentialDto: UserCredentialDto): Promise<User> {
+  async register(userCredentialDto: UserCredentialDto): Promise<User> {
     try {
-      return await this.userRepository.register(authCredentialDto);
+      return await this.userRepository.register(userCredentialDto);
     } catch (e) {
       throw new InternalServerErrorException(e);
     }

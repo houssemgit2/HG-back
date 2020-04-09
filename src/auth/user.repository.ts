@@ -14,7 +14,7 @@ export class UserRepository extends Repository<User> {
     super();
   }
   logger = new Logger('USER REPOS');
-  async register(authCredentialDto: UserCredentialDto): Promise<User> {
+  async register(userCredentialDto: UserCredentialDto): Promise<User> {
     const {
       storeId,
       firstName,
@@ -23,7 +23,7 @@ export class UserRepository extends Repository<User> {
       email,
       userRoleId,
       address,
-    } = authCredentialDto;
+    } = userCredentialDto;
     const exists = await this.findOne({ email });
     if (!exists)
       this.logger.setContext(
