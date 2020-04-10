@@ -8,12 +8,12 @@ import {
   Logger,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { AuthCredentialDto } from './dto/auth-credential.dto';
+import { UserCredentialDto } from './dto/user-credential.dto';
 import { AuthService } from './auth.service';
 import { User } from '../entities/User';
 import { AuthGuard } from '@nestjs/passport';
 import { LoginCredentialDto } from './dto/login-credential.dto';
-import { ResetPwdDto } from './dto/reset-pwd.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import {
   ApiTags,
   ApiBearerAuth,
@@ -32,12 +32,12 @@ export class AuthController {
   @ApiOperation({ summary: 'Register new user' })
   @ApiResponse({ status: 200, description: 'Return the new user paramters' })
   @Post('register')
-  async register(@Body() authCredentialDto: AuthCredentialDto): Promise<User> {
+  async register(@Body() userCredentialDto: UserCredentialDto): Promise<User> {
     this.logger.verbose(
-      `adding user... ${authCredentialDto.firstName} ${authCredentialDto.lastName}`,
+      `adding user... ${userCredentialDto.firstName} ${userCredentialDto.lastName}`,
     );
     try {
-      return await this.authService.register(authCredentialDto);
+      return await this.authService.register(userCredentialDto);
     } catch (e) {
       this.logger.error('failed to register new user');
       throw new InternalServerErrorException(e);
@@ -60,13 +60,13 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Email not matched' })
   @Post('reset-password')
   @UseGuards(AuthGuard())
-  resetPwd(
-    @Body() resetPwdDto: ResetPwdDto,
+  resetPassword(
+    @Body() resetPasswordDto: ResetPasswordDto,
     @Req() req: IGetUserAuthInfoRequest,
   ): Promise<void> {
     const user: User = req.user;
     this.logger.verbose('reset passowrd');
-    return this.authService.resetPwd(resetPwdDto, user);
+    return this.authService.resetPassword(resetPasswordDto, user);
   }
 
   // TODO this role is for development only

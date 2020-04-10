@@ -7,15 +7,16 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
-  BaseEntity
-} from "typeorm";
-import { EligibilityCondition } from "./EligibilityCondition";
-import { Emplacement } from "./Emplacement";
-import { Gamme } from "./Gamme";
-import { PromoType } from "./PromoType";
-import { Remuneration } from "./Remuneration";
-import { StorePromoMea } from "./StorePromoMea";
-import { StorePromoSelected } from "./StorePromoSelected";
+  BaseEntity,
+} from 'typeorm';
+import { EligibilityCondition } from './EligibilityCondition';
+import { Emplacement } from './Emplacement';
+import { Gamme } from './Gamme';
+import { PromoType } from './PromoType';
+import { Remuneration } from './Remuneration';
+import { StorePromoMea } from './StorePromoMea';
+import { StorePromoSelected } from './StorePromoSelected';
+import { PromoCluster } from './PromoCluster';
 
 @Index('promo_gamme_id_fk', ['gammeId'], {})
 @Entity('promo', { schema: 'hg_promo_beta' })
@@ -95,4 +96,10 @@ export class Promo extends BaseEntity {
     storePromoSelected => storePromoSelected.promo,
   )
   storePromoSelecteds: StorePromoSelected[];
+
+  @OneToMany(
+    () => PromoCluster,
+    promoCluster => promoCluster.promo,
+  )
+  promoClusters: PromoCluster[];
 }

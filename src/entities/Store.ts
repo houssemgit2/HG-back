@@ -6,13 +6,13 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-  BaseEntity
-} from "typeorm";
-import { Cluster } from "./Cluster";
-import { StorePermission } from "./StorePermission";
-import { StorePromoMea } from "./StorePromoMea";
-import { StorePromoSelected } from "./StorePromoSelected";
-import { User } from "./User";
+  BaseEntity,
+} from 'typeorm';
+import { Cluster } from './Cluster';
+import { StorePermission } from './StorePermission';
+import { StorePromoMea } from './StorePromoMea';
+import { StorePromoSelected } from './StorePromoSelected';
+import { User } from './User';
 
 @Index('store_cluster_id_fk', ['clusterId'], {})
 @Entity('store', { schema: 'hg_promo_beta' })
@@ -72,6 +72,7 @@ export class Store extends BaseEntity {
   @OneToMany(
     () => User,
     user => user.store,
+    { eager: true },
   )
   users: User[];
 }
