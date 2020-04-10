@@ -99,7 +99,7 @@ export class AuthService {
     };
 
     try {
-      await this.userRepository.updatepwd(user, password);
+      await this.userRepository.updatePassword(user, password);
 
       const message = await new AWS.SES({ apiVersion: '2010-12-01' })
         .sendEmail(params)

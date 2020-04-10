@@ -13,29 +13,15 @@ import { GetStoreDto } from './dto/get-store.dto';
 
 @Injectable()
 export class StoreService {
-  constructor(
-    private storeRepository: StoreRepository,
-    private userRepository: UserRepository,
-  ) {}
+  constructor(private storeRepository: StoreRepository) {}
   logger = new Logger('Store service');
 
   async createOne(store: AddStoreDto, owner: UserCredentialDto, user: User) {
-    try {
-      //todo debug log
-      this.logger.debug('adding new store...');
-      const newStore: Store = await this.storeRepository.add(store);
-      this.logger.debug('store added ');
-      // console.log(newStore);
-
-      owner.storeId = newStore.id;
-      owner.userRoleId = 2;
-
-      //      const newUser: User = await this.userRepository.register(owner);
-      // const addedStore = await this.storeRepository.get(newStore.id);
-      return newStore;
-    } catch (e) {
-      throw new InternalServerErrorException(e);
-    }
+    //todo debug log
+    this.logger.debug('adding new store...');
+    const result = await this.storeRepository.add(store, owner);
+    console.log(`the result is ${result}`);
+    return result;
   }
   async getAll(filter: GetStoreDto) {
     this.storeRepository.findAll();
