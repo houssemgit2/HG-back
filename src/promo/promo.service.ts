@@ -1,22 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PromoRepository } from './promo.repository';
 // Entity
 import { Promo } from './../entities/Promo';
 // DTO
-// import { PromoDto } from './dto/promo.dto';
-
+import { GetPromoDto } from './dto/get-promo.dto';
 @Injectable()
 export class PromoService {
   constructor(
-    @InjectRepository(PromoRepository)
-    private readonly promoRepository: PromoRepository,
+    @InjectRepository(Promo)
+    private promoRepository: Repository<Promo>,
   ) {}
 
-  async getAll(): Promise<Promo[]> {
+  async getAll(filter): Promise<Promo[]> {
     try {
-      return await this.promoRepository.find({});
+      return await this.promoRepository.find({ where: filter });
     } catch (err) {
       return err;
     }

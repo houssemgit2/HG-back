@@ -6,7 +6,7 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { AddStoreDto } from './add-store.dto';
-import { AuthCredentialDto } from 'src/auth/dto/auth-credential.dto';
+import { UserCredentialDto } from 'src/auth/dto/user-credential.dto';
 export class StoreOwnerDto {
   @ApiProperty()
   @ValidateNested()
@@ -14,5 +14,5 @@ export class StoreOwnerDto {
 
   @ApiProperty()
   @ValidateNested()
-  owner: AuthCredentialDto;
+  owner: UserCredentialDto;
 }

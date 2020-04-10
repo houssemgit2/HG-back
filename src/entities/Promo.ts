@@ -28,10 +28,13 @@ export class Promo extends BaseEntity {
   gammeId: number;
 
   @Column('date', { name: 'start_date', nullable: true })
-  startDate: string | null;
+  startDate: Date | null;
 
   @Column('date', { name: 'end_date', nullable: true })
-  endDate: string | null;
+  endDate: Date | null;
+
+  @Column('int', { name: 'offer_advantage_client', nullable: true })
+  offerAvantageClient: number;
 
   @Column('json', { name: 'products_id_in', nullable: true })
   productsIdIn: object | null;
