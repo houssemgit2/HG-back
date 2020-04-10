@@ -71,10 +71,14 @@ export class UserRepository extends Repository<User> {
     }
     return null;
   }
-  async updatepwd(user: User, password: string): Promise<any> {
+  async generateSaltPassword(password: string): Promise<any> {
     const salt = await bcrypt.genSalt();
-    const newPwd = await this.hashPassword(password, salt);
-    return this.save({ ...user, password: newPwd, salt });
+    const hashPassword = await this.hashPassword(password, salt);
+    return { password: hashPassword, salt };
+  }
+  async updatePassword(user: User, password: string): Promise<any> {
+    const passwordSalt = this.generateSaltPassword(password);
+    return this.save({ ...user, ...passwordSalt });
   }
   private hashPassword(password: string, salt: string): Promise<string> {
     return bcrypt.hash(password, salt);
