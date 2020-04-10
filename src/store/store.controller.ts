@@ -13,32 +13,68 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { GetStoreDto } from './dto/get-store.dto';
 import { AddStoreDto } from './dto/add-store.dto';
-
+import { AdminGuard } from '../auth/guards/admin.guard';
+import { StoreService } from './store.service';
+import { UserCredentialDto } from '../user/dto/user.dto';
+import { IGetUserAuthInfoRequest } from '../auth/interface/user.interface';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiQuery,
+} from '@nestjs/swagger';
+import { StoreOwnerDto } from './dto/store-owner.dto';
+@ApiBearerAuth()
+@ApiTags('Store')
 @Controller('store')
 export class StoreController {
+  constructor(private storeService: StoreService) {}
+
+  @ApiOperation({ summary: 'Add store, and officine' })
+  @ApiResponse({ status: 200, description: 'store added succefuly' })
   @Post()
-  create(@Body() store: AddStoreDto) {
-    return 'This action add new store';
+  @UseGuards(AuthGuard(), AdminGuard)
+  create(
+    @Body() body: StoreOwnerDto,
+
+    @Req() req: IGetUserAuthInfoRequest,
+  ) {
+    const { owner, store } = body;
+    return this.storeService.createOne(store, owner, req.user);
   }
 
+
+
+
+
+  @ApiOperation({ summary: 'get All store' })
+  @ApiResponse({ status: 200, description: 'store list' })
   @Get()
-  @UseGuards(AuthGuard())
-  findAll(@Req() req: any) {
-    return `This action returns all store ${req.user.id} ${req.user.userRoleId}`;
+  @UseGuards(AuthGuard(), AdminGuard)
+  async findAll(@Query() filter: GetStoreDto) {
+    return await this.storeService.getAll(filter);
   }
 
+  @ApiOperation({ summary: 'Store info' })
+  @ApiResponse({ status: 200, description: 'Get the store info by id' })
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return `This action returns a #${id} cat`;
+  @UseGuards(AuthGuard())
+  async findOne(@Param('id') id: number) {
+    return await this.storeService.getStore(id);
   }
 
+  @ApiOperation({ summary: 'Update Store' })
+  @ApiResponse({ status: 200, description: 'update the store info' })
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateCatDto: AddStoreDto) {
-    return `This action updates a #${id} cat`;
+  @UseGuards(AuthGuard())
+  async update(@Param('id') id: number, @Body() updateCatDto: AddStoreDto) {
+    return await this.storeService.updateStore(id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return `This action removes a #${id} cat`;
+  @UseGuards(AuthGuard())
+  async remove(@Param('id') id: number) {
+    return await this.storeService.removeStore(id);
   }
 }

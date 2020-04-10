@@ -1,8 +1,8 @@
 import { Repository, EntityRepository } from 'typeorm';
 import { User } from '../entities/User';
-import { AuthCredentialDto } from './dto/auth-credential.dto';
+import { UserCredentialDto } from './dto/user-credential.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ConflictException } from '@nestjs/common';
+import { ConflictException, Logger } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { LoginCredentialDto } from './dto/login-credential.dto';
 @EntityRepository(User)
@@ -13,8 +13,8 @@ export class UserRepository extends Repository<User> {
   ) {
     super();
   }
-
-  async register(authCredentialDto: AuthCredentialDto): Promise<User> {
+  logger = new Logger('USER REPOS');
+  async register(userCredentialDto: UserCredentialDto): Promise<User> {
     const {
       storeId,
       firstName,
@@ -23,8 +23,12 @@ export class UserRepository extends Repository<User> {
       email,
       userRoleId,
       address,
-    } = authCredentialDto;
+    } = userCredentialDto;
     const exists = await this.findOne({ email });
+    if (!exists)
+      this.logger.setContext(
+        `we didn't find a user with this email:${email}, w're creating a new one ...`,
+      );
     if (exists)
       throw new ConflictException(`${email} already token by another user`);
 
@@ -42,6 +46,7 @@ export class UserRepository extends Repository<User> {
     newUser.transform();
     return newUser;
   }
+
   async findAll(): Promise<any> {
     const users = await this.find();
     users.map(user => {
@@ -66,10 +71,14 @@ export class UserRepository extends Repository<User> {
     }
     return null;
   }
-  async updatepwd(user: User, password: string): Promise<any> {
+  async generateSaltPassword(password: string): Promise<any> {
     const salt = await bcrypt.genSalt();
-    const newPwd = await this.hashPassword(password, salt);
-    return this.save({ ...user, password: newPwd, salt });
+    const hashPassword = await this.hashPassword(password, salt);
+    return { password: hashPassword, salt };
+  }
+  async updatePassword(user: User, password: string): Promise<any> {
+    const passwordSalt = this.generateSaltPassword(password);
+    return this.save({ ...user, ...passwordSalt });
   }
   private hashPassword(password: string, salt: string): Promise<string> {
     return bcrypt.hash(password, salt);

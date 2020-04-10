@@ -6,6 +6,7 @@ import {
   BaseEntity,
 } from 'typeorm';
 import { Store } from './Store';
+import { PromoCluster } from './PromoCluster';
 
 @Entity('cluster', { schema: 'hg_promo_beta' })
 export class Cluster extends BaseEntity {
@@ -20,4 +21,9 @@ export class Cluster extends BaseEntity {
     store => store.cluster,
   )
   stores: Store[];
+  @OneToMany(
+    () => PromoCluster,
+    promoCluster => promoCluster.cluster,
+  )
+  promoClusters: PromoCluster[];
 }

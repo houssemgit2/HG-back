@@ -7,7 +7,7 @@ import {
   IsOptional,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-export class AuthCredentialDto {
+export class UserCredentialDto {
   @ApiProperty()
   @IsNumber()
   @IsOptional()
