@@ -14,7 +14,10 @@ export class PromoService {
 
   async getAll(filter): Promise<Promo[]> {
     try {
-      return await this.promoRepository.find({ where: filter });
+      return await this.promoRepository.find({
+        where: filter,
+        relations: ['promoClusters'],
+      });
     } catch (err) {
       return err;
     }
