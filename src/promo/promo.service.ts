@@ -13,11 +13,30 @@ export class PromoService {
   ) {}
 
   async getAll(filter): Promise<Promo[]> {
-    try {
-      return await this.promoRepository.find({
-        where: filter,
-        relations: ['promoClusters'],
-      });
+//      const queryOptions = {};
+//     try {
+//       if(filter.startDate&& filter.endDate){
+// test=[
+
+// ]
+//       }
+     
+//       if(filter.offerAvantageClient){
+
+//       }
+
+      return await this.promoRepository
+        .createQueryBuilder('p')
+        .leftJoin('promo_cluster', 'cluster', 'cluster.promo_id = p.id')
+        .where(filter)
+        .andWhere('cluster.cluster_id IN (:...clusters)', {
+          clusters: [1, 2],
+        })
+        .getMany();
+      // .find({
+      //   where: filter,
+      //   relations: ['promoClusters'],
+      // })
     } catch (err) {
       return err;
     }
