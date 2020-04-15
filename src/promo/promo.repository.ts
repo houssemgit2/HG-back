@@ -1,6 +1,8 @@
-import { Promo } from './../entities/Promo';
 import { Repository, EntityRepository } from 'typeorm';
+import { Promo } from '../entities/Promo';
 import { InjectRepository } from '@nestjs/typeorm';
+import { GetPromoDto } from './dto/get-promo.dto';
+import { InternalServerErrorException } from '@nestjs/common';
 
 @EntityRepository(Promo)
 export class PromoRepository extends Repository<Promo> {
@@ -12,13 +14,5 @@ export class PromoRepository extends Repository<Promo> {
   }
   async findAll(): Promise<Promo[]> {
     return await this.promoRepository.find();
-  }
-
-  async update(promo: Promo) {
-    return await this.promoRepository.update(promo.id, promo);
-  }
-
-  async delete(id) {
-    return await this.promoRepository.delete(id);
   }
 }
