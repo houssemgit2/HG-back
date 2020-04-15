@@ -13,11 +13,14 @@ export class PromoService {
   ) {}
 
   async getAll(filter): Promise<Promo[]> {
-    let queryDateOptions;
+    const sqlQuery = this.promoRepository
+      .createQueryBuilder('p')
+      .leftJoin('promo_cluster', 'promoCluster', 'promoCluster.promo_id = p.id')
+      .leftJoin('cluster', 'c', 'c.id = promoCluster.cluster_id')
+      .leftJoin('promo_type', 'promoType', 'promoType.promo_id = p.id')
+      .leftJoin('operation_type', 't', 't.id = promoType.operation_type_id');
     if (filter.startDate && filter.endDate) {
-      console.log('startDate', filter.startDate);
-      console.log('endDate', filter.endDate);
-      queryDateOptions = [
+      const queryDateOptions = [
         {
           startDate: LessThan(filter.startDate),
         },
@@ -30,38 +33,22 @@ export class PromoService {
           endDate: Between(filter.startDate, filter.endDate),
         },
       ];
+
+      sqlQuery.where(queryDateOptions);
     }
-    // if (filter.clusters) {
-    //   const clusterConditionList = [];
-    //   clusters.forEach(clusterID => {
-    //     const clusterObj = {};
-    //     clusterObj[clusterID] = 1;
-    //     clusterConditionList.push(clusterObj);
-    //   });
-    //   queryConditions.push({ [Op.or]: clusterConditionList });
-    // }
-    if (filter.cluster) console.log(queryDateOptions);
-
-    //      const queryOptions = {};
+    if (filter.clusters) {
+      console.log('clusters', filter.clusters);
+      sqlQuery.andWhere('c.name IN (:...clusters)', {
+        clusters: ['cluster1'],
+      });
+    }
+    if (filter.type) {
+      sqlQuery.andWhere('t.name like :name', {
+        name: '%' + filter.type + '%',
+      });
+    }
     try {
-      //       if(filter.startDate&& filter.endDate){
-      // test=[
-
-      // ]
-      //       }
-
-      //       if(filter.offerAvantageClient){
-
-      //       }
-
-      return await this.promoRepository
-        .createQueryBuilder('p')
-        .leftJoin('promo_cluster', 'cluster', 'cluster.promo_id = p.id')
-        .where(queryDateOptions)
-        // .andWhere('cluster.cluster_id IN (:...clusters)', {
-        //   clusters: [1, 2],
-        // })
-        .getMany();
+      return await sqlQuery.getMany();
       // .find({
       //   where: filter,
       //   relations: ['promoClusters'],
