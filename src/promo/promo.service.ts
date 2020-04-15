@@ -37,7 +37,6 @@ export class PromoService {
       sqlQuery.where(queryDateOptions);
     }
     if (filter.clusters) {
-      console.log('clusters', filter.clusters);
       sqlQuery.andWhere('c.name IN (:...clusters)', {
         clusters: ['cluster1'],
       });
