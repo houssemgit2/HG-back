@@ -1,0 +1,46 @@
+.white-fill {
+  fill: #fff;
+}
+.black-fill {
+  fill: #1d1d1b;
+}
+.yellow-fill {
+  fill: #f1d359;
+}
+.red-fill {
+  fill: #a03344;
+}
+.sharpGroteskBold15 {
+  font-family: SharpGroteskBold15;
+}
+
+.sharpGroteskBook20 {
+  font-family: SharpGroteskBook20;
+}
+
+.sharpGroteskBook15 {
+  font-family: SharpGroteskBook15;
+}
+
+.sharpGroteskSmBold15 {
+  font-family: SharpGroteskSmBold15;
+}
+
+.none-fill {
+  fill: none;
+}
+
+.black-stroke {
+  stroke: #1d1d1b;
+}
+.red-stroke {
+  stroke: #a03344;
+}
+.stroke-charac {
+  stroke-miterlimit: 10;
+  stroke-width: 1.41px;
+}
+
+.white-stroke {
+  stroke: #fff;
+}

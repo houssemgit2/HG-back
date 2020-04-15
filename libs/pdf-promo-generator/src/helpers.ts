@@ -100,3 +100,52 @@ export function wordWrap(str, cols) {
   res.push(formatedString);
   return res;
 }
+
+// extracts the PDFPromo number from the PDFPromo format
+export function extractPDFPromoFormatNum(PDFPromoFormat) {
+  return PDFPromoFormat ? parseInt(PDFPromoFormat.slice(-1), 10) : -1;
+}
+
+// Sorts the PDFPromos based on their format
+export function sortPDFPromos(PDFPromos) {
+  return PDFPromos.sort(
+    (PDFPromo1, PDFPromo2) =>
+      extractPDFPromoFormatNum(PDFPromo1.format) -
+      extractPDFPromoFormatNum(PDFPromo2.format),
+  );
+}
+
+// Calculates next PDFPromo index
+export function calculateNextPDFPromoIndex(
+  currentPDFPromo,
+  nextPDFPromo,
+  currentIndex,
+) {
+  // console.log(currentPDFPromo, nextPDFPromo, currentIndex);
+  if (!currentPDFPromo || !currentPDFPromo.format || !currentIndex) {
+    // console.log("CalculateNextPDFPromoIndex: Error missing parameters ");
+    return 1;
+  }
+  if (!nextPDFPromo || !nextPDFPromo.format) {
+    return 1;
+  }
+  if (
+    extractPDFPromoFormatNum(nextPDFPromo.format) <
+    extractPDFPromoFormatNum(currentPDFPromo.format)
+  ) {
+    console.log(
+      'generate.js: Fatal Error, PDFPromos array not properly sorted',
+    );
+    throw new Error(
+      'generate.js: Fatal Error, PDFPromos array not properly sorted',
+    );
+  }
+
+  return (
+    currentIndex *
+      2 **
+        (extractPDFPromoFormatNum(nextPDFPromo.format) -
+          extractPDFPromoFormatNum(currentPDFPromo.format)) +
+    1
+  );
+}

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg"
+    xmlns="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" viewBox="{{viewBox}}" version="1.1" id="svg62"
+    sodipodi:docname="third-prod.svg" inkscape:version="0.92.4 (unknown)">
+    <defs id="defs4">
+        <style> {{style}}</style>
+    </defs>
+    <g transform="{{transform}}">
+        {{#if landscape}}
+        <rect class="white-fill" x="0.71" y="0.71" width="840.83" height="594.58" id="rect8" />
+        {{> landscape_header}}
+        {{> landscape_bodyCircle}}
+        {{> landscape_footer}}
+        <g id="COUPE">
+            <polyline class="none-fill white-stroke stroke-charac"
+                points="841.53 190.89 841.53 0.71 0.71 0.71 0.71 190.89" id="polyline590" />
+                <polyline class="none-fill black-stroke stroke-charac"
+                points="0.71 190.89 0.71 594.58 841.53 594.58 841.53 190.89  " id="polyline59" />
+        </g>
+        {{/if}}
+
+        {{#if portrait}}
+        <rect id="rect8" height="841.89001" width="595.28003" y="0.5" x="0.5" class="white-fill" />
+        {{> portrait_header}}
+        {{> portrait_bodyCircle}}
+        {{> portrait_footer}}
+        <g id="COUPE">
+            <polyline class="none-fill white-stroke stroke-charac"
+                points="595 133.23 595 0.71 0.71 0.71 0.71 133.23" id="polyline590" />
+                <polyline class="none-fill black-stroke stroke-charac" stroke="blue"
+                points="0.71 133.23 0.71 840 595 840 595 133.23  " id="polyline59" />
+        </g>
+        {{/if}}
+    </g>
+</svg>
