@@ -7,6 +7,7 @@ import { StoreModule } from './store/store.module';
 import { UserModule } from './user/user.module';
 import { PromoModule } from './promo/promo.module';
 import { LoggerMiddleware } from './middleware/logger.middleware';
+import { PdfPromoGeneratorModule } from '@app/pdf-promo-generator';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
     AuthModule,
     StoreModule,
     UserModule,
+    PdfPromoGeneratorModule,
     PromoModule,
   ],
   controllers: [AppController],
