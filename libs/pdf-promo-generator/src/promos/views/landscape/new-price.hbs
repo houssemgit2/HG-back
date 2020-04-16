@@ -1,0 +1,38 @@
+<svg x="660" y="195" width="180" height="180">
+  <rect x="0" y="0" width="180" height="180" fill="transparent" />
+
+
+    <text class="{{color2}} sharpGroteskSmBold15" style="font-size: 23.9px" id="text48" x="50%" y="25"
+          text-anchor="middle">Soit
+    </text>
+  <g style="margin: auto" transform="translate({{NP_Translate}} 0)">
+    <text class="{{color2}} sharpGroteskBold15" id="text50" x="115"
+          text-anchor="end" y="95"
+          style="font-size:90px">
+      {{#if newUnitPriceDigits}}
+        {{newUnitPriceDigits}}
+      {{else}}
+        {{newPriceDigits}}
+      {{/if}}
+    </text>
+    <svg x="115" y="20" width="50" height="80">
+      <rect x="0" y="30" width="50" height="80" fill="transparent"/>
+      <text class="{{color2}} sharpGroteskBold15" style="font-size: 45px" x="0" y="40" id="text52">€</text>
+      <text class="{{color2}} sharpGroteskBold15" style="font-size: 45px" x="0" text-anchor="start" y="75" id="text54">
+        {{#if newUnitPriceDecimal}}
+          {{newUnitPriceDecimal}}
+        {{else}}
+          {{newPriceDecimal}}
+        {{/if}}
+      </text>
+
+    </svg>
+  </g>
+    <text class="{{color2}} sharpGroteskBold15" style="font-size: 26px" id="text48" x="50%" y="120"
+          text-anchor="middle">{{textBelowNewPrice}}</text>
+    {{#if newUnitPriceDigits}}
+      <text class="{{color2}} sharpGroteskBold15" style="font-size: 13.9px" id="text48" x="50%" y="140"
+            text-anchor="middle">APRÈS REMISE
+      </text>
+    {{/if}}
+</svg>

@@ -1,4 +1,18 @@
 {
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src"
+  "sourceRoot": "src",
+  "projects": {
+    "pdf-promo-generator": {
+      "type": "library",
+      "root": "libs/pdf-promo-generator",
+      "entryFile": "index",
+      "sourceRoot": "libs/pdf-promo-generator/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/pdf-promo-generator/tsconfig.lib.json"
+      }
+    }
+  },
+  "compilerOptions": {
+    "webpack": true
+  }
 }

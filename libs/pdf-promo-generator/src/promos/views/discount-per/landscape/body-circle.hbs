@@ -1,0 +1,21 @@
+<circle class="{{color2}}" cx="419.16" cy="389.46" r="184.18" id="circle26"/>
+<text id="text843" class="{{color1}}" style="font-size:168.610000px;font-family:SharpGroteskBold15" x="420.41763"
+      y="434.26001" transform="translate(0 {{#if D_Translate_Y}}{{D_Translate_Y}} {{else}}0{{/if}})">
+  <tspan
+    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:168.61332703px;font-family:SharpGroteskBold15;-inkscape-font-specification:'SharpGroteskBold15, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:center;writing-mode:lr-tb;text-anchor:middle"
+    id="tspan884">-{{discount}}%
+  </tspan>
+</text>
+{{#if textBelowDiscount}}
+  <text id="text845"
+  class="{{color1}}"
+        style="font-style:normal;font-variant:normal;font-weight:normal;font-size:42px;font-family:SharpGroteskBold15;text-align:center;;text-anchor:middle"
+        x="421" y="484">
+    <tspan>SUR {{textBelowDiscount}}</tspan>{{#if second}} 2<tspan style="font-size: 20px" dy="-2ex">ème</tspan>{{/if}}
+  </text>
+
+  {{#if textBelowDiscount2}}
+    <text y="524" x="421"
+    class="{{color1}}"
+          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:42px;font-family:SharpGroteskBold15;text-align:center;text-anchor:middle">g{{textBelowDiscount2}}  </text>{{/if}}
+{{/if}}

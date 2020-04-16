@@ -31,8 +31,8 @@ import { StoreOwnerDto } from './dto/store-owner.dto';
 export class StoreController {
   constructor(private storeService: StoreService) {}
 
-  @ApiOperation({ summary: 'Add store, and officine' })
-  @ApiResponse({ status: 200, description: 'store added succefuly' })
+  @ApiOperation({ summary: 'Add store' })
+  @ApiResponse({ status: 200, description: 'store added successfully' })
   @Post()
   @UseGuards(AuthGuard(), AdminGuard)
   create(
@@ -43,10 +43,6 @@ export class StoreController {
     const { owner, store } = body;
     return this.storeService.createOne(store, owner, req.user);
   }
-
-
-
-
 
   @ApiOperation({ summary: 'get All store' })
   @ApiResponse({ status: 200, description: 'store list' })

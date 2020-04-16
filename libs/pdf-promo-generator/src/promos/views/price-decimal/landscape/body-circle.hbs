@@ -1,0 +1,35 @@
+{{#if fallingPrices}}
+<circle cx="420.95001" cy="400.39999" r="175.5" id="circle839" class="{{color2}}" />
+{{else}}
+<circle class="{{color2}}" cx="419.16" cy="389.46" r="184.18" id="circle26" />
+{{/if}}
+
+<g transform="translate(0 {{#if P_translate_Y}}{{P_translate_Y}}{{else}}0{{/if}}) ">
+  <text transform="{{transformPriceDigits}}" class="st0 st4 st11 {{color1}}" id="text26" x="193.5867" y="0"
+        style="font-size:200px;font-family:SharpGroteskBold15">
+    <tspan style="text-anchor:end;text-align:end" id="tspan35">{{newPriceDigits}}</tspan>
+  </text>
+  <text transform="{{transformPriceDecimal}}" style="font-size:87.99px" class="sharpGroteskBold15 {{color1}}"
+        id="text24">{{newPriceDecimal}}</text>
+  <text transform="{{transformSymbol}}" style="font-size:107.51px" class="sharpGroteskBold15 {{color1}}"
+        id="text22">€
+  </text></g>
+{{#if textBelowDiscount}}
+    <svg y="440.27002" x="243.65988" width="350" height="100">
+      <rect y="0" x="0" width="350" height="100" fill="transparent"/>
+      <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"
+            style="font-size:42.38px;font-family:SharpGroteskBold15;text-align:center;text-anchor:middle;isolation:isolate"
+            class="cls-6 {{color1}}" id="text1497">{{textBelowDiscount}} </text>
+    </svg>
+
+{{/if}}
+{{#if soit}}
+<text transform="matrix(1 0 0 1 416.16 479.65)" style="font-size:23.09px" class="sharpGroteskSmBold15 {{color1}}"
+    id="text28">soit</text>
+<text class="st0 st4 st14 {{color1}}" id="text32" style="font-size:41.72999954px;font-family:SharpGroteskBold15"
+    x="418.81613" y="520.53998">
+    <tspan style="font-size:34px;text-anchor:middle;text-align:center" id="tspan64">{{discount}}{{symbol}}
+        d’économie
+    </tspan>
+</text>
+{{/if}}

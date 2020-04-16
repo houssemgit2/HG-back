@@ -1,0 +1,30 @@
+<circle id="circle28" r="255.12" cy="500.41" cx="298.14001" class="{{color2}}" />
+<g transform="translate(0 {{#if P_translate_Y}}{{P_translate_Y}}{{else}}0{{/if}}) ">
+<text transform="{{transformPriceDigits}}" class="st0 st4 st17 {{color1}}" id="text40" x="262.44168" y="0"
+    style="font-size:294.63000488px;font-family:SharpGroteskBold15">
+    <tspan style="text-anchor:end;text-align:end" id="tspan70">{{newPriceDigits}}</tspan>
+</text>
+
+<text transform="{{transformPriceDecimal}}" style="font-size:119.29px" class="sharpGroteskBold15 {{color1}}"
+    id="text32">{{newPriceDecimal}}</text>
+
+<text transform="{{transformSymbol}}" style="font-size:145.75px" class="sharpGroteskBold15 {{color1}}"
+    id="text30">€</text></g>
+
+{{#if textBelowDiscount}}
+
+<text y="626.27002" x="297.65988"
+    style="font-size:58.70000076px;font-family:SharpGroteskBold15;text-align:center;text-anchor:middle;isolation:isolate"
+    class="cls-6 {{color1}}" id="text1497">{{textBelowDiscount}}</text>
+{{/if}}
+{{#if soit}}
+<text transform="matrix(1 0 0 1 280.44 609.94)" style="font-size:31.3px" class="sharpGroteskSmBold15 {{color1}}"
+    id="text42">soit</text>
+
+<text class="st0 st4 st16 {{color1}}" id="text38" style="font-size:61.52000046px;font-family:SharpGroteskBold15"
+    x="298.99744" y="658.73999">
+    <tspan style="font-size:50px;text-align:center;text-anchor:middle" id="tspan64">{{discount}}{{symbol}}
+        d’économie
+    </tspan>
+</text>
+{{/if}}
