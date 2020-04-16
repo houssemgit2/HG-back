@@ -10,7 +10,7 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot(),
+    TypeOrmModule.forRoot({ autoLoadEntities: true, logging: true }),
     AuthModule,
     StoreModule,
     UserModule,
