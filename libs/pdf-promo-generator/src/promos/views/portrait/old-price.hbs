@@ -1,0 +1,30 @@
+<svg x="0" y="135" width="180" height="150">
+    <rect x="0" y="0" width="180" height="150" fill="transparent" />
+  <g  style="margin: auto" transform="translate({{OP_Translate}} 0)">
+    <text x="95" y="95" text-anchor="end"
+    class="{{color2}}"
+          style="font-size:80px;font-family:SharpGroteskBold15" id="text5010">
+      {{oldPriceDigits}}
+    </text>
+    <svg x="100" y="20" width="50" height="80">
+      <rect x="0" y="0" width="50" height="80" fill="transparent"/>
+      <text x="0" y="45" id="text46"
+      class="{{color2}}"
+            style="font-size:40px;font-family:SharpGroteskBold15">€
+      </text>
+
+      <text id="text46" class="{{color2}} sharpGroteskBold15" style="font-size:40px" x="0"
+            y="75">{{oldPriceDecimal}}</text>
+
+    </svg>
+  </g>
+    <svg x="0" y="90" width="180" height="30">
+        <rect x="0" y="0" width="180" height="30" fill="transparent" />
+        <text class="{{color2}} sharpGroteskBold15" id="text48" x="50%" y="30" text-anchor="middle"
+            style="font-size:22px">{{textBelowOldPrice}}</text>
+    </svg>
+</svg>
+{{#if crossed}}
+<line style="fill:none;stroke-width:7.41279984" class="st20 {{crossColor}}" x1="15" y1="260" x2="115" y2="140"
+    id="line863" />
+{{/if}}
