@@ -7,7 +7,7 @@ import * as fs from 'fs';
 import { ORIENTATIONS, PAGE_FORMATS } from './consts';
 import { A4, A5, A6, A7, A8 } from './config';
 import { calculateNextPDFPromoIndex, sortPDFPromos } from './helpers';
-import { PDFPromo } from '@app/pdf-promo-generator/entities/PDFPromo';
+import { PDFPromo } from '@app/pdf-promo-generator/classes/PDFPromo';
 import SVGtoPDF = require('svg-to-pdfkit');
 import PDFPromoTemplateFiller from './promos';
 @Injectable()
