@@ -38,20 +38,21 @@ export class PromoService {
     }
     if (filter.clusters) {
       sqlQuery.andWhere('c.name IN (:...clusters)', {
-        clusters: ['cluster1'],
+        clusters: JSON.parse(filter.clusters),
       });
     }
     if (filter.type) {
-      sqlQuery.andWhere('t.name like :name', {
-        name: '%' + filter.type + '%',
+      filter.type.split(',').forEach(val => {
+        sqlQuery.orWhere('t.name like :name', {
+          name: '%' + val + '%',
+        });
       });
+    }
+    if (filter.perPage && filter.page) {
+      sqlQuery.skip(filter.perPage * (filter.page - 1)).take(filter.perPage);
     }
     try {
       return await sqlQuery.getMany();
-      // .find({
-      //   where: filter,
-      //   relations: ['promoClusters'],
-      // })
     } catch (err) {
       return err;
     }

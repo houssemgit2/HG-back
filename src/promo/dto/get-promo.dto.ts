@@ -24,6 +24,18 @@ export class GetPromoDto {
   offerAvantageClient: number;
 
   @ApiProperty({ required: false })
-  @Type(() => Array)
+  @Type(() => String)
   clusters: string;
+
+  @ApiProperty({ required: false })
+  @Type(() => String)
+  type: string;
+
+  @ApiProperty({ required: false })
+  @Type(() => Number)
+  perPage: number;
+
+  @ApiProperty({ required: false })
+  @Type(() => Number)
+  page: number;
 }
