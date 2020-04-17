@@ -12,19 +12,17 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { GetStoreDto } from './dto/get-store.dto';
-import { AddStoreDto } from './dto/add-store.dto';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { StoreService } from './store.service';
-import { UserCredentialDto } from '../user/dto/user.dto';
-import { IGetUserAuthInfoRequest } from '../auth/interface/user.interface';
+import { ReqWithUser } from '../auth/interface/user.interface';
 import {
   ApiTags,
   ApiBearerAuth,
   ApiOperation,
   ApiResponse,
-  ApiQuery,
 } from '@nestjs/swagger';
 import { StoreOwnerDto } from './dto/store-owner.dto';
+import { Store } from 'src/entities/Store';
 @ApiBearerAuth()
 @ApiTags('Store')
 @Controller('store')
@@ -38,7 +36,7 @@ export class StoreController {
   create(
     @Body() body: StoreOwnerDto,
 
-    @Req() req: IGetUserAuthInfoRequest,
+    @Req() req: ReqWithUser,
   ) {
     const { owner, store } = body;
     return this.storeService.createOne(store, owner, req.user);
@@ -49,7 +47,10 @@ export class StoreController {
   @Get()
   @UseGuards(AuthGuard(), AdminGuard)
   async findAll(@Query() filter: GetStoreDto) {
-    return await this.storeService.getAll(filter);
+    // return filter;
+    const storeList: Store[] = await this.storeService.getAllStore(filter);
+    //console.log(storeList);
+    return storeList;
   }
 
   @ApiOperation({ summary: 'Store info' })
@@ -64,7 +65,7 @@ export class StoreController {
   @ApiResponse({ status: 200, description: 'update the store info' })
   @Put(':id')
   @UseGuards(AuthGuard())
-  async update(@Param('id') id: number, @Body() updateCatDto: AddStoreDto) {
+  async update(@Param('id') id: number) {
     return await this.storeService.updateStore(id);
   }
 

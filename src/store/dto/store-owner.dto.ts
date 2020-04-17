@@ -15,4 +15,8 @@ export class StoreOwnerDto {
   @ApiProperty()
   @ValidateNested()
   owner: UserCredentialDto;
+
+  @ApiProperty()
+  @ValidateNested()
+  permission: UserCredentialDto;
 }

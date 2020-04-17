@@ -7,6 +7,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   BaseEntity,
+  OneToOne,
 } from 'typeorm';
 import { Cluster } from './Cluster';
 import { StorePermission } from './StorePermission';
@@ -23,7 +24,7 @@ export class Store extends BaseEntity {
   @Column('int', { name: 'cluster_id' })
   clusterId: number;
 
-  @Column('varchar', { name: 'cip', length: 32 })
+  @Column('int', { name: 'cip' })
   cip: string;
 
   @Column('varchar', { name: 'name', length: 132 })
@@ -46,7 +47,7 @@ export class Store extends BaseEntity {
   @ManyToOne(
     () => Cluster,
     cluster => cluster.stores,
-    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
   )
   @JoinColumn([{ name: 'cluster_id', referencedColumnName: 'id' }])
   cluster: Cluster;
@@ -72,7 +73,14 @@ export class Store extends BaseEntity {
   @OneToMany(
     () => User,
     user => user.store,
-    { eager: true },
   )
   users: User[];
+
+  @OneToOne(
+    () => User,
+    user => user.id,
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
+  )
+  @JoinColumn([{ name: 'cip', referencedColumnName: 'id' }])
+  owner: User;
 }
