@@ -19,7 +19,7 @@ async function bootstrap() {
     }),
   );
   app.use(helmet());
-
+  app.setGlobalPrefix('v1');
   // swagger initialization
   const options = new DocumentBuilder()
     .setTitle('HealthyGroup')
