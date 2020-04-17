@@ -13,7 +13,7 @@ export class UserRepository extends Repository<User> {
   ) {
     super();
   }
-  logger = new Logger('USER REPOS');
+  logger = new Logger('USER REPOSitory');
   async register(userCredentialDto: UserCredentialDto): Promise<User> {
     const {
       storeId,
@@ -49,10 +49,10 @@ export class UserRepository extends Repository<User> {
 
   async findAll(): Promise<any> {
     const users = await this.find();
-    users.map(user => {
-      user.transform();
-      console.log(user);
-    });
+    // users.map(user => {
+    //   user.transform();
+    //   console.log(user);
+    // });
     return users;
   }
   async findAndTransform(id: number): Promise<User> {
@@ -65,11 +65,19 @@ export class UserRepository extends Repository<User> {
   ): Promise<User> {
     const { email, password } = loginCredentialDto;
     const user = await this.findOne({ email });
-    if (user && (await user.validatePassword(password))) {
-      user.transform();
-      return user;
+    console.log('find user ***********>', user);
+    try {
+      const valid = await user.validatePassword(password);
+      if (user && valid) {
+        user.transform();
+        return user;
+      } else {
+        throw new Error('invalid credential');
+      }
+    } catch (e) {
+      console.error('failed to validate--');
+      return e;
     }
-    return null;
   }
   async generateSaltPassword(password: string): Promise<any> {
     const salt = await bcrypt.genSalt();

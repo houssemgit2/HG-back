@@ -38,10 +38,10 @@ export class AuthService {
     loginCredentialDto: LoginCredentialDto,
   ): Promise<{ accessToken: string }> {
     try {
+      this.logger.debug(`trying to validate credential`);
       const result = await this.userRepository.validateUserLogin(
         loginCredentialDto,
       );
-
       if (!result) throw new UnauthorizedException('Invalid credential');
       const payload: JwtPayload = { email: loginCredentialDto.email };
       const accessToken = await this.jwtService.sign(payload);

@@ -22,6 +22,7 @@ import { StorePermission } from './StorePermission';
 import { StorePromoMea } from './StorePromoMea';
 import { StorePromoSelected } from './StorePromoSelected';
 import { UserRole } from './UserRole';
+import { Resource } from './resource';
 
 const entities = [
   Brand,
@@ -48,5 +49,6 @@ const entities = [
   StorePromoSelected,
   User,
   UserRole,
+  Resource,
 ];
 export default entities;
