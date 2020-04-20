@@ -15,10 +15,19 @@ export class PromoService {
   async getAll(filter): Promise<Promo[]> {
     const sqlQuery = this.promoRepository
       .createQueryBuilder('p')
-      .leftJoin('promo_cluster', 'promoCluster', 'promoCluster.promo_id = p.id')
-      .leftJoin('cluster', 'c', 'c.id = promoCluster.cluster_id')
+      .leftJoinAndSelect(
+        'p.promoClusters',
+        'promoCluster',
+        'promoCluster.promo_id = p.id',
+      )
+      .leftJoinAndSelect(
+        'promoCluster.cluster',
+        'c',
+        'c.id = promoCluster.cluster_id',
+      )
       .leftJoin('promo_type', 'promoType', 'promoType.promo_id = p.id')
-      .leftJoin('operation_type', 't', 't.id = promoType.operation_type_id');
+      .leftJoin('operation_type', 't', 't.id = promoType.operation_type_id')
+      .leftJoinAndSelect('p.gamme', 'gamme');
     if (filter.startDate && filter.endDate) {
       const queryDateOptions = [
         {
