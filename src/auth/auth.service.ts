@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import {
   Injectable,
   UnauthorizedException,
@@ -34,7 +35,24 @@ export class AuthService {
       throw new InternalServerErrorException(e);
     }
   }
-
+  transformUserObject(user): any {
+    const userObject: any = {};
+    userObject.fst_name = user.firstName;
+    userObject.lst_name = user.lastName;
+    userObject.store_cip = user.storeId;
+    userObject.phone_num = user.phone;
+    userObject.role = user.userRole.name;
+    userObject.store = { ...user.store };
+    userObject.store.cluster = user.store.clusters;
+    delete user.userRole;
+    delete user.store.clusters;
+    delete userObject.store.clusters;
+    delete user.firstName;
+    delete user.lastName;
+    delete user.storeId;
+    delete user.phone;
+    return { id: user.id, ...userObject, ...user, store: userObject.store };
+  }
   async login(loginCredentialDto: LoginCredentialDto): Promise<any> {
     try {
       const user: any = await this.userRepository.validateUserLogin(
@@ -45,11 +63,6 @@ export class AuthService {
       const payload: JwtPayload = { email: loginCredentialDto.email };
       const accessToken = await this.jwtService.sign(payload);
       this.logger.verbose('connected succssefly');
-
-      user.role = user.userRole.name;
-      user.store.cluster = user.store.clusters;
-      delete user.userRole;
-      delete user.store.clusters;
       return {
         token: {
           tokenType: 'Bearer',
@@ -58,10 +71,10 @@ export class AuthService {
             .add(1, 'months')
             .format(`YYYY-MM-DDTHH:mm:ss:sssZ`),
         },
-        user,
+        user: this.transformUserObject(user),
       };
     } catch (e) {
-      throw new ForbiddenException(e);
+      throw new Error(e);
     }
   }
 
