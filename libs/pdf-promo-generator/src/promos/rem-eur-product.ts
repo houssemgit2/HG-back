@@ -58,10 +58,13 @@ export class RemEurProduct {
   }
   generate(templateOrientation, desiredOrientation) {
     const priceDecimalTemplate = fs.readFileSync(
-      `${__dirname}/views/price-decimal/price-decimal.hbs`,
+      `${__dirname}/resources/views/price-decimal/price-decimal.hbs`,
       'utf-8',
     );
-    const style = fs.readFileSync(`${__dirname}/views/style.css`, 'utf-8');
+    const style = fs.readFileSync(
+      `${__dirname}/resources/views/style.css`,
+      'utf-8',
+    );
 
     const compiled = Handlebars.compile(priceDecimalTemplate);
     const promoData = {
@@ -98,23 +101,23 @@ export class RemEurProduct {
     let template = '';
     if (templateOrientation === ORIENTATIONS.LANDSCAPE) {
       const landscape_header = fs.readFileSync(
-        `${__dirname}/views/landscape/header.hbs`,
+        `${__dirname}/resources/views/landscape/header.hbs`,
         'utf-8',
       );
       const landscape_footer = fs.readFileSync(
-        `${__dirname}/views/landscape/footer.hbs`,
+        `${__dirname}/resources/views/landscape/footer.hbs`,
         'utf-8',
       );
       const landscape_bodyCircle = fs.readFileSync(
-        `${__dirname}/views/price-decimal/landscape/body-circle.hbs`,
+        `${__dirname}/resources/views/price-decimal/landscape/body-circle.hbs`,
         'utf-8',
       );
       const oldPrice_landscape = fs.readFileSync(
-        `${__dirname}/views/landscape/old-price.hbs`,
+        `${__dirname}/resources/views/landscape/old-price.hbs`,
         'utf-8',
       );
       const newPrice_landscape = fs.readFileSync(
-        `${__dirname}/views/landscape/new-price.hbs`,
+        `${__dirname}/resources/views/landscape/new-price.hbs`,
         'utf-8',
       );
 
@@ -147,23 +150,23 @@ export class RemEurProduct {
       template = compiled(context).toString();
     } else if (templateOrientation === ORIENTATIONS.PORTRAIT) {
       const portrait_header = fs.readFileSync(
-        `${__dirname}/views/portrait/header.hbs`,
+        `${__dirname}/resources/views/portrait/header.hbs`,
         'utf-8',
       );
       const portrait_footer = fs.readFileSync(
-        `${__dirname}/views/portrait/footer.hbs`,
+        `${__dirname}/resources/views/portrait/footer.hbs`,
         'utf-8',
       );
       const portrait_bodyCircle = fs.readFileSync(
-        `${__dirname}/views/price-decimal/portrait/body-circle.hbs`,
+        `${__dirname}/resources/views/price-decimal/portrait/body-circle.hbs`,
         'utf-8',
       );
       const oldPrice_portrait = fs.readFileSync(
-        `${__dirname}/views/portrait/old-price.hbs`,
+        `${__dirname}/resources/views/portrait/old-price.hbs`,
         'utf-8',
       );
       const newPrice_portrait = fs.readFileSync(
-        `${__dirname}/views/portrait/new-price.hbs`,
+        `${__dirname}/resources/views/portrait/new-price.hbs`,
         'utf-8',
       );
       Handlebars.registerPartial('oldPrice_portrait', oldPrice_portrait);

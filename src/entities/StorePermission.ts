@@ -5,11 +5,13 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
-  BaseEntity
-} from "typeorm";
-import { Store } from "./Store";
+  BaseEntity,
+} from 'typeorm';
+import { Store } from './Store';
+import { Resource } from './resource';
 
 @Index('store_permission_store_id_fk', ['storeId'], {})
+@Index('store_permission_resource_id_fk', ['resourceId'], {})
 @Entity('store_permission', { schema: 'hg_promo_beta' })
 export class StorePermission extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
@@ -18,8 +20,8 @@ export class StorePermission extends BaseEntity {
   @Column('int', { name: 'store_id' })
   storeId: number;
 
-  @Column('varchar', { name: 'resource', length: 64 })
-  resource: string;
+  @Column('int', { name: 'resource_id' })
+  resourceId: number;
 
   @Column('tinyint', { name: 'allow', nullable: true, width: 1 })
   allow: boolean | null;
@@ -45,4 +47,12 @@ export class StorePermission extends BaseEntity {
   )
   @JoinColumn([{ name: 'store_id', referencedColumnName: 'id' }])
   store: Store;
+
+  @ManyToOne(
+    () => Resource,
+    resource => resource.storesPermission,
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
+  )
+  @JoinColumn([{ name: 'resource_id', referencedColumnName: 'id' }])
+  resource: Resource;
 }

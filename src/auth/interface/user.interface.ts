@@ -3,6 +3,6 @@ import { Request } from 'express';
 import { User } from '../../entities/User';
 
 // import this to use req.user
-export interface IGetUserAuthInfoRequest extends Request {
+export interface ReqWithUser extends Request {
   user: User; // or any other type
 }

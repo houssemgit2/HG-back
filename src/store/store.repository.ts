@@ -4,23 +4,47 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AddStoreDto } from './dto/add-store.dto';
 import { InternalServerErrorException } from '@nestjs/common';
 import { UserCredentialDto } from '../user/dto/user.dto';
-import { User } from '../entities/User';
 import { UserRepository } from 'src/auth/user.repository';
+import { GetStoreDto } from './dto/get-store.dto';
+import { User } from '../entities/User';
+import { Cluster } from '../entities/Cluster';
 
 @EntityRepository(Store)
 export class StoreRepository extends Repository<Store> {
   constructor(
     @InjectRepository(Store)
     private readonly storeRepository: Repository<Store>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
     private connection: Connection,
-    private userRepoFunction: UserRepository,
   ) {
     super();
   }
-  async findAll(): Promise<Store[]> {
-    return await this.storeRepository.find();
+  async findAll(filter: GetStoreDto): Promise<any> {
+    const queryOption: any = {};
+    if (filter.perPage && filter.page) {
+      queryOption.skip = filter.perPage * (filter.page - 1);
+      queryOption.take = filter.perPage;
+    }
+    /**
+  set to false to not load the join relation automatically
+ */
+    // queryOption.loadEagerRelations = true;
+    // queryOption.join = {
+    //   alias: 'User',
+    //   leftJoinAndSelect: {
+    //     firstName: 'user.first_name',
+    //     lastName: 'user.last_name',
+    //     email: 'user.email',
+    //     phone: 'user.phone',
+    //     address: 'user.address',
+    //   },
+    // };
+    // queryOption.relations = [User, Cluster];
+    try {
+      const result: Store[] = await this.find(queryOption);
+      return result;
+    } catch (e) {
+      return e;
+    }
   }
 
   async add(addStore: AddStoreDto, owner: UserCredentialDto): Promise<any> {
@@ -45,7 +69,7 @@ export class StoreRepository extends Repository<Store> {
     } finally {
       // you need to release a queryRunner which was manually instantiated
       await queryRunner.release();
-      return { data: 'store added sccefully' };
+      return { data: 'store added successfully' };
     }
   }
 

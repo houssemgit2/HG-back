@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import {
   Injectable,
   UnauthorizedException,
@@ -16,6 +17,7 @@ import { LoginCredentialDto } from './dto/login-credential.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import * as generator from 'generate-password';
 import * as AWS from 'aws-sdk';
+import moment = require('moment');
 AWS.config.update({ region: 'us-east-1' });
 
 @Injectable()
@@ -33,21 +35,46 @@ export class AuthService {
       throw new InternalServerErrorException(e);
     }
   }
-
-  async login(
-    loginCredentialDto: LoginCredentialDto,
-  ): Promise<{ accessToken: string }> {
+  transformUserObject(user): any {
+    const userObject: any = {};
+    userObject.fst_name = user.firstName;
+    userObject.lst_name = user.lastName;
+    userObject.store_cip = user.storeId;
+    userObject.phone_num = user.phone;
+    userObject.role = user.userRole.name;
+    userObject.store = { ...user.store };
+    userObject.store.cluster = user.store.clusters;
+    delete user.userRole;
+    delete user.store.clusters;
+    delete userObject.store.clusters;
+    delete user.firstName;
+    delete user.lastName;
+    delete user.storeId;
+    delete user.phone;
+    return { id: user.id, ...userObject, ...user, store: userObject.store };
+  }
+  async login(loginCredentialDto: LoginCredentialDto): Promise<any> {
     try {
-      const result = await this.userRepository.validateUserLogin(
+      const user: any = await this.userRepository.validateUserLogin(
         loginCredentialDto,
       );
 
-      if (!result) throw new UnauthorizedException('Invalid credential');
+      if (!user) throw new UnauthorizedException('Invalid credential');
       const payload: JwtPayload = { email: loginCredentialDto.email };
       const accessToken = await this.jwtService.sign(payload);
-      return { accessToken };
+      this.logger.verbose('connected succssefly');
+      return {
+        token: {
+          tokenType: 'Bearer',
+          accessToken,
+          expiresIn: moment()
+            .add(1, 'months')
+            .format(`YYYY-MM-DDTHH:mm:ss:sssZ`),
+        },
+        user: this.transformUserObject(user),
+      };
     } catch (e) {
-      throw new ForbiddenException(e);
+      throw new Error(e);
     }
   }
 
