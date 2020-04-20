@@ -1,7 +1,7 @@
 import { PROMO_TYPES } from '../consts';
 import { RemEurProduct } from './rem-eur-product';
 
-export default function PDFPromoTemplateFiller(
+export function PDFPromoTemplateFiller(
   promo,
   desiredOrientation,
   templateOrientation,
@@ -60,5 +60,3 @@ export default function PDFPromoTemplateFiller(
   }
   return filler.generate(templateOrientation, desiredOrientation);
 }
-
-module.exports = PDFPromoTemplateFiller;

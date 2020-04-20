@@ -32,3 +32,15 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+#outputFiles
+output/calendars/*
+!output/calendars/.gitkeep
+output/PDFPromos/*
+!output/PDFPromos/.gitkeep
+output/PDFBadges/*
+!output/PDFBadges/.gitkeep
+output/ordersZips/*
+!output/ordersZips/.gitkeep
+uploads/*
+!uploads/.gitkeep

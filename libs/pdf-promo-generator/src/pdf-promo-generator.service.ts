@@ -2,20 +2,19 @@ import { Injectable } from '@nestjs/common';
 import * as PDFDocument from 'pdfkit';
 import { v1 as uuidv1 } from 'uuid';
 import * as moment from 'moment';
-import 'moment/src/locale/fr-fr';
 import * as fs from 'fs';
 import { ORIENTATIONS, PAGE_FORMATS } from './consts';
 import { A4, A5, A6, A7, A8 } from './config';
 import { calculateNextPDFPromoIndex, sortPDFPromos } from './helpers';
 import { PDFPromo } from '@app/pdf-promo-generator/classes/PDFPromo';
 import SVGtoPDF = require('svg-to-pdfkit');
-import PDFPromoTemplateFiller from './promos';
+import { PDFPromoTemplateFiller } from './promos';
 @Injectable()
 export class PdfPromoGeneratorService {
   constructor() {
-    moment.locale('fr-fr');
+    moment.locale('fr');
   }
-  generatePDF(PDFPromos) {
+  generatePDF(PDFPromos): Promise<string> {
     const doc = new PDFDocument({
       size: 'A4',
       margin: 0,
@@ -24,7 +23,7 @@ export class PdfPromoGeneratorService {
 
     // eslint-disable-next-line no-unused-vars
     const fontsCallback = (family, bold, italic, fontOptions) => {
-      const fontsDirPath = `${__dirname}/../../../static/fonts/`;
+      const fontsDirPath = `${__dirname}/resources/fonts/`;
 
       const availableFonts = Array.from(
         fs.readdirSync(fontsDirPath).filter(file => /\.ttf$/.test(file)),
@@ -134,7 +133,7 @@ export class PdfPromoGeneratorService {
       PDFPromoCount++;
     });
 
-    const filePath = `${__dirname}/../../../../output/PDFPromos/${uuidv1()}.pdf`;
+    const filePath = `${__dirname}/../output/PDFPromos/${uuidv1()}.pdf`;
 
     const stream = fs.createWriteStream(filePath);
 

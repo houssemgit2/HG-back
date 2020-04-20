@@ -8,6 +8,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
+    "copy-assets": "cpx 'libs/pdf-promo-generator/resources/**' 'dist/resources'",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -35,6 +36,7 @@
     "bcrypt": "^4.0.1",
     "class-transformer": "^0.2.3",
     "class-validator": "^0.11.1",
+    "cpx": "^1.5.0",
     "generate-password": "^1.5.1",
     "handlebars": "^4.7.6",
     "helmet": "^3.22.0",
