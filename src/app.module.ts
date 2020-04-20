@@ -9,6 +9,8 @@ import { PromoModule } from './promo/promo.module';
 import { LoggerMiddleware } from './middleware/logger.middleware';
 import entities from './entities';
 import { from } from 'rxjs';
+import { PdfPromoGeneratorModule } from '@app/pdf-promo-generator';
+
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -27,6 +29,7 @@ import { from } from 'rxjs';
     AuthModule,
     StoreModule,
     UserModule,
+    PdfPromoGeneratorModule,
     PromoModule,
   ],
   controllers: [AppController],
