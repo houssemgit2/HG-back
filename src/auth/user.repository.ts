@@ -64,7 +64,8 @@ export class UserRepository extends Repository<User> {
     loginCredentialDto: LoginCredentialDto,
   ): Promise<User> {
     const { email, password } = loginCredentialDto;
-    const user = await this.findOne({ email });
+    const user = await this.findOne({ where: { email }, relations: ['store'] });
+
     if (user && (await user.validatePassword(password))) {
       user.transform();
       return user;

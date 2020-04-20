@@ -16,6 +16,7 @@ import { LoginCredentialDto } from './dto/login-credential.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import * as generator from 'generate-password';
 import * as AWS from 'aws-sdk';
+import moment = require('moment');
 AWS.config.update({ region: 'us-east-1' });
 
 @Injectable()
@@ -34,18 +35,31 @@ export class AuthService {
     }
   }
 
-  async login(
-    loginCredentialDto: LoginCredentialDto,
-  ): Promise<{ accessToken: string }> {
+  async login(loginCredentialDto: LoginCredentialDto): Promise<any> {
     try {
-      const result = await this.userRepository.validateUserLogin(
+      const user: any = await this.userRepository.validateUserLogin(
         loginCredentialDto,
       );
 
-      if (!result) throw new UnauthorizedException('Invalid credential');
+      if (!user) throw new UnauthorizedException('Invalid credential');
       const payload: JwtPayload = { email: loginCredentialDto.email };
       const accessToken = await this.jwtService.sign(payload);
-      return { accessToken };
+      this.logger.verbose('connected succssefly');
+
+      user.role = user.userRole.name;
+      user.store.cluster = user.store.clusters;
+      delete user.userRole;
+      delete user.store.clusters;
+      return {
+        token: {
+          tokenType: 'Bearer',
+          accessToken,
+          expiresIn: moment()
+            .add(1, 'months')
+            .format(`YYYY-MM-DDTHH:mm:ss:sssZ`),
+        },
+        user,
+      };
     } catch (e) {
       throw new ForbiddenException(e);
     }

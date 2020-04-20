@@ -46,10 +46,10 @@ export class Store extends BaseEntity {
   @ManyToOne(
     () => Cluster,
     cluster => cluster.stores,
-    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
   )
   @JoinColumn([{ name: 'cluster_id', referencedColumnName: 'id' }])
-  cluster: Cluster;
+  clusters: Cluster;
 
   @OneToMany(
     () => StorePermission,
@@ -72,7 +72,6 @@ export class Store extends BaseEntity {
   @OneToMany(
     () => User,
     user => user.store,
-    { eager: true },
   )
   users: User[];
 }
