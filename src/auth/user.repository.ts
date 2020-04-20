@@ -64,19 +64,11 @@ export class UserRepository extends Repository<User> {
     loginCredentialDto: LoginCredentialDto,
   ): Promise<User> {
     const { email, password } = loginCredentialDto;
-    const user = await this.findOne({ email });
-    console.log('find user ***********>', user);
-    try {
-      const valid = await user.validatePassword(password);
-      if (user && valid) {
-        user.transform();
-        return user;
-      } else {
-        throw new Error('invalid credential');
-      }
-    } catch (e) {
-      console.error('failed to validate--');
-      return e;
+    const user = await this.findOne({ where: { email }, relations: ['store'] });
+
+    if (user && (await user.validatePassword(password))) {
+      user.transform();
+      return user;
     }
   }
   async generateSaltPassword(password: string): Promise<any> {

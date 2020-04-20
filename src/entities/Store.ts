@@ -50,7 +50,7 @@ export class Store extends BaseEntity {
     { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
   )
   @JoinColumn([{ name: 'cluster_id', referencedColumnName: 'id' }])
-  cluster: Cluster;
+  clusters: Cluster;
 
   @OneToMany(
     () => StorePermission,

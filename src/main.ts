@@ -19,7 +19,7 @@ async function bootstrap() {
     }),
   );
   app.use(helmet());
-
+  app.setGlobalPrefix('v1');
   // swagger initialization
   const options = new DocumentBuilder()
     .setTitle('HealthyGroup')
@@ -36,5 +36,6 @@ async function bootstrap() {
   await app.listen(port);
 
   logger.log(`Application listening in port ${port}`);
+  console.log('API url: http://localhost:3000/api');
 }
 bootstrap();
