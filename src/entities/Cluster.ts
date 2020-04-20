@@ -18,7 +18,7 @@ export class Cluster extends BaseEntity {
 
   @OneToMany(
     () => Store,
-    store => store.cluster,
+    store => store.clusters,
   )
   stores: Store[];
   @OneToMany(

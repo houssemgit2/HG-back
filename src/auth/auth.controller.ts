@@ -20,9 +20,8 @@ import {
   ApiOperation,
   ApiResponse,
 } from '@nestjs/swagger';
-import { IGetUserAuthInfoRequest } from './interface/user.interface';
+import { ReqWithUser } from './interface/user.interface';
 
-@ApiBearerAuth()
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
@@ -30,7 +29,7 @@ export class AuthController {
   private logger = new Logger('/auth/');
 
   @ApiOperation({ summary: 'Register new user' })
-  @ApiResponse({ status: 200, description: 'Return the new user paramters' })
+  @ApiResponse({ status: 200, description: 'Return the new user parameters' })
   @Post('register')
   async register(@Body() userCredentialDto: UserCredentialDto): Promise<User> {
     this.logger.verbose(
@@ -54,6 +53,8 @@ export class AuthController {
     this.logger.verbose(`user is connecting... ${loginCredentialDto.email}`);
     return this.authService.login(loginCredentialDto);
   }
+
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Reset password' })
   @ApiResponse({ status: 200, description: 'Return new password' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
@@ -62,20 +63,21 @@ export class AuthController {
   @UseGuards(AuthGuard())
   resetPassword(
     @Body() resetPasswordDto: ResetPasswordDto,
-    @Req() req: IGetUserAuthInfoRequest,
+    @Req() req: ReqWithUser,
   ): Promise<void> {
     const user: User = req.user;
-    this.logger.verbose('reset passowrd');
+    this.logger.verbose('reset password');
     return this.authService.resetPassword(resetPasswordDto, user);
   }
 
   // TODO this role is for development only
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'this user' })
   @ApiResponse({ status: 200, description: 'return the connected user' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @Post('/test')
   @UseGuards(AuthGuard())
-  test(@Req() req: IGetUserAuthInfoRequest) {
+  test(@Req() req: ReqWithUser) {
     // console.log(ip);
     return req.user;
   }

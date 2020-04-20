@@ -1,18 +1,10 @@
-import {
-  Controller,
-  Get,
-  UseGuards,
-  Req,
-  Param,
-  Put,
-  Delete,
-  Body,
-} from '@nestjs/common';
+import { Controller, Get, UseGuards, Req, Param } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { User } from '../entities/User';
 import { UserService } from './user.service';
 import { AdminGuard } from '../auth/guards/admin.guard';
-
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+@ApiBearerAuth()
+@ApiTags('User')
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
@@ -20,6 +12,7 @@ export class UserController {
   @Get()
   @UseGuards(AuthGuard(), AdminGuard)
   findAll(@Req() req: any) {
+    console.log(req); // todo remove it
     return this.userService.findUsers();
   }
 

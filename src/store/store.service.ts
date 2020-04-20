@@ -1,15 +1,11 @@
-import {
-  Injectable,
-  Logger,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { StoreRepository } from './store.repository';
 import { AddStoreDto } from './dto/add-store.dto';
 import { UserCredentialDto } from 'src/auth/dto/user-credential.dto';
 import { User } from 'src/entities/User';
-import { UserRepository } from '../auth/user.repository';
 import { Store } from 'src/entities/Store';
 import { GetStoreDto } from './dto/get-store.dto';
+import { getRepository } from 'typeorm';
 
 @Injectable()
 export class StoreService {
@@ -18,16 +14,35 @@ export class StoreService {
 
   async createOne(store: AddStoreDto, owner: UserCredentialDto, user: User) {
     //todo debug log
-    this.logger.debug('adding new store...');
+    this.logger.debug('adding new store... for ' + user.firstName);
     const result = await this.storeRepository.add(store, owner);
     console.log(`the result is ${result}`);
     return result;
   }
-  async getAll(filter: GetStoreDto) {
-    this.storeRepository.findAll();
+  async getAllStore(filter: GetStoreDto) {
+    // const storeList: Store[] = await this.storeRepository.findAll(filter);
+    // console.log(storeList);
+    const { perPage, page } = filter;
+
+    // const query = getRepository(Store)
+    //   .createQueryBuilder('store')
+    //   .leftJoinAndSelect('cluster', 'cluster', 'cluster.id = s.cluster_id')
+    //   .leftJoinAndSelect('user', 'owner', 'owner.id = s.cip');
+
+    // if (filter.perPage && filter.page) {
+    //   const offset: number = perPage * (page - 1);
+    //   const limit: number = perPage;
+    //   query.skip(offset).take(limit);
+    // }
+    try {
+      // return await query.getRawMany();
+      return await this.storeRepository.findAll(filter);
+    } catch (e) {
+      return e;
+    }
   }
   async getStore(id: number) {
-    console.log(id);
+    return await this.storeRepository.findByIds([id]);
   }
   async updateStore(id: number) {
     console.log(id);

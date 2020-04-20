@@ -7,6 +7,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   BaseEntity,
+  OneToOne,
 } from 'typeorm';
 import { RefreshToken } from './RefreshToken';
 import { Store } from './Store';
@@ -32,7 +33,7 @@ export class User extends BaseEntity {
   @Column('varchar', { name: 'last_name', length: 255 })
   lastName: string;
 
-  @Column('varchar', { name: 'password', length: 255 })
+  @Column('varchar', { name: 'password', length: 255,  /*select: false*/  })
   password: string;
 
   @Column('varchar', { name: 'email', length: 255 })
@@ -44,7 +45,7 @@ export class User extends BaseEntity {
   @Column('varchar', { name: 'address', length: 255 })
   address: string;
 
-  @Column('varchar', { name: 'salt', length: 255 })
+  @Column('varchar', { name: 'salt', length: 255, /* select: false*/ })
   salt: string;
 
   @Column('datetime', {
@@ -82,6 +83,12 @@ export class User extends BaseEntity {
   )
   @JoinColumn([{ name: 'user_role_id', referencedColumnName: 'id' }])
   userRole: UserRole;
+
+  @OneToOne(
+    () => Store,
+    store => store.id,
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
+  )
 
   async validatePassword(password: string): Promise<boolean> {
     const hash = await bcrypt.hash(password, this.salt);
