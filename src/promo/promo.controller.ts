@@ -12,6 +12,7 @@ import {
   UsePipes,
   ValidationPipe,
   Header,
+  Res,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AdminGuard } from '../auth/guards/admin.guard';
@@ -43,12 +44,10 @@ export class PromoController {
   @Post('generate/promos')
   @Header('Content-Type', 'image/pdf')
   @Header('Content-Disposition', 'attachment; filename=promos.pdf')
-  async generatePromos(@Body() body: any) {
-    console.log(body.promos);
+  async generatePromos(@Body() body: any, @Res() response) {
     const file: string = await this.pdfPromoGeneratorService.generatePDF(
       body.promos,
     );
-    console.log(file);
-    return fs.createReadStream(file);
+    return fs.createReadStream(file).pipe(response);
   }
 }
