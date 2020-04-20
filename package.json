@@ -12,6 +12,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"libs/**/*.ts\"",
     "prestart": "yarn copy-assets",
     "prestart:dev": "yarn copy-assets",
+    "prestart:prod": "yarn build && yarn copy-assets",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
