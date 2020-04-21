@@ -1,5 +1,6 @@
 import { PROMO_TYPES } from '../consts';
 import { RemEurProduct } from './rem-eur-product';
+import { RemEurGamme } from './rem-eur-gamme';
 
 export function PDFPromoTemplateFiller(
   promo,
@@ -11,12 +12,13 @@ export function PDFPromoTemplateFiller(
     case PROMO_TYPES.PRICE_DISCOUNT_EUR_PRODUCT:
       filler = new RemEurProduct(promo);
       break;
-    /*case PROMO_TYPES.PRICE_DISCOUNT_PER_PRODUCT:
+    case PROMO_TYPES.PRICE_DISCOUNT_EUR_RANGE:
+      filler = new RemEurGamme(promo);
+      break;
+    /*  case PROMO_TYPES.PRICE_DISCOUNT_PER_PRODUCT:
       filler = new PriceDiscountPerProd(promo);
       break;
-    case PROMO_TYPES.PRICE_DISCOUNT_EUR_RANGE:
-      filler = new PriceDiscountEurRange(promo);
-      break;
+
     case PROMO_TYPES.PRICE_DISCOUNT_PER_RANGE:
       filler = new PriceDiscountPerRange(promo);
       break;
