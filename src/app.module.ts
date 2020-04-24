@@ -11,6 +11,7 @@ import entities from './entities';
 import { from } from 'rxjs';
 import { PdfPromoGeneratorModule } from '@app/pdf-promo-generator';
 import { LefletPeriodModule } from './leflet-period/leflet-period.module';
+import { LeafletModule } from './leaflet/leaflet.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { LefletPeriodModule } from './leflet-period/leflet-period.module';
     PdfPromoGeneratorModule,
     PromoModule,
     LefletPeriodModule,
+    LeafletModule,
   ],
   controllers: [AppController],
   providers: [AppService],
