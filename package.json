@@ -34,6 +34,7 @@
     "@nestjs/typeorm": "^7.0.0",
     "@types/express-handlebars": "^3.1.0",
     "@types/pdfkit": "^0.10.5",
+    "@types/pdfmake": "^0.1.13",
     "@types/uuid": "^7.0.2",
     "aws-sdk": "^2.655.0",
     "bcrypt": "^4.0.1",
@@ -48,6 +49,7 @@
     "node-gyp": "^6.1.0",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
+    "pdfmake": "^0.1.65",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^6.5.4",
@@ -98,7 +100,9 @@
     ],
     "moduleNameMapper": {
       "@app/pdf-promo-generator/(.*)": "<rootDir>/libs/pdf-promo-generator/src/$1",
-      "@app/pdf-promo-generator": "<rootDir>/libs/pdf-promo-generator/src"
+      "@app/pdf-promo-generator": "<rootDir>/libs/pdf-promo-generator/src",
+      "@app/pdf-calendar-generator/(.*)": "<rootDir>/libs/pdf-calendar-generator/src/$1",
+      "@app/pdf-calendar-generator": "<rootDir>/libs/pdf-calendar-generator/src"
     }
   }
 }

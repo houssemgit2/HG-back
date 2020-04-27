@@ -10,6 +10,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/pdf-promo-generator/tsconfig.lib.json"
       }
+    },
+    "pdf-calendar-generator": {
+      "type": "library",
+      "root": "libs/pdf-calendar-generator",
+      "entryFile": "index",
+      "sourceRoot": "libs/pdf-calendar-generator/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/pdf-calendar-generator/tsconfig.lib.json"
+      }
     }
   },
   "compilerOptions": {

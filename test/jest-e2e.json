@@ -12,6 +12,8 @@
   },
   "moduleNameMapper": {
     "@app/pdf-promo-generator/(.*)": "<rootDir>/../libs/pdf-promo-generator/src/$1",
-    "@app/pdf-promo-generator": "<rootDir>/../libs/pdf-promo-generator/src"
+    "@app/pdf-promo-generator": "<rootDir>/../libs/pdf-promo-generator/src",
+    "@app/pdf-calendar-generator/(.*)": "<rootDir>/../libs/pdf-calendar-generator/src/$1",
+    "@app/pdf-calendar-generator": "<rootDir>/../libs/pdf-calendar-generator/src"
   }
 }

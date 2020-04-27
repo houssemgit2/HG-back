@@ -16,6 +16,12 @@
       ],
       "@app/pdf-promo-generator/*": [
         "libs/pdf-promo-generator/src/*"
+      ],
+      "@app/pdf-calendar-generator": [
+        "libs/pdf-calendar-generator/src"
+      ],
+      "@app/pdf-calendar-generator/*": [
+        "libs/pdf-calendar-generator/src/*"
       ]
     }
   },
