@@ -10,6 +10,8 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
 import entities from './entities';
 import { from } from 'rxjs';
 import { PdfPromoGeneratorModule } from '@app/pdf-promo-generator';
+import { LefletPeriodModule } from './leflet-period/leflet-period.module';
+import { LeafletModule } from './leaflet/leaflet.module';
 
 @Module({
   imports: [
@@ -31,6 +33,8 @@ import { PdfPromoGeneratorModule } from '@app/pdf-promo-generator';
     UserModule,
     PdfPromoGeneratorModule,
     PromoModule,
+    LefletPeriodModule,
+    LeafletModule,
   ],
   controllers: [AppController],
   providers: [AppService],
