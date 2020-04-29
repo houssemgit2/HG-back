@@ -8,6 +8,7 @@ import { UserRepository } from 'src/auth/user.repository';
 import { GetStoreDto } from './dto/get-store.dto';
 import { User } from '../entities/User';
 import { Cluster } from '../entities/Cluster';
+import { StorePermissionDto } from 'src/auth/dto/store-permission.dto';
 
 @EntityRepository(Store)
 export class StoreRepository extends Repository<Store> {
@@ -47,20 +48,25 @@ export class StoreRepository extends Repository<Store> {
     }
   }
 
-  async add(addStore: AddStoreDto, owner: UserCredentialDto): Promise<any> {
+  async add(
+    addStore: AddStoreDto,
+    owner: UserCredentialDto,
+    permission: StorePermissionDto[],
+  ): Promise<any> {
     //const userAuth = this.userRepoFunction.generateSaltPassword(owner.password);
-
     // const user: UserCredentialDto = { ...owner, ...userAuth };
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     console.log('start transaction');
+    let store: any;
     try {
-      const store = await queryRunner.manager.save(addStore);
+      store = await queryRunner.manager.save(addStore);
       // owner.storeId = store.id;
       console.log(store);
       const userIn = await queryRunner.manager.save(owner);
       console.log(userIn);
+      await queryRunner.manager.save(permission);
       await queryRunner.commitTransaction();
     } catch (err) {
       // since we have errors lets rollback the changes we made
@@ -69,7 +75,7 @@ export class StoreRepository extends Repository<Store> {
     } finally {
       // you need to release a queryRunner which was manually instantiated
       await queryRunner.release();
-      return { data: 'store added successfully' };
+      return store;
     }
   }
 

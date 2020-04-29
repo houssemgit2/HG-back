@@ -3,10 +3,12 @@ import {
   IsObject,
   IsNotEmptyObject,
   ValidateNested,
+  IsArray,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { AddStoreDto } from './add-store.dto';
 import { UserCredentialDto } from 'src/auth/dto/user-credential.dto';
+import { StorePermissionDto } from 'src/auth/dto/store-permission.dto';
 export class StoreOwnerDto {
   @ApiProperty()
   @ValidateNested()
@@ -18,5 +20,6 @@ export class StoreOwnerDto {
 
   @ApiProperty()
   @ValidateNested()
-  permission: UserCredentialDto;
+  @IsArray()
+  permission: StorePermissionDto[];
 }

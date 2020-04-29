@@ -6,16 +6,21 @@ import { User } from 'src/entities/User';
 import { Store } from 'src/entities/Store';
 import { GetStoreDto } from './dto/get-store.dto';
 import { getRepository } from 'typeorm';
+import { StorePermissionDto } from 'src/auth/dto/store-permission.dto';
 
 @Injectable()
 export class StoreService {
   constructor(private storeRepository: StoreRepository) {}
   logger = new Logger('Store service');
 
-  async createOne(store: AddStoreDto, owner: UserCredentialDto, user: User) {
+  async createOne(
+    store: AddStoreDto,
+    owner: UserCredentialDto,
+    permission: StorePermissionDto[],
+  ) {
     //todo debug log
-    this.logger.debug('adding new store... for ' + user.firstName);
-    const result = await this.storeRepository.add(store, owner);
+    this.logger.debug('adding new store... for ' + owner.firstName);
+    const result = await this.storeRepository.add(store, owner,permission);
     console.log(`the result is ${result}`);
     return result;
   }

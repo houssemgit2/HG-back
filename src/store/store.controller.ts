@@ -33,13 +33,9 @@ export class StoreController {
   @ApiResponse({ status: 200, description: 'store added successfully' })
   @Post()
   @UseGuards(AuthGuard(), AdminGuard)
-  create(
-    @Body() body: StoreOwnerDto,
-
-    @Req() req: ReqWithUser,
-  ) {
-    const { owner, store } = body;
-    return this.storeService.createOne(store, owner, req.user);
+  create(@Body() body: StoreOwnerDto) {
+    const { owner, store, permission } = body;
+    return this.storeService.createOne(store, owner, permission);
   }
 
   @ApiOperation({ summary: 'get All store' })
