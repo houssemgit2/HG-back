@@ -12,6 +12,8 @@ import { from } from 'rxjs';
 import { PdfPromoGeneratorModule } from '@app/pdf-promo-generator';
 import { LefletPeriodModule } from './leflet-period/leflet-period.module';
 import { LeafletModule } from './leaflet/leaflet.module';
+import { OrderUploadModule } from './order-upload/order-upload.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -28,6 +30,9 @@ import { LeafletModule } from './leaflet/leaflet.module';
       synchronize: false,
       entities: entities,
     }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     AuthModule,
     StoreModule,
     UserModule,
@@ -35,6 +40,7 @@ import { LeafletModule } from './leaflet/leaflet.module';
     PromoModule,
     LefletPeriodModule,
     LeafletModule,
+    OrderUploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],
