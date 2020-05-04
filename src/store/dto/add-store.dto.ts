@@ -2,23 +2,21 @@ import {
   IsNotEmpty,
   IsNumber,
   MaxLength,
-  IsOptional,
-  IsString,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 export class AddStoreDto {
   @ApiProperty()
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
-  cip: string;
+  cip: number;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsNumber()
-  cluster_id: number;
+  clu_id: number;
 
   @ApiProperty()
   @IsNotEmpty()
   @MaxLength(255)
-  name: string;
+  descr: string;
 }

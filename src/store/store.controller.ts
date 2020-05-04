@@ -23,9 +23,13 @@ import {
 } from '@nestjs/swagger';
 import { StoreOwnerDto } from './dto/store-owner.dto';
 import { Store } from 'src/entities/Store';
+import { EditStoreDto } from './dto/edit-store.dto';
+import { StorePermissionDto } from 'src/store/dto/store-permission.dto';
+import { EditUserCredentialDto } from 'src/user/dto/edit-user.dto';
+import { EditStoreOwnerDto } from './dto/edit-store-owner.dto';
 @ApiBearerAuth()
 @ApiTags('Store')
-@Controller('store')
+@Controller('stores')
 export class StoreController {
   constructor(private storeService: StoreService) {}
 
@@ -34,8 +38,8 @@ export class StoreController {
   @Post()
   @UseGuards(AuthGuard(), AdminGuard)
   create(@Body() body: StoreOwnerDto) {
-    const { owner, store, permission } = body;
-    return this.storeService.createOne(store, owner, permission);
+    const { owner, store, permissions } = body;
+    return this.storeService.createOne(store, owner, permissions);
   }
 
   @ApiOperation({ summary: 'get All store' })
@@ -61,8 +65,9 @@ export class StoreController {
   @ApiResponse({ status: 200, description: 'update the store info' })
   @Put(':id')
   @UseGuards(AuthGuard())
-  async update(@Param('id') id: number) {
-    return await this.storeService.updateStore(id);
+  async update(@Param('id') id: number, @Body() body: EditStoreOwnerDto) {
+    const { store, owner, permissions } = body;
+    return await this.storeService.updateStore(id, store, owner, permissions);
   }
 
   @Delete(':id')

@@ -11,7 +11,7 @@ export class UserCredentialDto {
   @ApiProperty()
   @IsNumber()
   @IsOptional()
-  storeId: number;
+  sto_id: number;
 
   @ApiProperty()
   @IsNotEmpty()
@@ -22,13 +22,13 @@ export class UserCredentialDto {
   @IsNotEmpty()
   @MaxLength(255)
   @MinLength(3)
-  firstName: string;
+  fst_name: string;
 
   @ApiProperty()
   @IsNotEmpty()
   @MaxLength(255)
   @MinLength(3)
-  lastName: string;
+  lst_name: string;
 
   @ApiProperty()
   @IsNotEmpty()
@@ -47,5 +47,9 @@ export class UserCredentialDto {
 
   @ApiPropertyOptional()
   @IsNumber()
-  phone: number;
+  role: number;
+
+  @ApiPropertyOptional()
+  @IsNumber()
+  phoneNum: number;
 }

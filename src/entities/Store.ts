@@ -25,7 +25,7 @@ export class Store extends BaseEntity {
   clusterId: number;
 
   @Column('int', { name: 'cip' })
-  cip: string;
+  cip: number;
 
   @Column('varchar', { name: 'name', length: 132 })
   name: string;
