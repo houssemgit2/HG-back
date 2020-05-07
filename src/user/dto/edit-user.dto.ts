@@ -33,5 +33,5 @@ export class EditUserCredentialDto {
 
   @ApiPropertyOptional({ required: false })
   @IsNumber()
-  phoneNum?: number;
+  phone_num?: string;
 }
