@@ -1,18 +1,20 @@
 /* eslint-disable @typescript-eslint/camelcase */
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { StoreRepository } from './store.repository';
 import { AddStoreDto } from './dto/add-store.dto';
-import { UserCredentialDto } from '../user/dto/user.dto';
 import { User } from 'src/entities/User';
 import { Store } from 'src/entities/Store';
 import { GetStoreDto } from './dto/get-store.dto';
-import { getRepository } from 'typeorm';
 import { StorePermissionDto } from 'src/store/dto/store-permission.dto';
 import { UserRepository } from 'src/auth/user.repository';
 import { StorePermission } from 'src/entities/StorePermission';
 import { EditStoreDto } from './dto/edit-store.dto';
-import { StoreOwnerDto } from './dto/store-owner.dto';
 import { EditUserCredentialDto } from '../user/dto/edit-user.dto';
+import { AddOwnerDto } from './dto/add-owner.dto';
 
 @Injectable()
 export class StoreService {
@@ -24,38 +26,35 @@ export class StoreService {
 
   async createOne(
     addStore: AddStoreDto,
-    owner: UserCredentialDto,
+    owner: AddOwnerDto,
     permissions: StorePermissionDto[],
   ) {
     const store: Store = new Store();
     store.clusterId = addStore.clu_id;
-    store.cip = addStore.cip;
+    store.id = addStore.cip;
     store.name = addStore.descr;
     const newOwner: User = new User();
     newOwner.storeId = addStore.cip;
     newOwner.firstName = owner.fst_name;
     newOwner.lastName = owner.lst_name;
     newOwner.email = owner.email;
-    newOwner.phone = `${owner.phoneNum}`;
+    newOwner.phone = owner.phone_num;
     newOwner.address = owner.address;
-    newOwner.storeId = owner.sto_id;
-    newOwner.userRoleId = owner.role;
-    const password_salt: any = this.userRepository.generateSaltPassword(
+    newOwner.userRoleId = 2;
+    const password_salt: any = await this.userRepository.generateSaltPassword(
       owner.password,
     );
-    console.log('the generated assword is ------->', password_salt);
+    console.log('the generated password is ------->', password_salt);
     newOwner.password = password_salt.password;
     newOwner.salt = password_salt.salt;
 
     const storePermissions = permissions.map(item => {
       const permis = new StorePermission();
-      permis.storeId = item.store_cip;
-      permis.resourceId = item.resource_id;
+      permis.resourceId = item.resource;
       permis.allow = item.allow;
+      permis.storeId = store.id;
       return permis;
     });
-    //todo debug log
-    this.logger.debug('adding new store... for ' + owner);
     const result = await this.storeRepository.add(
       store,
       newOwner,
@@ -63,32 +62,25 @@ export class StoreService {
       false,
     );
     console.log(`the result is ${result}`);
-    return result ? result : { data: 'added successful ' };
+    return this.storeV1Key(result);
   }
   async getAllStore(filter: GetStoreDto) {
-    // const storeList: Store[] = await this.storeRepository.findAll(filter);
-    // console.log(storeList);
-    const { perPage, page } = filter;
-
-    // const query = getRepository(Store)
-    //   .createQueryBuilder('store')
-    //   .leftJoinAndSelect('cluster', 'cluster', 'cluster.id = s.cluster_id')
-    //   .leftJoinAndSelect('user', 'owner', 'owner.id = s.cip');
-
-    // if (filter.perPage && filter.page) {
-    //   const offset: number = perPage * (page - 1);
-    //   const limit: number = perPage;
-    //   query.skip(offset).take(limit);
-    // }
     try {
-      // return await query.getRawMany();
       return await this.storeRepository.findAll(filter);
     } catch (e) {
       return e;
     }
   }
   async getStore(id: number) {
-    return await this.storeRepository.findByIds([id]);
+    try {
+      return await this.storeRepository.findOne(
+        { id },
+        { relations: ['storePermissions'] },
+      );
+    } catch (e) {
+      console.error(`could not find one store by id cip`);
+      throw new InternalServerErrorException(e);
+    }
   }
   async updateStore(
     id: number,
@@ -98,8 +90,8 @@ export class StoreService {
   ) {
     const store: Store = new Store();
     store.id = id;
+    store.cip = addStore.cip;
     if (addStore.clu_id) store.clusterId = addStore.clu_id;
-    if (addStore.cip) store.cip = addStore.cip;
     if (addStore.descr) store.name = addStore.descr;
     const newOwner: User = new User();
     if (owner) {
@@ -107,7 +99,7 @@ export class StoreService {
       newOwner.firstName = owner.fst_name;
       newOwner.lastName = owner.lst_name;
       newOwner.email = owner.email;
-      newOwner.phone = `${owner.phoneNum}`;
+      newOwner.phone = owner.phone_num;
       newOwner.address = owner.address;
     }
     if (owner.password) {
@@ -121,8 +113,8 @@ export class StoreService {
     const storePermissions = permissions
       ? permissions.map(item => {
           const permis = new StorePermission();
-          permis.storeId = item.store_cip;
-          permis.resourceId = item.resource_id;
+          permis.storeId = store.cip;
+          permis.resourceId = item.resource;
           permis.allow = item.allow;
           return permis;
         })
@@ -135,7 +127,28 @@ export class StoreService {
     );
     return result;
   }
+  async findByCip(cip: number): Promise<Store> {
+    try {
+      return await this.storeRepository.findOne({ cip });
+    } catch (e) {
+      console.error(`could not find one store by id cip`);
+      throw new InternalServerErrorException(e);
+    }
+  }
   async removeStore(id: number) {
-    console.log(id);
+    return await this.storeRepository.deleteStore(id);
+  }
+  storeV1Key(store: Store): any {
+    const storeV1: any = {};
+    storeV1.cip = store.id;
+    storeV1.owner_id = store.cip;
+    storeV1.descr = store.name;
+    storeV1.clu_id = store.clusterId;
+
+    delete store.id;
+    delete store.cip;
+    delete store.name;
+    delete store.clusterId;
+    return { ...storeV1, ...store };
   }
 }

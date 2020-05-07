@@ -3,12 +3,11 @@ import {
   ValidationOptions,
   ValidationArguments,
 } from 'class-validator';
-import { boolean } from 'joi';
 
 export function IsArrayOfObject(validationOptions?: ValidationOptions) {
   return (object: any, propertyName: string) => {
     registerDecorator({
-      name: 'IsNonPrimitiveArray',
+      name: 'IsArrayOfObject',
       target: object.constructor,
       propertyName,
       constraints: [],
@@ -20,8 +19,8 @@ export function IsArrayOfObject(validationOptions?: ValidationOptions) {
             value.some(
               item =>
                 item.allow &&
-                typeof item.store_cip === 'number' &&
-                typeof item.resource_id === 'number',
+                // typeof item.store_cip === 'number' &&
+                typeof item.resource === 'number',
             )
           );
         },
