@@ -14,6 +14,7 @@ import { LefletPeriodModule } from './leflet-period/leflet-period.module';
 import { LeafletModule } from './leaflet/leaflet.module';
 import { OrderUploadModule } from './order-upload/order-upload.module';
 import { ConfigModule } from '@nestjs/config';
+import { AccessPermissionsModule } from './access-permissions/access-permissions.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { ConfigModule } from '@nestjs/config';
     LefletPeriodModule,
     LeafletModule,
     OrderUploadModule,
+    AccessPermissionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

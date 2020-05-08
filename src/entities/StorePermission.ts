@@ -24,7 +24,7 @@ export class StorePermission extends BaseEntity {
   resourceId: number;
 
   @Column('tinyint', { name: 'allow', nullable: true, width: 1 })
-  allow: boolean | null;
+  allow: number | null;
 
   @Column('datetime', {
     name: 'created_at',

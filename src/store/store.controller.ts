@@ -10,7 +10,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { GetStoreDto } from './dto/get-store.dto';
+import { PaginationDto } from './dto/pagination.dto';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { StoreService } from './store.service';
 import {
@@ -42,7 +42,7 @@ export class StoreController {
   @ApiResponse({ status: 200, description: 'store list' })
   @Get()
   @UseGuards(AuthGuard(), AdminGuard)
-  async findAll(@Query() filter: GetStoreDto): Promise<Store[]> {
+  async findAll(@Query() filter: PaginationDto): Promise<Store[]> {
     // return filter;
     const storeList: Store[] = await this.storeService.getAllStore(filter);
     //console.log(storeList);
@@ -61,7 +61,10 @@ export class StoreController {
   @ApiResponse({ status: 200, description: 'update the store info' })
   @Put(':id')
   @UseGuards(AuthGuard())
-  async update(@Param('id') id: number, @Body() body: EditStoreOwnerDto): Promise<Store> {
+  async update(
+    @Param('id') id: number,
+    @Body() body: EditStoreOwnerDto,
+  ): Promise<Store> {
     const { store, owner, permissions } = body;
     return await this.storeService.updateStore(id, store, owner, permissions);
   }

@@ -8,7 +8,7 @@ import {
 import { Store } from '../entities/Store';
 import { InjectRepository } from '@nestjs/typeorm';
 import { InternalServerErrorException } from '@nestjs/common';
-import { GetStoreDto } from './dto/get-store.dto';
+import { PaginationDto } from './dto/pagination.dto';
 import { User } from '../entities/User';
 import { StorePermission } from '../entities/StorePermission';
 
@@ -21,7 +21,7 @@ export class StoreRepository extends Repository<Store> {
   ) {
     super();
   }
-  async findAll(filter: GetStoreDto): Promise<any> {
+  async findAll(filter: PaginationDto): Promise<any> {
     const queryOption: any = {};
     if (filter.perPage && filter.page) {
       queryOption.skip = filter.perPage * (filter.page - 1);

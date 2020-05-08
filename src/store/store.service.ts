@@ -8,7 +8,7 @@ import { StoreRepository } from './store.repository';
 import { AddStoreDto } from './dto/add-store.dto';
 import { User } from 'src/entities/User';
 import { Store } from 'src/entities/Store';
-import { GetStoreDto } from './dto/get-store.dto';
+import { PaginationDto } from './dto/pagination.dto';
 import { StorePermissionDto } from 'src/store/dto/store-permission.dto';
 import { UserRepository } from 'src/auth/user.repository';
 import { StorePermission } from 'src/entities/StorePermission';
@@ -64,7 +64,7 @@ export class StoreService {
     console.log(`the result is ${result}`);
     return this.storeV1Key(result);
   }
-  async getAllStore(filter: GetStoreDto) {
+  async getAllStore(filter: PaginationDto) {
     try {
       return await this.storeRepository.findAll(filter);
     } catch (e) {
@@ -106,7 +106,7 @@ export class StoreService {
       const password_salt: any = this.userRepository.generateSaltPassword(
         owner.password,
       );
-      console.log('the generated assword is ------->', password_salt);
+      console.log('the generated password is ------->', password_salt);
       newOwner.password = password_salt.password;
       newOwner.salt = password_salt.salt;
     }
