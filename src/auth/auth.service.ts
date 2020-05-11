@@ -43,10 +43,10 @@ export class AuthService {
     userObject.phone_num = user.phone;
     userObject.role = user.userRole.name;
     userObject.store = { ...user.store };
-    userObject.store.cluster = user.store.clusters;
+    if (user.store) userObject.store.cluster = user.store.clusters;
     delete user.userRole;
-    delete user.store.clusters;
-    delete userObject.store.clusters;
+    if (user.store) delete user.store.clusters;
+    if (userObject.store) delete userObject.store.clusters;
     delete user.firstName;
     delete user.lastName;
     delete user.storeId;
@@ -74,6 +74,7 @@ export class AuthService {
         user: this.transformUserObject(user),
       };
     } catch (e) {
+      console.log(e);
       throw new Error(e);
     }
   }
