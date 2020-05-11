@@ -15,6 +15,7 @@ import { LeafletModule } from './leaflet/leaflet.module';
 import { OrderUploadModule } from './order-upload/order-upload.module';
 import { ConfigModule } from '@nestjs/config';
 import { AccessPermissionsModule } from './access-permissions/access-permissions.module';
+import { RejectionReasonModule } from './rejection-reason/rejection-reason.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { AccessPermissionsModule } from './access-permissions/access-permissions
     LeafletModule,
     OrderUploadModule,
     AccessPermissionsModule,
+    RejectionReasonModule,
   ],
   controllers: [AppController],
   providers: [AppService],

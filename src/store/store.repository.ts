@@ -4,6 +4,7 @@ import {
   EntityRepository,
   Connection,
   getConnection,
+  FindManyOptions,
 } from 'typeorm';
 import { Store } from '../entities/Store';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -22,7 +23,7 @@ export class StoreRepository extends Repository<Store> {
     super();
   }
   async findAll(filter: PaginationDto): Promise<any> {
-    const queryOption: any = {};
+    const queryOption: FindManyOptions = {};
     if (filter.perPage && filter.page) {
       queryOption.skip = filter.perPage * (filter.page - 1);
       queryOption.take = filter.perPage;
