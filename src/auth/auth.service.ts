@@ -3,7 +3,6 @@ import {
   Injectable,
   UnauthorizedException,
   InternalServerErrorException,
-  ForbiddenException,
   Logger,
   BadRequestException,
 } from '@nestjs/common';
@@ -75,7 +74,7 @@ export class AuthService {
       };
     } catch (e) {
       console.log(e);
-      throw new Error(e);
+      throw new UnauthorizedException(e);
     }
   }
 
@@ -138,7 +137,8 @@ export class AuthService {
           'success a mail has been sent to the site admin we will send you your password as soon as possible',
       };
     } catch (e) {
-      throw new BadRequestException("couldn't reset password");
+      console.log(e);
+      throw new InternalServerErrorException(e);
     }
   }
 }

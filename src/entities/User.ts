@@ -33,7 +33,7 @@ export class User extends BaseEntity {
   @Column('varchar', { name: 'last_name', length: 255 })
   lastName: string;
 
-  @Column('varchar', { name: 'password', length: 255, select: true })
+  @Column('varchar', { name: 'password', length: 255, select: false })
   password: string;
 
   @Column('varchar', { name: 'email', length: 255 })
@@ -45,7 +45,7 @@ export class User extends BaseEntity {
   @Column('varchar', { name: 'address', length: 255 })
   address: string;
 
-  @Column('varchar', { name: 'salt', length: 255, select: true })
+  @Column('varchar', { name: 'salt', length: 255, select: false })
   salt: string;
 
   @Column('datetime', {
