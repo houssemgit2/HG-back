@@ -87,14 +87,4 @@ export class AccessPermissionsController {
       updateAccessPermissionDto,
     );
   }
-
-  //   @UseGuards(AuthGuard())
-  //   @Delete(':storeId')
-  //   delete(@Param('storeId') storeId: number): Promise<any> {
-  //     return this.accessPermissionsService.remove(storeId);
-  //   }
-  wrapRespSucc = data => ({
-    code: httpStatus.OK,
-    data,
-  });
 }
