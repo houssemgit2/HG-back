@@ -3,6 +3,7 @@ import {
   Injectable,
   Logger,
   InternalServerErrorException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { StoreRepository } from './store.repository';
 import { AddStoreDto } from './dto/add-store.dto';
@@ -15,20 +16,45 @@ import { StorePermission } from 'src/entities/StorePermission';
 import { EditStoreDto } from './dto/edit-store.dto';
 import { EditUserCredentialDto } from '../user/dto/edit-user.dto';
 import { AddOwnerDto } from './dto/add-owner.dto';
-
+import { InjectEventEmitter } from 'nest-emitter';
+import { MyEventEmitter } from './store.events';
+import { getConnection } from 'typeorm';
+import { PromoCluster } from 'src/entities/PromoCluster';
+import { StorePromoMea } from '../entities/StorePromoMea';
 @Injectable()
-export class StoreService {
+export class StoreService implements OnModuleInit {
   constructor(
     private storeRepository: StoreRepository,
     private userRepository: UserRepository,
+    @InjectEventEmitter() private readonly emitter: MyEventEmitter,
   ) {}
+  onModuleInit() {
+    this.emitter.on('storeCreated', async (clusterId, storeId) => {
+      const testCluster = await this.findMeaByStore(clusterId, storeId);
+      console.log('----------promo mea added----------', testCluster);
+    });
+  }
   logger = new Logger('Store service');
-
+  async findMeaByStore(clusterId: number, storeId: number) {
+    const promosIds = await getConnection()
+      .createQueryBuilder()
+      .select('promoCluster.promoId')
+      .from(PromoCluster, 'promoCluster')
+      .where('promoCluster.clusterId = :id', { id: clusterId })
+      .getMany();
+    console.log('promos list to add to the store', storeId);
+    return await getConnection()
+      .createQueryBuilder()
+      .insert()
+      .into(StorePromoMea)
+      .values(promosIds.map(promo => ({ storeId, promoId: promo.promoId })))
+      .execute();
+  }
   async createOne(
     addStore: AddStoreDto,
     owner: AddOwnerDto,
     permissions: StorePermissionDto[],
-  ) {
+  ): Promise<Store> {
     const store: Store = new Store();
     store.clusterId = addStore.clu_id;
     store.id = addStore.cip;
@@ -61,8 +87,8 @@ export class StoreService {
       storePermissions,
       false,
     );
-    console.log(`the result is ${result}`);
-    return this.storeV1Key(result);
+    console.log(`the result is `, result);
+    return result;
   }
   async getAllStore(filter: PaginationDto) {
     try {

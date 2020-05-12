@@ -41,7 +41,7 @@ export class StoreRepository extends Repository<Store> {
     owner: User,
     permissions: StorePermission[],
     update: boolean,
-  ): Promise<any> {
+  ): Promise<Store> {
     const connection = getConnection();
     const queryRunner = connection.createQueryRunner();
     await queryRunner.connect();

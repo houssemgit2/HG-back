@@ -28,12 +28,6 @@ export class StorePromoMea extends BaseEntity {
   @Column('int', { name: 'rejected_reason_id' })
   rejectedReasonId: number;
 
-  @Column('int', { name: 'month' })
-  month: number;
-
-  @Column('int', { name: 'year' })
-  year: number;
-
   @Column('tinyint', { name: 'active', nullable: true, width: 1 })
   active: boolean | null;
 
