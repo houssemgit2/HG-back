@@ -3,7 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Leaflet } from './../entities/Leaflet';
 import { AddLeafletDto } from './dto/add-leaflet.dto';
 import { Injectable, Logger } from '@nestjs/common';
-import { UpdateResult, DeleteResult, Repository } from 'typeorm';
+import { UpdateResult, DeleteResult, Repository, In, Not } from 'typeorm';
+import { v1 as uuidv1 } from 'uuid';
+import * as fs from 'fs';
+import * as request from 'request-promise';
+import * as allSettled from 'promise-all-settled';
 
 @Injectable()
 export class LeafletService {
@@ -47,5 +51,42 @@ export class LeafletService {
 
   async remove(id): Promise<DeleteResult> {
     return await this.leafletRepository.delete(id);
+  }
+  async downloadOrders(ordersIDs): Promise<any> {
+    let promises;
+    const filesPath = `${__dirname}/../output/ordersZips/${uuidv1()}`;
+    try {
+      const leaflets = await this.leafletRepository.find({
+        where: [
+          { id: In(ordersIDs), urlOrder: Not(null) },
+          { id: In(ordersIDs), urlOrder: Not('') },
+        ],
+      });
+      console.log('leaflets', leaflets);
+      await fs.mkdirSync(filesPath);
+      promises = leaflets.map((leaflet, index) => {
+        return new Promise((resolve, reject) => {
+          const filepath = `${filesPath}/${index}-${leaflet.libelle.replace(
+            '/',
+            ' ',
+          )}.pdf`;
+          const file = fs.createWriteStream(filepath);
+          request
+            .get(`${leaflet.urlOrder}`)
+            .pipe(file)
+            .on('finish', () => {
+              resolve(filepath);
+            })
+            .on('error', error => {
+              reject(error);
+            });
+        });
+      });
+    } catch (e) {
+      console.log(e);
+    }
+    await allSettled(promises, { onlyFulfilled: true });
+
+    return filesPath;
   }
 }

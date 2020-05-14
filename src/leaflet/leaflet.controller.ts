@@ -11,8 +11,7 @@ import {
   Post,
   Res,
   NotFoundException,
-  UploadedFile,
-  UseInterceptors,
+  Header,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -27,6 +26,9 @@ import { AddLeafletDto } from './dto/add-leaflet.dto';
 import { GetLeafletDto } from './dto/get-leaflet.dto';
 import { Leaflet } from './../entities/Leaflet';
 import { OrderUploadService } from './../order-upload/order-upload.service';
+import * as fs from 'fs';
+import * as archiver from 'archiver';
+import * as rimraf from 'rimraf';
 
 @ApiBearerAuth()
 @ApiTags('leaflet')
@@ -40,7 +42,7 @@ export class LeafletController {
   @ApiOperation({ summary: 'Add leaflet' })
   @ApiResponse({ status: 200, description: 'leaflet added successfully' })
   @Post()
-  //@UseGuards(AuthGuard(), AdminGuard)
+  @UseGuards(AuthGuard(), AdminGuard)
   create(@Body() leaflet: AddLeafletDto) {
     return this.leafletService.create(leaflet);
   }
@@ -48,7 +50,7 @@ export class LeafletController {
   @ApiOperation({ summary: 'get All leaflets' })
   @ApiResponse({ status: 200, description: 'leaflets list' })
   @Get()
-  //@UseGuards(AuthGuard(), AdminGuard)
+  @UseGuards(AuthGuard(), AdminGuard)
   async findAll(@Query() filter: GetLeafletDto) {
     const leafletList: Leaflet[] = await this.leafletService.getAll(filter);
     return leafletList;
@@ -57,7 +59,7 @@ export class LeafletController {
   @ApiOperation({ summary: 'leaflet info' })
   @ApiResponse({ status: 200, description: 'Get the leaflet info by id' })
   @Get(':id')
-  // @UseGuards(AuthGuard(), AdminGuard)
+  @UseGuards(AuthGuard(), AdminGuard)
   async findOne(@Param('id') id: number) {
     return await this.leafletService.get(id);
   }
@@ -65,19 +67,19 @@ export class LeafletController {
   @ApiOperation({ summary: 'Update Leaflet' })
   @ApiResponse({ status: 200, description: 'update the leaflet info' })
   @Put(':id')
-  // @UseGuards(AuthGuard())
+  @UseGuards(AuthGuard())
   async update(@Param('id') id: number, @Body() leaflet: AddLeafletDto) {
     return await this.leafletService.update(id, leaflet);
   }
 
   @Delete(':id')
-  //@UseGuards(AuthGuard(), AdminGuard)
+  @UseGuards(AuthGuard(), AdminGuard)
   async remove(@Param('id') id: number) {
     return await this.leafletService.remove(id);
   }
 
   @Post('/order/:leafletId')
-  //@UseGuards(AuthGuard(), AdminGuard)
+  @UseGuards(AuthGuard(), AdminGuard)
   async uploadOrder(
     @Param('leafletId') leafletId: number,
     @Req() request,
@@ -106,5 +108,31 @@ export class LeafletController {
       console.log(error);
       return response.status(500).json(`Failed to upload order file: ${error}`);
     }
+  }
+
+  @Post('/download-orders')
+  @UseGuards(AuthGuard(), AdminGuard)
+  @Header('Content-Type', 'Application/zip')
+  async downloadOrders(@Body() body: any, @Res() response) {
+    const filesPath = await this.leafletService.downloadOrders(body.ordersIDs);
+    const output = fs.createWriteStream(`${filesPath}.zip`);
+    const archive = archiver('zip', {
+      zlib: { level: 9 }, // Sets the compression level.
+    });
+    archive.directory(`${filesPath}/`, false);
+    archive.pipe(output);
+    // or write everything to disk
+    output.on('close', () => {
+      response.download(`${filesPath}.zip`, 'orders.zip', err => {
+        rimraf.sync(filesPath);
+        rimraf.sync(`${filesPath}.zip`);
+      });
+    });
+
+    output.on('error', error => {
+      console.log(error);
+      return error;
+    });
+    archive.finalize();
   }
 }
