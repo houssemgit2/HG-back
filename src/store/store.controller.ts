@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   UseGuards,
-  Req,
   Param,
   Delete,
   Put,
@@ -11,10 +10,9 @@ import {
   Post,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { GetStoreDto } from './dto/get-store.dto';
+import { PaginationDto } from './dto/pagination.dto';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { StoreService } from './store.service';
-import { ReqWithUser } from '../auth/interface/user.interface';
 import {
   ApiTags,
   ApiBearerAuth,
@@ -23,9 +21,11 @@ import {
 } from '@nestjs/swagger';
 import { StoreOwnerDto } from './dto/store-owner.dto';
 import { Store } from 'src/entities/Store';
+import { EditStoreOwnerDto } from './dto/edit-store-owner.dto';
+
 @ApiBearerAuth()
 @ApiTags('Store')
-@Controller('store')
+@Controller('stores')
 export class StoreController {
   constructor(private storeService: StoreService) {}
 
@@ -33,20 +33,16 @@ export class StoreController {
   @ApiResponse({ status: 200, description: 'store added successfully' })
   @Post()
   @UseGuards(AuthGuard(), AdminGuard)
-  create(
-    @Body() body: StoreOwnerDto,
-
-    @Req() req: ReqWithUser,
-  ) {
-    const { owner, store } = body;
-    return this.storeService.createOne(store, owner, req.user);
+  create(@Body() body: StoreOwnerDto): Promise<Store> {
+    const { owner, store, permissions } = body;
+    return this.storeService.createOne(store, owner, permissions);
   }
 
   @ApiOperation({ summary: 'get All store' })
   @ApiResponse({ status: 200, description: 'store list' })
   @Get()
   @UseGuards(AuthGuard(), AdminGuard)
-  async findAll(@Query() filter: GetStoreDto) {
+  async findAll(@Query() filter: PaginationDto): Promise<Store[]> {
     // return filter;
     const storeList: Store[] = await this.storeService.getAllStore(filter);
     //console.log(storeList);
@@ -57,7 +53,7 @@ export class StoreController {
   @ApiResponse({ status: 200, description: 'Get the store info by id' })
   @Get(':id')
   @UseGuards(AuthGuard())
-  async findOne(@Param('id') id: number) {
+  async findOne(@Param('id') id: number): Promise<Store> {
     return await this.storeService.getStore(id);
   }
 
@@ -65,8 +61,12 @@ export class StoreController {
   @ApiResponse({ status: 200, description: 'update the store info' })
   @Put(':id')
   @UseGuards(AuthGuard())
-  async update(@Param('id') id: number) {
-    return await this.storeService.updateStore(id);
+  async update(
+    @Param('id') id: number,
+    @Body() body: EditStoreOwnerDto,
+  ): Promise<Store> {
+    const { store, owner, permissions } = body;
+    return await this.storeService.updateStore(id, store, owner, permissions);
   }
 
   @Delete(':id')

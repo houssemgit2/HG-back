@@ -1,22 +1,32 @@
 import {
   IsNotEmpty,
   IsObject,
-  IsNotEmptyObject,
   ValidateNested,
+  IsDefined,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { AddStoreDto } from './add-store.dto';
-import { UserCredentialDto } from 'src/auth/dto/user-credential.dto';
+import { StorePermissionDto } from 'src/store/dto/store-permission.dto';
+import { IsArrayOfObject } from '../validatore/arrayValidator';
+import { Type } from 'class-transformer';
+import { AddOwnerDto } from './add-owner.dto';
+
 export class StoreOwnerDto {
   @ApiProperty()
-  @ValidateNested()
-  store: AddStoreDto;
+  @ValidateNested({ each: true, always: true })
+  @Type(() => AddStoreDto)
+  public store: AddStoreDto;
 
   @ApiProperty()
-  @ValidateNested()
-  owner: UserCredentialDto;
+  @ValidateNested({ each: true })
+  @Type(() => AddOwnerDto)
+  public owner: AddOwnerDto;
 
-  @ApiProperty()
-  @ValidateNested()
-  permission: UserCredentialDto;
+  @ApiProperty({ isArray: true, type: StorePermissionDto })
+  @IsArrayOfObject(
+       {
+      message: 'permissions must be an array of permission',
+    },
+  )
+  public permissions: StorePermissionDto[];
 }

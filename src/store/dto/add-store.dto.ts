@@ -1,24 +1,26 @@
-import {
-  IsNotEmpty,
-  IsNumber,
-  MaxLength,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsNotEmpty, IsNumber, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsUserAlreadyExist } from '../../decorators/isUnique.validation';
+import { Store } from 'src/entities/Store';
 export class AddStoreDto {
   @ApiProperty()
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
-  cip: string;
+  @IsUserAlreadyExist(
+    {
+      message: `Store cip  already exists. Choose another cip.`,
+    },
+    { entityName: 'store', entity: Store, key: 'id' },
+  )
+  public cip: number;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsNumber()
-  cluster_id: number;
+  public clu_id: number;
 
   @ApiProperty()
   @IsNotEmpty()
   @MaxLength(255)
-  name: string;
+  public descr: string;
 }

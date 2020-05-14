@@ -3,7 +3,6 @@ import {
   Injectable,
   UnauthorizedException,
   InternalServerErrorException,
-  ForbiddenException,
   Logger,
   BadRequestException,
 } from '@nestjs/common';
@@ -43,10 +42,10 @@ export class AuthService {
     userObject.phone_num = user.phone;
     userObject.role = user.userRole.name;
     userObject.store = { ...user.store };
-    userObject.store.cluster = user.store.clusters;
+    if (user.store) userObject.store.cluster = user.store.clusters;
     delete user.userRole;
-    delete user.store.clusters;
-    delete userObject.store.clusters;
+    if (user.store) delete user.store.clusters;
+    if (userObject.store) delete userObject.store.clusters;
     delete user.firstName;
     delete user.lastName;
     delete user.storeId;
@@ -74,7 +73,8 @@ export class AuthService {
         user: this.transformUserObject(user),
       };
     } catch (e) {
-      throw new Error(e);
+      console.log(e);
+      throw new UnauthorizedException(e);
     }
   }
 
@@ -137,7 +137,8 @@ export class AuthService {
           'success a mail has been sent to the site admin we will send you your password as soon as possible',
       };
     } catch (e) {
-      throw new BadRequestException("couldn't reset password");
+      console.log(e);
+      throw new InternalServerErrorException(e);
     }
   }
 }

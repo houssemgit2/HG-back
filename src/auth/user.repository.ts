@@ -64,11 +64,26 @@ export class UserRepository extends Repository<User> {
     loginCredentialDto: LoginCredentialDto,
   ): Promise<User> {
     const { email, password } = loginCredentialDto;
-    const user = await this.findOne({ where: { email }, relations: ['store'] });
+    const user = await this.findOne({
+      where: { email },
+      relations: ['store'],
+      select: [
+        'id',
+        'firstName',
+        'lastName',
+        'email',
+        'storeId',
+        'userRoleId',
+        'password',
+        'salt',
+      ],
+    });
 
     if (user && (await user.validatePassword(password))) {
-      user.transform();
-      return user;
+      return await this.findOne({
+        where: { email },
+        relations: ['store'],
+      });
     }
   }
   async generateSaltPassword(password: string): Promise<any> {
@@ -77,8 +92,8 @@ export class UserRepository extends Repository<User> {
     return { password: hashPassword, salt };
   }
   async updatePassword(user: User, password: string): Promise<any> {
-    const passwordSalt = this.generateSaltPassword(password);
-    return this.save({ ...user, ...passwordSalt });
+    const passwordSalt = await this.generateSaltPassword(password);
+    return await this.save({ ...user, ...passwordSalt });
   }
   private hashPassword(password: string, salt: string): Promise<string> {
     return bcrypt.hash(password, salt);

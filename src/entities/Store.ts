@@ -25,7 +25,7 @@ export class Store extends BaseEntity {
   clusterId: number;
 
   @Column('int', { name: 'cip' })
-  cip: string;
+  cip: number;
 
   @Column('varchar', { name: 'name', length: 132 })
   name: string;
@@ -79,7 +79,7 @@ export class Store extends BaseEntity {
   @OneToOne(
     () => User,
     user => user.id,
-    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
   )
   @JoinColumn([{ name: 'cip', referencedColumnName: 'id' }])
   owner: User;
