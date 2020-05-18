@@ -27,6 +27,8 @@ import { PromoService } from './promo.service';
 import { GetPromoDto } from './dto/get-promo.dto';
 import { PdfPromoGeneratorService } from '@app/pdf-promo-generator';
 import { RejectionReasonService } from 'src/rejection-reason/rejection-reason.service';
+import { ReqWithUser } from '../auth/interface/user.interface';
+import { StorePromoSelectedService } from './../store-promo-selected/store-promo-selected.service';
 
 @ApiBearerAuth()
 @ApiTags('Promo')
@@ -36,6 +38,7 @@ export class PromoController {
     private readonly promoService: PromoService,
     private pdfPromoGeneratorService: PdfPromoGeneratorService,
     private rejectionReasonService: RejectionReasonService,
+    private storePromoSelectedService: StorePromoSelectedService,
   ) {}
 
   @Get()
@@ -72,5 +75,20 @@ export class PromoController {
   async addRejectionReasons(@Body() body: any) {
     const { name } = body;
     return await this.rejectionReasonService.add(name);
+  }
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'saved promo' })
+  @ApiResponse({ status: 200, description: 'saved promo' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @Post('saved')
+  // @UseGuards(AuthGuard())
+  async saveSelected(@Body() body: any, @Req() req: ReqWithUser) {
+    const { month, year, promos } = body;
+    return await this.storePromoSelectedService.savedPromos(
+      req.user.storeId,
+      month,
+      year,
+      promos,
+    );
   }
 }
