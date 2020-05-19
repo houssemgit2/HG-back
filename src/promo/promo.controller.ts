@@ -1,3 +1,4 @@
+import { SaveSelectedDto } from './dto/save-selected.dto';
 import {
   Controller,
   Get,
@@ -82,7 +83,7 @@ export class PromoController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @Post('saved')
   @UseGuards(AuthGuard())
-  async saveSelected(@Body() body: any, @Req() req: ReqWithUser) {
+  async saveSelected(@Body() body: SaveSelectedDto, @Req() req: ReqWithUser) {
     const { month, year, promos } = body;
     return await this.storePromoSelectedService.savedPromos(
       req.user.storeId,
@@ -95,15 +96,33 @@ export class PromoController {
   @ApiOperation({ summary: 'saved print config' })
   @ApiResponse({ status: 200, description: 'saved print config' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  @Put()
+  @Put('saved')
   @UseGuards(AuthGuard())
-  async savePrintConfigs(@Body() body: any, @Req() req: ReqWithUser) {
+  async savePrintConfigs(
+    @Body() body: SaveSelectedDto,
+    @Req() req: ReqWithUser,
+  ) {
     const { month, year, promos } = body;
     return await this.storePromoSelectedService.savePrintConfig(
       req.user.storeId,
       month,
       year,
       promos,
+    );
+  }
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'get saved promo' })
+  @ApiResponse({ status: 200, description: 'saved print config' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @Get('saved')
+  @UseGuards(AuthGuard())
+  async getSaved(@Body() body: any, @Req() req: ReqWithUser) {
+    const { month, year, includePromoDetails } = body;
+    return await this.storePromoSelectedService.list(
+      req.user.storeId,
+      month,
+      year,
+      includePromoDetails,
     );
   }
 }

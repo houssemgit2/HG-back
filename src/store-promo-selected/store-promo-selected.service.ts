@@ -18,7 +18,7 @@ export class StorePromoSelectedService {
       .createQueryBuilder()
       .delete()
       .where('promo_id NOT IN (:...ids)', {
-        ids: promos.map(prm => prm.id),
+        ids: promos.map(prm => prm.ID),
       })
       // eslint-disable-next-line @typescript-eslint/camelcase
       .andWhere('store_id = :store_id', { store_id: storeId })
@@ -31,7 +31,7 @@ export class StorePromoSelectedService {
         if (promo.micro_type === PROMO_TYPES.FIXED_PRICE) {
           priceRef = promo.price || 0;
         }
-        const promoId = promo.id;
+        const promoId = promo.ID;
         return this.storePromoSelectedRepository.save({
           promoId,
           storeId,
@@ -87,7 +87,6 @@ export class StorePromoSelectedService {
         );
       }),
     );
-    console.log('storeId', storeId);
     return (
       this.storePromoSelectedRepository
         .createQueryBuilder()
@@ -101,5 +100,8 @@ export class StorePromoSelectedService {
         .andWhere('year = :year', { year })
         .execute()
     );
+  }
+  async list(storeId, month, year, includePromoDetails) {
+    console.log('ok');
   }
 }
