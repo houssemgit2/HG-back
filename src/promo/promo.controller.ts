@@ -81,10 +81,25 @@ export class PromoController {
   @ApiResponse({ status: 200, description: 'saved promo' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @Post('saved')
-  // @UseGuards(AuthGuard())
+  @UseGuards(AuthGuard())
   async saveSelected(@Body() body: any, @Req() req: ReqWithUser) {
     const { month, year, promos } = body;
     return await this.storePromoSelectedService.savedPromos(
+      req.user.storeId,
+      month,
+      year,
+      promos,
+    );
+  }
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'saved print config' })
+  @ApiResponse({ status: 200, description: 'saved print config' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @Put()
+  @UseGuards(AuthGuard())
+  async savePrintConfigs(@Body() body: any, @Req() req: ReqWithUser) {
+    const { month, year, promos } = body;
+    return await this.storePromoSelectedService.savePrintConfig(
       req.user.storeId,
       month,
       year,
