@@ -14,12 +14,12 @@ import { IsArrayOfObject } from '../validator/arrayValidator';
 
 export class SaveSelectedDto {
   @ApiProperty({ required: false })
-  @Type(() => String)
-  month: string;
+  @Type(() => Number)
+  month: number;
 
   @ApiProperty({ required: false })
-  @Type(() => String)
-  year: string;
+  @Type(() => Number)
+  year: number;
 
   @ApiProperty({ isArray: true, type: Array })
   @IsArrayOfObject({

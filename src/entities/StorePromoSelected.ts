@@ -27,7 +27,7 @@ export class StorePromoSelected extends BaseEntity {
   month: number;
 
   @Column('json', { name: 'print_config', nullable: true })
-  printConfig: object | null;
+  printConfig: any | null;
 
   @Column('datetime', {
     name: 'created_at',

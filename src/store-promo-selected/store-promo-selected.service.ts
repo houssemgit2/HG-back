@@ -102,6 +102,13 @@ export class StorePromoSelectedService {
     );
   }
   async list(storeId, month, year, includePromoDetails) {
-    console.log('ok');
+    const relations = [];
+    if (includePromoDetails) {
+      relations.push('promo');
+    }
+    return await this.storePromoSelectedRepository.find({
+      where: { storeId, month, year },
+      relations,
+    });
   }
 }

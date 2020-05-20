@@ -1,3 +1,4 @@
+import { GetSelectedDto } from './dto/get-selected.dto';
 import { SaveSelectedDto } from './dto/save-selected.dto';
 import {
   Controller,
@@ -116,13 +117,30 @@ export class PromoController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @Get('saved')
   @UseGuards(AuthGuard())
-  async getSaved(@Body() body: any, @Req() req: ReqWithUser) {
-    const { month, year, includePromoDetails } = body;
-    return await this.storePromoSelectedService.list(
-      req.user.storeId,
-      month,
-      year,
-      includePromoDetails,
-    );
+  async getSaved(@Query() filter: GetSelectedDto, @Req() req: ReqWithUser) {
+    const { month, year, includePromoDetails } = filter;
+    try {
+      const promos = await this.storePromoSelectedService.list(
+        req.user.storeId,
+        month,
+        year,
+        includePromoDetails,
+      );
+      let result = [];
+      if (includePromoDetails === 'true') {
+        result = promos.reduce((r, promo) => {
+          const prm = Object.assign({}, promo, promo.promo);
+          prm.printConfig.forEach((config, index) => {
+            r.push(Object.assign({}, prm, config, { isAdded: index !== 0 }));
+          });
+          return r;
+        }, []);
+      } else {
+        result = promos.map(promo => promo.promoId);
+      }
+      return result;
+    } catch (e) {
+      return e;
+    }
   }
 }
