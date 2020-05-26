@@ -4385,6 +4385,13 @@ inquirer@7.1.0, inquirer@^7.0.0:
     strip-ansi "^6.0.0"
     through "^2.3.6"
 
+interceptor@^0.1.4:
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/interceptor/-/interceptor-0.1.4.tgz#c9ba69692ab8eac138fbebe3d9722f1f5dd40d9b"
+  integrity sha1-ybppaSq46sE4++vj2XIvH13UDZs=
+  dependencies:
+    optimist "0.3.5"
+
 interpret@^1.0.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/interpret/-/interpret-1.2.0.tgz#d5061a6224be58e8083985f5014d844359576296"
@@ -6246,6 +6253,13 @@ onetime@^5.1.0:
   integrity sha512-5NcSkPHhwTVFIQN+TUqXoS5+dlElHXdpAWu9I0HP20YOtIi+aZ0Ct82jdlILDxjLEAWwvm+qj1m6aEtsDVmm6Q==
   dependencies:
     mimic-fn "^2.1.0"
+
+optimist@0.3.5:
+  version "0.3.5"
+  resolved "https://registry.yarnpkg.com/optimist/-/optimist-0.3.5.tgz#03654b52417030312d109f39b159825b60309304"
+  integrity sha1-A2VLUkFwMDEtEJ85sVmCW2AwkwQ=
+  dependencies:
+    wordwrap "~0.0.2"
 
 optional@0.1.4:
   version "0.1.4"
@@ -8791,6 +8805,11 @@ wordwrap@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/wordwrap/-/wordwrap-1.0.0.tgz#27584810891456a4171c8d0226441ade90cbcaeb"
   integrity sha1-J1hIEIkUVqQXHI0CJkQa3pDLyus=
+
+wordwrap@~0.0.2:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/wordwrap/-/wordwrap-0.0.3.tgz#a3d5da6cd5c0bc0008d37234bbaf1bed63059107"
+  integrity sha1-o9XabNXAvAAI03I0u68b7WMFkQc=
 
 worker-farm@^1.7.0:
   version "1.7.0"
