@@ -1,4 +1,3 @@
-import { TransformInterceptor } from './../transform.interceptor';
 import { AddLeafletPeriodDto } from './dto/add-leaflet-period.dto';
 import { GetLeafletPeriodDto } from './dto/get-leaflet-period.dto';
 import { LefletPeriodService } from './leflet-period.service';
@@ -43,7 +42,6 @@ export class LefletPeriodController {
   @ApiResponse({ status: 200, description: 'leaflet period list' })
   @Get()
   @UseGuards(AuthGuard('jwt'))
-  @UseInterceptors(TransformInterceptor)
   async findAll(@Req() req: ReqWithUser, @Query() filter: GetLeafletPeriodDto) {
     return await this.lefletPeriodService.getAll(filter, req.user);
   }
