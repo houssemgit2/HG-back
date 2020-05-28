@@ -16,6 +16,7 @@ import { OrderUploadModule } from './order-upload/order-upload.module';
 import { ConfigModule } from '@nestjs/config';
 import { AccessPermissionsModule } from './access-permissions/access-permissions.module';
 import { RejectionReasonModule } from './rejection-reason/rejection-reason.module';
+import { StorePromoSelectedModule } from './store-promo-selected/store-promo-selected.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { RejectionReasonModule } from './rejection-reason/rejection-reason.modul
     OrderUploadModule,
     AccessPermissionsModule,
     RejectionReasonModule,
+    StorePromoSelectedModule,
   ],
   controllers: [AppController],
   providers: [AppService],

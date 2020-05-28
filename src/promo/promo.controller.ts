@@ -1,3 +1,5 @@
+import { GetSelectedDto } from './dto/get-selected.dto';
+import { SaveSelectedDto } from './dto/save-selected.dto';
 import {
   Controller,
   Get,
@@ -27,6 +29,8 @@ import { PromoService } from './promo.service';
 import { GetPromoDto } from './dto/get-promo.dto';
 import { PdfPromoGeneratorService } from '@app/pdf-promo-generator';
 import { RejectionReasonService } from 'src/rejection-reason/rejection-reason.service';
+import { ReqWithUser } from '../auth/interface/user.interface';
+import { StorePromoSelectedService } from './../store-promo-selected/store-promo-selected.service';
 
 @ApiBearerAuth()
 @ApiTags('Promo')
@@ -36,6 +40,7 @@ export class PromoController {
     private readonly promoService: PromoService,
     private pdfPromoGeneratorService: PdfPromoGeneratorService,
     private rejectionReasonService: RejectionReasonService,
+    private storePromoSelectedService: StorePromoSelectedService,
   ) {}
 
   @Get()
@@ -72,5 +77,70 @@ export class PromoController {
   async addRejectionReasons(@Body() body: any) {
     const { name } = body;
     return await this.rejectionReasonService.add(name);
+  }
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'saved promo' })
+  @ApiResponse({ status: 200, description: 'saved promo' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @Post('saved')
+  @UseGuards(AuthGuard())
+  async saveSelected(@Body() body: SaveSelectedDto, @Req() req: ReqWithUser) {
+    const { month, year, promos } = body;
+    return await this.storePromoSelectedService.savedPromos(
+      req.user.storeId,
+      month,
+      year,
+      promos,
+    );
+  }
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'saved print config' })
+  @ApiResponse({ status: 200, description: 'saved print config' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @Put('saved')
+  @UseGuards(AuthGuard())
+  async savePrintConfigs(
+    @Body() body: SaveSelectedDto,
+    @Req() req: ReqWithUser,
+  ) {
+    const { month, year, promos } = body;
+    return await this.storePromoSelectedService.savePrintConfig(
+      req.user.storeId,
+      month,
+      year,
+      promos,
+    );
+  }
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'get saved promo' })
+  @ApiResponse({ status: 200, description: 'saved print config' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @Get('saved')
+  @UseGuards(AuthGuard())
+  async getSaved(@Query() filter: GetSelectedDto, @Req() req: ReqWithUser) {
+    const { month, year, includePromoDetails } = filter;
+    try {
+      const promos = await this.storePromoSelectedService.list(
+        req.user.storeId,
+        month,
+        year,
+        includePromoDetails,
+      );
+      let result = [];
+      if (includePromoDetails === 'true') {
+        result = promos.reduce((r, promo) => {
+          const prm = Object.assign({}, promo, promo.promo);
+          prm.printConfig.forEach((config, index) => {
+            r.push(Object.assign({}, prm, config, { isAdded: index !== 0 }));
+          });
+          return r;
+        }, []);
+      } else {
+        result = promos.map(promo => promo.promoId);
+      }
+      return result;
+    } catch (e) {
+      return e;
+    }
   }
 }

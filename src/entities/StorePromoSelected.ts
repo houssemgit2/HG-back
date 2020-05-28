@@ -5,19 +5,16 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
-  BaseEntity
-} from "typeorm";
-import { Promo } from "./Promo";
-import { Store } from "./Store";
+  BaseEntity,
+} from 'typeorm';
+import { Promo } from './Promo';
+import { Store } from './Store';
 
 @Index('store_promo_selected_store_id_fk', ['storeId'], {})
 @Index('store_promo_selected_promo_id_fk', ['promoId'], {})
 @Entity('store_promo_selected', { schema: 'hg_promo_beta' })
 export class StorePromoSelected extends BaseEntity {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
-  id: number;
-
-  @Column('int', { name: 'promo_id' })
+  @Column('int', { primary: true, name: 'promo_id' })
   promoId: number;
 
   @Column('int', { name: 'store_id' })
@@ -30,7 +27,7 @@ export class StorePromoSelected extends BaseEntity {
   month: number;
 
   @Column('json', { name: 'print_config', nullable: true })
-  printConfig: object | null;
+  printConfig: any | null;
 
   @Column('datetime', {
     name: 'created_at',

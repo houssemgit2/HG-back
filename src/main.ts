@@ -3,12 +3,14 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as helmet from 'helmet';
+import { TransformInterceptor } from './transform.interceptor';
 
 async function bootstrap() {
   const logger = new Logger('bootstrap_main.ts');
   logger.log('starting the application....');
 
   const app = await NestFactory.create(AppModule, { cors: true });
+  app.useGlobalInterceptors(new TransformInterceptor());
 
   // ensuring all endpoints are protected from receiving incorrect data.
   app.useGlobalPipes(

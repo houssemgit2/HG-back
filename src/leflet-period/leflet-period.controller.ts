@@ -15,6 +15,7 @@ import {
   Query,
   Body,
   Post,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -24,8 +25,8 @@ import {
 } from '@nestjs/swagger';
 
 @ApiBearerAuth()
-@ApiTags('leflet-period')
-@Controller('leflet-period')
+@ApiTags('leaflet-period')
+@Controller('leaflet-period')
 export class LefletPeriodController {
   constructor(private lefletPeriodService: LefletPeriodService) {}
 
