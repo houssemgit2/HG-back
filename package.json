@@ -63,6 +63,7 @@
     "request-promise": "^4.2.5",
     "rimraf": "^3.0.2",
     "rxjs": "^6.5.4",
+    "snakecase-keys": "^3.2.0",
     "svg-to-pdfkit": "^0.1.8",
     "swagger-ui-express": "^4.1.4",
     "typeorm": "^0.2.24",

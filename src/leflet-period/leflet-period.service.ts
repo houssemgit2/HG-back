@@ -47,6 +47,28 @@ export class LefletPeriodService {
     return await this.leafletPeriodRepository.save(leafletPeriod);
   }
 
+  async findOrCreate(period, year): Promise<LeafletPeriod> {
+    try {
+      const periodExisted = await this.leafletPeriodRepository.findOne({
+        where: {
+          calendarPeriod: parseInt(period),
+          year: parseInt(year),
+        },
+      });
+      if (periodExisted) {
+        return periodExisted;
+      } else {
+        const periodCreated = await this.leafletPeriodRepository.save({
+          calendarPeriod: parseInt(period),
+          year: parseInt(year),
+        });
+        return periodCreated;
+      }
+    } catch (e) {
+      return e;
+    }
+  }
+
   findOne(id: number): Promise<LeafletPeriod> {
     return this.leafletPeriodRepository.findOne(id);
   }

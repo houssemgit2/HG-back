@@ -1,3 +1,4 @@
+import { LefletPeriodModule } from './../leflet-period/leflet-period.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Leaflet } from './../entities/Leaflet';
 import { Module } from '@nestjs/common';
@@ -7,7 +8,12 @@ import { OrderUploadModule } from './../order-upload/order-upload.module';
 import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Leaflet]), OrderUploadModule, AuthModule],
+  imports: [
+    TypeOrmModule.forFeature([Leaflet]),
+    LefletPeriodModule,
+    OrderUploadModule,
+    AuthModule,
+  ],
   providers: [LeafletService],
   controllers: [LeafletController],
 })

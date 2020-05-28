@@ -1,3 +1,4 @@
+import { LefletPeriodService } from './../leflet-period/leflet-period.service';
 import { GetLeafletDto } from './dto/get-leaflet.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Leaflet } from './../entities/Leaflet';
@@ -14,14 +15,31 @@ export class LeafletService {
   constructor(
     @InjectRepository(Leaflet)
     private leafletRepository: Repository<Leaflet>,
+    private lefletPeriodService: LefletPeriodService,
   ) {}
 
   logger = new Logger('leaflet service');
 
   async create(leaflet: AddLeafletDto) {
-    this.logger.debug('adding new leaflet');
     try {
-      const result = await this.leafletRepository.save(leaflet);
+      const periodData = await this.lefletPeriodService.findOrCreate(
+        leaflet.period,
+        leaflet.year,
+      );
+
+      const newLeaflet = {
+        periodId: periodData.id,
+        condEl: leaflet.cond_el,
+        price: leaflet.price,
+        lab: leaflet.lab,
+        libelle: leaflet.libelle,
+        gamme: leaflet.gamme,
+        qteLot: leaflet.qte_lot,
+        unit: leaflet.unit,
+        contenance: leaflet.contenance,
+      };
+
+      const result = await this.leafletRepository.save(newLeaflet);
       return result;
     } catch (e) {
       return e;
@@ -43,10 +61,29 @@ export class LeafletService {
     }
   }
   async get(id: number) {
-    return await this.leafletRepository.findOne(id);
+    return await this.leafletRepository.findOne(id, {
+      relations: ['period'],
+    });
   }
   async update(id: number, leaflet: AddLeafletDto): Promise<UpdateResult> {
-    return await this.leafletRepository.update(id, leaflet);
+    let periodId;
+    try {
+      const updateLeaflet = {
+        periodId,
+        condEl: leaflet.cond_el,
+        price: leaflet.price,
+        lab: leaflet.lab,
+        libelle: leaflet.libelle,
+        gamme: leaflet.gamme,
+        qteLot: leaflet.qte_lot,
+        unit: leaflet.unit,
+        contenance: leaflet.contenance,
+      };
+
+      return await this.leafletRepository.update(id, updateLeaflet);
+    } catch (e) {
+      return e;
+    }
   }
 
   async remove(id): Promise<DeleteResult> {

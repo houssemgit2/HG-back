@@ -9,5 +9,6 @@ import { AuthModule } from '../auth/auth.module';
   imports: [TypeOrmModule.forFeature([LeafletPeriod]), AuthModule],
   providers: [LefletPeriodService],
   controllers: [LefletPeriodController],
+  exports: [LefletPeriodService],
 })
 export class LefletPeriodModule {}

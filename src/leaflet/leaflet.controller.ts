@@ -100,8 +100,23 @@ export class LeafletController {
         if (!leaflet) {
           throw new NotFoundException('leaflet not found');
         }
-        leaflet.urlOrder = request.files[0].location;
-        await _this.leafletService.update(leafletId, leaflet);
+        const updateLeaflet = {
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          cond_el: leaflet.condEl,
+          price: leaflet.price,
+          lab: leaflet.lab,
+          period: leaflet.period.calendarPeriod.toString(),
+          year: leaflet.period.year.toString(),
+          libelle: leaflet.libelle,
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          url_order: request.files[0].location,
+          gamme: leaflet.gamme,
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          qte_lot: leaflet.qteLot,
+          unit: leaflet.unit,
+          contenance: leaflet.contenance,
+        };
+        await _this.leafletService.update(leafletId, updateLeaflet);
         return response.status(201).json(request.files[0]);
       });
     } catch (error) {

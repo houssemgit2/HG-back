@@ -6,54 +6,45 @@ import {
   IsString,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 export class AddLeafletDto {
   @ApiProperty()
-  @IsNumber()
-  @IsNotEmpty()
-  periodId: number;
+  @Type(() => String)
+  cond_el: string;
 
   @ApiProperty()
-  @IsNumber()
-  @IsNotEmpty()
-  price: number;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @MaxLength(64)
-  lab: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @MaxLength(64)
-  libelle: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @MaxLength(64)
-  gamme: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsNumber()
+  @Type(() => Number)
   contenance: number;
 
   @ApiProperty()
-  @IsNotEmpty()
-  @MaxLength(50)
-  condEl: string;
+  @Type(() => String)
+  gamme: string;
 
   @ApiProperty()
-  @IsNotEmpty()
-  @MaxLength(25)
+  @Type(() => String)
+  lab: string;
+
+  @ApiProperty()
+  @Type(() => String)
+  libelle: string;
+
+  @ApiProperty()
+  @Type(() => String)
+  period: string;
+
+  @ApiProperty()
+  @Type(() => Number)
+  price: number;
+
+  @ApiProperty()
+  @Type(() => String)
   unit: string;
 
   @ApiProperty()
-  @IsNotEmpty()
-  @IsNumber()
-  qteLot: number;
+  @Type(() => Number)
+  qte_lot: number;
 
   @ApiProperty()
-  @IsNotEmpty()
-  @MaxLength(100)
-  urlOrder: string;
+  @Type(() => String)
+  year: string;
 }
