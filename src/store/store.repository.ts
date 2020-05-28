@@ -23,7 +23,7 @@ export class StoreRepository extends Repository<Store> {
     super();
   }
   async findAll(filter: PaginationDto): Promise<any> {
-    const queryOption: FindManyOptions = {};
+    const queryOption: FindManyOptions = { relations: ['owner'] };
     if (filter.perPage && filter.page) {
       queryOption.skip = filter.perPage * (filter.page - 1);
       queryOption.take = filter.perPage;
@@ -70,7 +70,10 @@ export class StoreRepository extends Repository<Store> {
   }
   async get(id: number): Promise<Store> {
     try {
-      return await this.storeRepository.findOne({ id });
+      return await this.storeRepository.findOne(
+        { id },
+        { relations: ['owner'] },
+      );
     } catch (e) {
       console.error(`could not find one store by id`);
       throw new InternalServerErrorException(e);

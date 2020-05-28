@@ -56,6 +56,7 @@
     "mysql": "^2.18.1",
     "nest-emitter": "^1.1.0",
     "node-gyp": "^6.1.0",
+    "node-xlsx": "^0.15.0",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "pdfmake": "^0.1.65",
@@ -68,7 +69,9 @@
     "swagger-ui-express": "^4.1.4",
     "typeorm": "^0.2.24",
     "typeorm-upsert": "^1.0.0",
-    "uuid": "^7.0.3"
+    "uuid": "^7.0.3",
+    "url-parse": "^1.4.7",
+    "xlsx": "^0.16.1"
   },
   "devDependencies": {
     "@nestjs/cli": "^7.0.0",

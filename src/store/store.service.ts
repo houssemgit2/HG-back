@@ -21,6 +21,7 @@ import { MyEventEmitter } from './store.events';
 import { getConnection } from 'typeorm';
 import { PromoCluster } from 'src/entities/PromoCluster';
 import { StorePromoMea } from '../entities/StorePromoMea';
+import { NotFoundException } from '@nestjs/common';
 @Injectable()
 export class StoreService implements OnModuleInit {
   constructor(
@@ -98,15 +99,12 @@ export class StoreService implements OnModuleInit {
     }
   }
   async getStore(id: number) {
-    try {
-      return await this.storeRepository.findOne(
-        { id },
-        { relations: ['storePermissions'] },
-      );
-    } catch (e) {
-      console.error(`could not find one store by id cip`);
-      throw new InternalServerErrorException(e);
-    }
+    const store = await this.storeRepository.findOne(
+      { id },
+      { relations: ['storePermissions', 'owner'] },
+    );
+    if (!store) throw new NotFoundException(`there is no store with id ${id}`);
+    return store;
   }
   async updateStore(
     id: number,
