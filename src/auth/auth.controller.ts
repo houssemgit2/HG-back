@@ -20,7 +20,7 @@ import {
   ApiOperation,
   ApiResponse,
 } from '@nestjs/swagger';
-import { ReqWithUser } from './interface/user.interface';
+import { UserReq } from './get-user.decorator';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -63,9 +63,8 @@ export class AuthController {
   @UseGuards(AuthGuard())
   resetPassword(
     @Body() resetPasswordDto: ResetPasswordDto,
-    @Req() req: ReqWithUser,
+    @UserReq() user: User,
   ): Promise<void> {
-    const user: User = req.user;
     this.logger.verbose('reset password');
     return this.authService.resetPassword(resetPasswordDto, user);
   }
@@ -77,8 +76,8 @@ export class AuthController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @Post('/test')
   @UseGuards(AuthGuard())
-  test(@Req() req: ReqWithUser) {
+  test(@UserReq() user: User) {
     // console.log(ip);
-    return req.user;
+    return user;
   }
 }

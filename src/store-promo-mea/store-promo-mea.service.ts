@@ -205,31 +205,33 @@ export class StorePromoMeaService {
     const promo = await this.doesPromoExist(promoId, storeId);
     return promo;
   }
-  async toggleActive(promo_id: number, storeId: number, active: boolean) {
+  async toggleActive(promoId: number, storeId: number, active: boolean) {
     await getConnection()
       .createQueryBuilder()
       .update(StorePromoMea)
       .set({ active: !active })
-      .where('promo_id = :promo_id AND store_id =:storeId', {
-        promo_id,
+      .where('promo_id = :promoId AND store_id =:storeId', {
+        promoId,
         storeId,
       })
       .execute();
-    const promo = await this.doesPromoExist(promo_id, storeId);
+    const promo = await this.doesPromoExist(promoId, storeId);
     return promo;
   }
   async doesPromoExist(
-    promo_id: number,
+    promoId: number,
     storeId: number,
   ): Promise<StorePromoMea> {
     try {
       const promo = await this.storePromoMeaRepository.findOne({
-        where: { promoId: promo_id, storeId },
+        where: { promoId, storeId },
       });
       if (!promo) throw new Error();
       return promo;
     } catch (e) {
-      throw new NotFoundException('promo not found');
+      throw new NotFoundException(
+        `promo promoId:${promoId} storeId:${storeId} not found`,
+      );
     }
   }
   async validatePromoState(

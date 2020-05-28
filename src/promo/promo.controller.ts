@@ -52,6 +52,9 @@ import { ListMeaToExportDto } from 'src/store-promo-mea/dto/list-mea-for-export.
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerOptions, storage } from 'src/config/multer';
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
+import { User } from 'src/entities/User';
+import { UserReq } from '../auth/get-user.decorator';
+
 const multerOptionsForMeaExcel: MulterOptions = multerOptions(
   /xlsm|xlsx|xlsb|xls|xla|xlml|ods|csv|.xlsx|csv/,
   `${__dirname}/../uploads/mea-state/`,
@@ -109,10 +112,10 @@ export class PromoController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @Post('saved')
   @UseGuards(AuthGuard())
-  async saveSelected(@Body() body: SaveSelectedDto, @Req() req: ReqWithUser) {
+  async saveSelected(@Body() body: SaveSelectedDto, @UserReq() user: User) {
     const { month, year, promos } = body;
     return await this.storePromoSelectedService.savedPromos(
-      req.user.storeId,
+      user.storeId,
       month,
       year,
       promos,
@@ -124,13 +127,10 @@ export class PromoController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @Put('saved')
   @UseGuards(AuthGuard())
-  async savePrintConfigs(
-    @Body() body: SaveSelectedDto,
-    @Req() req: ReqWithUser,
-  ) {
+  async savePrintConfigs(@Body() body: SaveSelectedDto, @UserReq() user: User) {
     const { month, year, promos } = body;
     return await this.storePromoSelectedService.savePrintConfig(
-      req.user.storeId,
+      user.storeId,
       month,
       year,
       promos,
@@ -142,11 +142,11 @@ export class PromoController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @Get('saved')
   @UseGuards(AuthGuard())
-  async getSaved(@Query() filter: GetSelectedDto, @Req() req: ReqWithUser) {
+  async getSaved(@Query() filter: GetSelectedDto, @UserReq() user: User) {
     const { month, year, includePromoDetails } = filter;
     try {
       const promos = await this.storePromoSelectedService.list(
-        req.user.storeId,
+        user.storeId,
         month,
         year,
         includePromoDetails,
@@ -167,7 +167,7 @@ export class PromoController {
     } catch (e) {
       return e;
     }
-}
+  }
 
   @ApiBearerAuth()
   @ApiOperation({ summary: 'list labs' })
@@ -190,9 +190,9 @@ export class PromoController {
   @UsePipes(new DatesListValidationPipe())
   async listAllMea(
     @Query() filter: ListMeaDto,
-    @Req() req: ReqWithUser,
+    @UserReq() user: User,
   ): Promise<StorePromoMea> {
-    return await this.storePromoMeaService.findPromos(filter, req.user);
+    return await this.storePromoMeaService.findPromos(filter, user);
   }
 
   @ApiOperation({ summary: 'Download mea list' })
@@ -207,12 +207,12 @@ export class PromoController {
   async downloadFile(
     @UploadedFile() file,
     @Query() filter: ListMeaToExportDto,
-    @Req() req: ReqWithUser,
+    @UserReq() user: User,
     @Res() res: any,
   ) {
     const filePath: string = await this.storePromoMeaService.exportExcelPromoState(
       filter,
-      req.user,
+      user,
     );
     res.status(200).download(filePath);
   }
@@ -228,6 +228,26 @@ export class PromoController {
   @UseInterceptors(FileInterceptor('promosMeaFile', multerOptionsForMeaExcel))
   async uploadedFile(@UploadedFile() file) {
     return await this.storePromoMeaService.updateMeaByExcel(file.path);
+  }
+
+  @ApiOperation({ summary: 'Update promo mea state' })
+  @ApiResponse({
+    status: 200,
+    description: 'update promo mea state Reject or Confirm ',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 400, description: 'missing reason for rejection' })
+  @ApiResponse({ status: 404, description: 'promo not found' })
+  @Post('promo-mea/:id/set-to')
+  @UseGuards(AuthGuard(), AdminGuard)
+  @UsePipes(new RejectionReasonValidation())
+  async changePromoState(@Body() body: SetStateDto, @Param('id') id: number) {
+    return await this.storePromoMeaService.validateProof(
+      id,
+      body.store_id,
+      body.reason,
+      body.state,
+    );
   }
 
   @ApiOperation({ summary: 'upload mea proof sells list' })
@@ -265,24 +285,34 @@ export class PromoController {
     });
   }
 
-  @ApiOperation({ summary: 'Update promo mea state' })
+  @ApiOperation({ summary: 'upload mea proof' })
   @ApiResponse({
     status: 200,
-    description: 'update promo mea state Reject or Confirm ',
+    description: 'upload photo for promo mea as proof',
   })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiResponse({ status: 400, description: 'missing reason for rejection' })
-  @ApiResponse({ status: 404, description: 'promo not found' })
-  @Post('promo-mea/:id/set-to')
-  @UseGuards(AuthGuard(), AdminGuard)
-  @UsePipes(new RejectionReasonValidation())
-  async changePromoState(@Body() body: SetStateDto, @Param('id') id: number) {
-    return await this.storePromoMeaService.validateProof(
-      id,
-      body.store_id,
-      body.reason,
-      body.state,
-    );
+  @ApiConsumes('multipart/form-data')
+  @Post('promo-mea/:id')
+  @UseGuards(AuthGuard(), StoreAdminGuard)
+  async uploadPromoMeaProofImage(
+    @Req() req: any,
+    @Res() res: any,
+    @Param('id') id: number,
+    @UserReq() user: User,
+    @Query('store_id') storeId = user.storeId,
+  ): Promise<any> {
+    await this.storePromoMeaService.validatePromoState(id, storeId);
+    this.meaUploadService.upload(req, res, async error => {
+      if (error) {
+        console.log(error);
+        return res.status(404).json(`Failed to upload image file: ${error}`);
+      }
+      // location = ;
+      const parsed = url.parse(req.files[0].location, true);
+      const location = parsed.path;
+      await this.meaUploadService.afterUpload(id, storeId, location, null);
+      const promo = await this.storePromoMeaService.doesPromoExist(id, storeId);
+      res.status(201).json(promo);
+    });
   }
 
   @ApiOperation({ summary: 'toggle promo mea active' })
@@ -295,10 +325,10 @@ export class PromoController {
   @UseGuards(AuthGuard(), StoreAdminGuard)
   async togglePromosMeaActive(
     @Body() promo: ActiveToggleDto,
-    @Req() req: ReqWithUser,
+    @UserReq() user: User,
     @Param('id') id: number,
   ) {
-    const storeId = promo.store_id || req.user.storeId;
+    const storeId = promo.store_id || user.storeId;
     return await this.storePromoMeaService.toggleActive(
       id,
       storeId,
@@ -322,44 +352,10 @@ export class PromoController {
   @UseGuards(AuthGuard(), StoreAdminGuard)
   async getPromoDetails(
     @Param('id') promoId: number,
-    @Req() req: ReqWithUser,
-    @Query('store_id') store_id = req.user.storeId,
+    @UserReq() user: User,
+    @Query('store_id') store_id = user.storeId,
   ) {
-    const storeId = store_id || req.user.storeId;
-    return await this.storePromoMeaService.findPromo(
-      promoId,
-      storeId,
-      req.user,
-    );
-  }
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'upload mea proof' })
-  @ApiResponse({
-    status: 200,
-    description: 'upload photo for promo mea as proof',
-  })
-  @ApiConsumes('multipart/form-data')
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  @Post('promo-mea/:id')
-  @UseGuards(AuthGuard(), StoreAdminGuard)
-  async uploadPromoMeaProofImage(
-    @Req() req: any,
-    @Res() res: any,
-    @Param('id') id: number,
-    @Query('store_id') storeId?: number,
-  ): Promise<any> {
-    await this.storePromoMeaService.validatePromoState(id, storeId);
-    this.meaUploadService.upload(req, res, async error => {
-      if (error) {
-        console.log(error);
-        return res.status(404).json(`Failed to upload image file: ${error}`);
-      }
-      // location = ;
-      const parsed = url.parse(req.files[0].location, true);
-      const location = parsed.path;
-      await this.meaUploadService.afterUpload(id, storeId, location, null);
-      const promo = await this.storePromoMeaService.doesPromoExist(id, storeId);
-      res.status(201).json(promo);
-    });
+    const storeId = store_id || user.storeId;
+    return await this.storePromoMeaService.findPromo(promoId, storeId, user);
   }
 }
