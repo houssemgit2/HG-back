@@ -10,16 +10,55 @@ export const USER_LOGGER = 'client';
 export const ADMIN = 'admin';
 @Injectable()
 export class AdminGuard implements CanActivate {
-  logger = new Logger('admin Gaurd canActivate');
+  logger = new Logger('admin Guard canActivate');
 
   canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
+    console.log(user); // todo
     this.logger.verbose(`the user is ${user.email}`);
     if (user && user.userRole.name === ADMIN) return true;
-    this.logger.error(`you'r not admin`);
+    this.logger.error(`you are not admin`);
     throw new UnauthorizedException(
-      `you'r not allowed to visit this, checkout`,
+      `you are not allowed to visit this, checkout`,
     );
+  }
+}
+@Injectable()
+export class StoreAdminGuard implements CanActivate {
+  logger = new Logger('Store admin Guard canActivate');
+
+  canActivate(context: ExecutionContext) {
+    // const args = context.getArgs();
+    // const storeId = args[0].query.store_id || args[0].body.store_id;
+    const request = context.switchToHttp().getRequest();
+    const user = request.user;
+    const storeId =
+      request.query.store_id ||
+      request.body.store_id ||
+      request.query.storeId ||
+      request.body.storeId ||
+      user.storeId;
+    console.log('---------------------------->', storeId); //.IncomingMessage.query);
+    this.logger.verbose(`the user is ${user.email}`);
+    if (
+      user &&
+      user.userRole.name === USER_LOGGER &&
+      parseInt(storeId) !== user.storeId
+    ) {
+      this.logger.error(
+        `your store id is ${user.storeId}, you can't access ${storeId} Just admin can access any store,and you are ${user.userRole.name}`,
+      );
+
+      throw new UnauthorizedException(
+        `you are not allowed to visit this store`,
+      );
+    }
+    // if (user && user.userRole.name === ADMIN && !storeId)
+    //   throw new UnauthorizedException(`please provide the store_id`);
+    this.logger.debug(
+      `Just admin can access any store,and you are ${user.userRole.name}`,
+    );
+    return true;
   }
 }

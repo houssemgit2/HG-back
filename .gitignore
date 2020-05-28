@@ -43,4 +43,5 @@ output/PDFBadges/*
 output/ordersZips/*
 !output/ordersZips/.gitkeep
 uploads/*
+uploads/mea-state/*
 !uploads/.gitkeep

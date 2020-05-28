@@ -6,6 +6,8 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   BaseEntity,
+  AfterUpdate,
+  BeforeUpdate,
 } from 'typeorm';
 import { RejectionReason } from './RejectionReason';
 import { Store } from './Store';
@@ -27,12 +29,6 @@ export class StorePromoMea extends BaseEntity {
 
   @Column('int', { name: 'rejected_reason_id' })
   rejectedReasonId: number;
-
-  @Column('int', { name: 'month' })
-  month: number;
-
-  @Column('int', { name: 'year' })
-  year: number;
 
   @Column('tinyint', { name: 'active', nullable: true, width: 1 })
   active: boolean | null;
@@ -80,6 +76,18 @@ export class StorePromoMea extends BaseEntity {
     default: () => 'CURRENT_TIMESTAMP',
   })
   createdAt: Date;
+
+  // @AfterUpdate()
+  // updateState() {
+  //   console.log('we are after update ---------------------->', this);
+  //   if (this.state === 'REJECTED' && this.rejectionNumber > 0) {
+  //     this.rejectionNumber = this.rejectionNumber - 1;
+  //   }
+  //   if (this.state === 'REJECTED' && this.rejectionNumber === 0) {
+  //     this.state = 'OPERATION_REFUSED';
+  //   }
+  //   // this.save();
+  // }
 
   @ManyToOne(
     () => RejectionReason,

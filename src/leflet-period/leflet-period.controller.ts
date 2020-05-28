@@ -4,6 +4,7 @@ import { LefletPeriodService } from './leflet-period.service';
 import { AuthGuard } from '@nestjs/passport';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { ReqWithUser } from '../auth/interface/user.interface';
+import { UserReq } from '../auth/get-user.decorator';
 import {
   Controller,
   Get,
@@ -23,6 +24,7 @@ import {
   ApiOperation,
   ApiResponse,
 } from '@nestjs/swagger';
+import { User } from 'src/entities/User';
 
 @ApiBearerAuth()
 @ApiTags('leaflet-period')
@@ -42,8 +44,8 @@ export class LefletPeriodController {
   @ApiResponse({ status: 200, description: 'leaflet period list' })
   @Get()
   @UseGuards(AuthGuard('jwt'))
-  async findAll(@Req() req: ReqWithUser, @Query() filter: GetLeafletPeriodDto) {
-    return await this.lefletPeriodService.getAll(filter, req.user);
+  async findAll(@UserReq() user: User, @Query() filter: GetLeafletPeriodDto) {
+    return await this.lefletPeriodService.getAll(filter, user);
   }
 
   @ApiOperation({ summary: 'Leaflet period info' })

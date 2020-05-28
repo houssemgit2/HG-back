@@ -79,7 +79,7 @@ export class Store extends BaseEntity {
   @OneToOne(
     () => User,
     user => user.id,
-    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT',/* eager: true */ },
   )
   @JoinColumn([{ name: 'cip', referencedColumnName: 'id' }])
   owner: User;

@@ -13,6 +13,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { PaginationDto } from './dto/pagination.dto';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { StoreService } from './store.service';
+import { InjectEventEmitter } from 'nest-emitter';
+import { MyEventEmitter } from './store.events';
 import {
   ApiTags,
   ApiBearerAuth,
@@ -27,7 +29,10 @@ import { EditStoreOwnerDto } from './dto/edit-store-owner.dto';
 @ApiTags('Store')
 @Controller('stores')
 export class StoreController {
-  constructor(private storeService: StoreService) {}
+  constructor(
+    private storeService: StoreService,
+    @InjectEventEmitter() private readonly emitter: MyEventEmitter,
+  ) {}
 
   @ApiOperation({ summary: 'Add store' })
   @ApiResponse({ status: 200, description: 'store added successfully' })
@@ -35,7 +40,14 @@ export class StoreController {
   @UseGuards(AuthGuard(), AdminGuard)
   create(@Body() body: StoreOwnerDto): Promise<Store> {
     const { owner, store, permissions } = body;
-    return this.storeService.createOne(store, owner, permissions);
+    const addedStore = this.storeService
+      .createOne(store, owner, permissions)
+      .then(newStore => {
+        this.emitter.emit('storeCreated', newStore.clusterId, newStore.id);
+        return this.storeService.storeV1Key(newStore);
+      });
+    // console.log('-*-*-*-*-*-*-*-*-*>', addedStore);
+    return addedStore;
   }
 
   @ApiOperation({ summary: 'get All store' })

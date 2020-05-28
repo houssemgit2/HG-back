@@ -8,7 +8,6 @@ import { UserModule } from './user/user.module';
 import { PromoModule } from './promo/promo.module';
 import { LoggerMiddleware } from './middleware/logger.middleware';
 import entities from './entities';
-import { from } from 'rxjs';
 import { PdfPromoGeneratorModule } from '@app/pdf-promo-generator';
 import { LefletPeriodModule } from './leflet-period/leflet-period.module';
 import { LeafletModule } from './leaflet/leaflet.module';
@@ -17,6 +16,8 @@ import { ConfigModule } from '@nestjs/config';
 import { AccessPermissionsModule } from './access-permissions/access-permissions.module';
 import { RejectionReasonModule } from './rejection-reason/rejection-reason.module';
 import { StorePromoSelectedModule } from './store-promo-selected/store-promo-selected.module';
+import { StorePromoMeaModule } from './store-promo-mea/store-promo-mea.module';
+import { MeaUploadModule } from './mea-upload/mea-upload.module';
 
 @Module({
   imports: [
@@ -47,6 +48,8 @@ import { StorePromoSelectedModule } from './store-promo-selected/store-promo-sel
     AccessPermissionsModule,
     RejectionReasonModule,
     StorePromoSelectedModule,
+    StorePromoMeaModule,
+    MeaUploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],
