@@ -4,14 +4,18 @@ import {
   Injectable,
   ArgumentMetadata,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import moment = require('moment');
 import { isArray } from 'util';
 
 @Injectable()
 export class DatesListValidationPipe implements PipeTransform {
+  logger = new Logger('Validation Dates');
   transform(value: any, metadata: ArgumentMetadata) {
-    console.log(value.month, value.year, value.dates_list);
+    this.logger.warn(
+      `month: ${value.month} year: ${value.year} value.dates ${value.dates_list}`,
+    );
     if (!(value.month && value.year) && !value.dates_list) {
       throw new BadRequestException(
         'month and year or dates list are required',

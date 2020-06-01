@@ -7,7 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { StorePromoMeaRepository } from './store-promo-mea.repository';
-import { getConnection, getRepository, AdvancedConsoleLogger } from 'typeorm';
+import { getConnection, getRepository } from 'typeorm';
 import { StorePromoMea } from '../entities/StorePromoMea';
 import { ListMeaDto } from './dto/list-mea.dto';
 import { User } from '../entities/User';
@@ -15,10 +15,12 @@ import { Laboratory } from '../entities/Laboratory';
 import * as XLSX from 'xlsx';
 import { ListMeaToExportDto } from './dto/list-mea-for-export.dto';
 import { ImportedExcelPromosJSon } from './dto/imported-excel.dto';
-import { validate, ValidationError, validateOrReject } from 'class-validator';
+import { validateOrReject } from 'class-validator';
 import moment = require('moment');
 import { RejectionReason } from 'src/entities/RejectionReason';
 import { RejectionReasonRepository } from 'src/rejection-reason/rejection-reason.repository';
+import { Cron } from '@nestjs/schedule';
+import { promoState } from 'src/config/stateEnum';
 
 @Injectable()
 export class StorePromoMeaService {
@@ -26,21 +28,66 @@ export class StorePromoMeaService {
     private storePromoMeaRepository: StorePromoMeaRepository,
     private rejectionReasonRepository: RejectionReasonRepository,
   ) {}
-  private logger = new Logger('Promos Logger');
+  private logger = new Logger(StorePromoMeaService.name);
 
+  @Cron('0 0 * * *')
+  async handleCron() {
+    this.logger.debug('this task run every 00:00:00');
+    const daysAfterEndDate = 22;
+    const filterPromos = new ListMeaDto();
+    filterPromos.end_date = moment()
+      .subtract(daysAfterEndDate + 1, 'days')
+      .format('YYYY-MM-DD');
+    this.logger.debug(
+      `fetching promo  where their end_date little then ${filterPromos.end_date} ${promoState.NOT_JUSTIFIED}`,
+    );
+    try {
+      const promos = await this.findPromos(filterPromos);
+      this.logger.debug(`there is  ${promos.length}`);
+
+      await this.updatePromoList(promos);
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
+  }
+  async updatePromoList(promos: StorePromoMea[]) {
+    return Promise.all(
+      promos.map(promo => this.updatePromoByState(promo.promoId)),
+    );
+  }
+  async updatePromoByState(promoId: number) {
+    try {
+      await this.updateState(
+        promoId,
+        null,
+        promoState.NOT_JUSTIFIED,
+        null,
+        true,
+      );
+      await this.updateState(
+        promoId,
+        null,
+        promoState.OPERATION_REFUSED,
+        null,
+        true,
+      );
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
+  }
   async findPromos(
     filter?: ListMeaDto,
     user?: User,
     toImportExcel = false,
-  ): Promise<any> {
+  ): Promise<StorePromoMea[]> {
     const {
       start_date,
       end_date,
       state,
       clusters,
       active,
-      lab,
-      circuit_vers,
+      // lab,
+      // circuit_vers,
       perPage,
       page,
       store_id,
@@ -61,15 +108,22 @@ export class StorePromoMeaService {
         'owner',
         'owner.store_id=store.id',
       );
-    sqlQuery.where(
-      `(promo.start_date BETWEEN :start_date AND :end_date
+    if (start_date && end_date)
+      sqlQuery.where(
+        `(promo.start_date BETWEEN :start_date AND :end_date
       OR (promo.end_date BETWEEN :start_date AND :end_date)
       OR (promo.start_date <= :start_date and promo.end_date>= :end_date) )`,
-      {
-        start_date,
-        end_date,
-      },
-    );
+        {
+          start_date,
+          end_date,
+        },
+      );
+    else if (end_date && !start_date)
+      if (start_date && end_date)
+        sqlQuery.where(`promo.end_date<= :end_date) )`, {
+          start_date,
+          end_date,
+        });
     if (state) {
       if (state === 'UNJUSTIFIED')
         sqlQuery.andWhere('sp.state IN(:...states)', {
@@ -87,7 +141,6 @@ export class StorePromoMeaService {
       sqlQuery.andWhere('store.clusterId = :clusters', { clusters }); //todo make it by promoCluster table
     }
     if (active === true || active === false) {
-      console.log('active', active);
       sqlQuery.andWhere('sp.active = :active', { active });
     }
     if (store_id) {
@@ -97,10 +150,14 @@ export class StorePromoMeaService {
     if (perPage && page) {
       sqlQuery.skip(filter.perPage * (page - 1)).take(perPage);
     }
-    const promos = await sqlQuery.getMany();
-    if (!promos.length)
-      throw new NotFoundException('there is no promos with this filters');
-    return promos;
+    try {
+      const promos: StorePromoMea[] = await sqlQuery.getMany();
+      // if (!promos.length)
+      //   throw new NotFoundException('there is no promos with this filters');
+      return promos;
+    } catch (e) {
+      throw new InternalServerErrorException(e, 'error during fetch promos');
+    }
   }
   async findPromo(promoId: number, storeId: number, user?: User) {
     const sqlQuery = this.storePromoMeaRepository
@@ -120,7 +177,7 @@ export class StorePromoMeaService {
     return promo;
   }
   async updateState(
-    promoId: number | null,
+    promoId: number,
     storeId: number | null,
     state: string,
     reasonId: number | null,
@@ -131,7 +188,7 @@ export class StorePromoMeaService {
     if (promoId) queryCondition.promoId = promoId;
     if (storeId) queryCondition.storeId = storeId;
     if (state === 'REJECTED' && !reasonId) {
-      // throw new BadRequestException('Rejected promo must has a reason');
+      throw new BadRequestException('Rejected promo must has a reason');
     }
     if (state === 'REJECTED') toSetObject.rejectedReasonId = reasonId;
     if (updateByState) {
@@ -145,7 +202,7 @@ export class StorePromoMeaService {
     }
     try {
       this.logger.debug(
-        `we are updating promoMEA to ${JSON.stringify(
+        `updating promoMEA to ${JSON.stringify(
           toSetObject,
         )} where ${JSON.stringify(queryCondition)}`,
       );
@@ -158,7 +215,13 @@ export class StorePromoMeaService {
         .update(queryCondition, toSetObject)
         .then(data => {
           if (!data.raw.affectedRows)
-            throw new InternalServerErrorException('nothing to update');
+            this.logger.error(
+              `no update from ${queryCondition.state} to ${toSetObject.state} promoId=${promoId}`,
+            );
+          else
+            this.logger.verbose(
+              `${data.raw.affectedRows} update from ${queryCondition.state} to ${toSetObject.state} for promoId=${promoId}`,
+            );
         });
       return updateResult;
     } catch (e) {
@@ -423,6 +486,17 @@ export class StorePromoMeaService {
     const labs = await laboRepository.find();
     if (!labs.length) throw new NotFoundException('labs list not found');
     return labs;
+  }
+  async insertPromoMea(promoId: number) {
+    try {
+      const promos = await this.storePromoMeaRepository.findPromoMeaByIdPromoStore(
+        promoId,
+      );
+      return await this.storePromoMeaRepository.save(promos);
+    } catch (e) {
+      console.log(e);
+      throw new InternalServerErrorException(e);
+    }
   }
 }
 // repository.find({

@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import convertToSnakeCase from './utils/helpers';
+import { convertToSnakeCase } from './utils/helpers';
 
 export interface Response<T> {
   statusCode: number;

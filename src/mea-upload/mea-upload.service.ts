@@ -9,7 +9,7 @@ import * as AWS from 'aws-sdk';
 import * as multerS3 from 'multer-s3';
 import * as mime from 'mime-types';
 import { StorePromoMea } from '../entities/StorePromoMea';
-import { getConnection, getRepository } from 'typeorm';
+import { getConnection } from 'typeorm';
 import moment = require('moment');
 import * as url from 'url';
 

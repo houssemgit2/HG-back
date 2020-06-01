@@ -7,7 +7,6 @@ import {
   UseGuards,
   Req,
   Param,
-  Delete,
   Put,
   Query,
   Body,
@@ -17,7 +16,6 @@ import {
   Res,
   UploadedFile,
   UseInterceptors,
-  UploadedFiles,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AdminGuard, StoreAdminGuard } from '../auth/guards/admin.guard';
@@ -27,7 +25,6 @@ import {
   ApiOperation,
   ApiResponse,
   ApiConsumes,
-  ApiBody,
   ApiQuery,
 } from '@nestjs/swagger';
 import * as fs from 'fs';
@@ -35,7 +32,6 @@ import { PromoService } from './promo.service';
 import { GetPromoDto } from './dto/get-promo.dto';
 import { PdfPromoGeneratorService } from '@app/pdf-promo-generator';
 import { RejectionReasonService } from 'src/rejection-reason/rejection-reason.service';
-import { ReqWithUser } from '../auth/interface/user.interface';
 import { StorePromoSelectedService } from './../store-promo-selected/store-promo-selected.service';
 
 import { StorePromoMeaService } from '../store-promo-mea/store-promo-mea.service';
@@ -43,17 +39,17 @@ import { ListMeaDto } from '../store-promo-mea/dto/list-mea.dto';
 import { StorePromoMea } from '../entities/StorePromoMea';
 import { ActiveToggleDto } from '../store-promo-mea/dto/active-toggle.dto';
 import { MeaUploadService } from 'src/mea-upload/mea-upload.service';
-import { getConnection } from 'typeorm';
 import * as url from 'url';
 import { SetStateDto } from 'src/store-promo-mea/dto/setState.dto';
 import { DatesListValidationPipe } from 'src/pipes/dates.validation.pipe';
 import { RejectionReasonValidation } from 'src/pipes/rejection-reason.pipe';
 import { ListMeaToExportDto } from 'src/store-promo-mea/dto/list-mea-for-export.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { multerOptions, storage } from 'src/config/multer';
+import { multerOptions } from 'src/config/multer';
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 import { User } from 'src/entities/User';
 import { UserReq } from '../auth/get-user.decorator';
+import { Transform } from 'stream';
 
 const multerOptionsForMeaExcel: MulterOptions = multerOptions(
   /xlsm|xlsx|xlsb|xls|xla|xlml|ods|csv|.xlsx|csv/,
@@ -191,7 +187,7 @@ export class PromoController {
   async listAllMea(
     @Query() filter: ListMeaDto,
     @UserReq() user: User,
-  ): Promise<StorePromoMea> {
+  ): Promise<StorePromoMea[]> {
     return await this.storePromoMeaService.findPromos(filter, user);
   }
 

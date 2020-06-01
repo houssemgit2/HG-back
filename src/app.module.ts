@@ -18,6 +18,7 @@ import { RejectionReasonModule } from './rejection-reason/rejection-reason.modul
 import { StorePromoSelectedModule } from './store-promo-selected/store-promo-selected.module';
 import { StorePromoMeaModule } from './store-promo-mea/store-promo-mea.module';
 import { MeaUploadModule } from './mea-upload/mea-upload.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { MeaUploadModule } from './mea-upload/mea-upload.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
     AuthModule,
     StoreModule,
     UserModule,

@@ -39,7 +39,6 @@ export class StoreAdminGuard implements CanActivate {
       request.query.storeId ||
       request.body.storeId ||
       user.storeId;
-    console.log('---------------------------->', storeId); //.IncomingMessage.query);
     this.logger.verbose(`the user is ${user.email}`);
     if (
       user &&
