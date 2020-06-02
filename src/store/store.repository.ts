@@ -23,7 +23,10 @@ export class StoreRepository extends Repository<Store> {
     super();
   }
   async findAll(filter: PaginationDto): Promise<any> {
-    const queryOption: FindManyOptions = { relations: ['owner'] };
+    const queryOption: FindManyOptions = {
+      relations: ['owner'],
+      where: { owner: { isOwner: true } },
+    };
     if (filter.perPage && filter.page) {
       queryOption.skip = filter.perPage * (filter.page - 1);
       queryOption.take = filter.perPage;
@@ -49,33 +52,39 @@ export class StoreRepository extends Repository<Store> {
     console.log('start transaction');
     // let store: any;
     try {
+      owner.isOwner = 1;
       const addedOwner = await queryRunner.manager.save(owner);
-      store.cip = addedOwner.id;
+      console.log('addedOwner', addedOwner);
+      // store.ownerId = addedOwner.id;
       const newStore = await queryRunner.manager.save(store);
+      console.log('newStore', newStore);
       if (update && permissions)
         await queryRunner.manager.delete(StorePermission, {
-          storeId: store.id,
+          storeId: store.cip,
         });
       if (permissions) await queryRunner.manager.save(permissions);
       await queryRunner.commitTransaction();
       return newStore;
     } catch (err) {
       // since we have errors lets rollback the changes we made
+      console.log(err);
       await queryRunner.rollbackTransaction();
-      throw new InternalServerErrorException('failed to finish transaction');
+      throw new InternalServerErrorException(
+        'failed to finish transaction' + err,
+      );
     } finally {
       // you need to release a queryRunner which was manually instantiated
       await queryRunner.release();
     }
   }
-  async get(id: number): Promise<Store> {
+  async get(cip: number): Promise<Store> {
     try {
       return await this.storeRepository.findOne(
-        { id },
+        { cip },
         { relations: ['owner'] },
       );
     } catch (e) {
-      console.error(`could not find one store by id`);
+      console.error(`could not find one store by cip`);
       throw new InternalServerErrorException(e);
     }
   }
@@ -90,7 +99,11 @@ export class StoreRepository extends Repository<Store> {
     await queryRunner.startTransaction();
     console.log('start transaction');
     try {
-      const newStore = await queryRunner.manager.update(Store, store.id, store);
+      const newStore = await queryRunner.manager.update(
+        Store,
+        store.cip,
+        store,
+      );
       const userIn = await queryRunner.manager.update(User, owner.id, owner);
       await queryRunner.manager.save(permissions);
       await queryRunner.commitTransaction();
@@ -106,7 +119,7 @@ export class StoreRepository extends Repository<Store> {
     }
   }
 
-  async deleteStore(id: number) {
+  async deleteStore(cip: number) {
     const connection = getConnection();
     const queryRunner = connection.createQueryRunner();
     await queryRunner.connect();
@@ -115,13 +128,13 @@ export class StoreRepository extends Repository<Store> {
     // let store: any;
     try {
       await queryRunner.manager.delete(StorePermission, {
-        storeId: id,
+        storeId: cip,
       });
 
-      await queryRunner.manager.delete(User, { storeId: id });
+      await queryRunner.manager.delete(User, { storeId: cip });
 
       const deletedStore = await queryRunner.manager.delete(Store, {
-        id: id,
+        cip,
       });
       await queryRunner.commitTransaction();
       return deletedStore;

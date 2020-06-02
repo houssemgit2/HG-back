@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   BaseEntity,
   AfterUpdate,
-  BeforeUpdate,
+  AfterLoad,
 } from 'typeorm';
 import { RejectionReason } from './RejectionReason';
 import { Store } from './Store';
@@ -77,6 +77,11 @@ export class StorePromoMea extends BaseEntity {
   })
   createdAt: Date;
 
+  @AfterLoad()
+  fixProofUrl() {
+    if (this.urlPicture)
+      this.urlPicture = process.env.AWS_S3_BASE_URL + this.urlPicture;
+  }
   // @AfterUpdate()
   // updateState() {
   //   console.log('we are after update ---------------------->', this);
@@ -102,7 +107,7 @@ export class StorePromoMea extends BaseEntity {
     store => store.storePromoMeas,
     { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
   )
-  @JoinColumn([{ name: 'store_id', referencedColumnName: 'id' }])
+  @JoinColumn([{ name: 'store_id', referencedColumnName: 'cip' }])
   store: Store;
 
   @ManyToOne(

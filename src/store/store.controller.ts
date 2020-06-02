@@ -38,12 +38,12 @@ export class StoreController {
   @ApiResponse({ status: 200, description: 'store added successfully' })
   @Post()
   @UseGuards(AuthGuard(), AdminGuard)
-  create(@Body() body: StoreOwnerDto): Promise<Store> {
+  async create(@Body() body: StoreOwnerDto): Promise<Store> {
     const { owner, store, permissions } = body;
-    const addedStore = this.storeService
+    const addedStore = await this.storeService
       .createOne(store, owner, permissions)
       .then(newStore => {
-        this.emitter.emit('storeCreated', newStore.clusterId, newStore.id);
+        this.emitter.emit('storeCreated', newStore.clusterId, newStore.cip);
         return this.storeService.storeV1Key(newStore);
       });
     // console.log('-*-*-*-*-*-*-*-*-*>', addedStore);
@@ -57,7 +57,6 @@ export class StoreController {
   async findAll(@Query() filter: PaginationDto): Promise<Store[]> {
     // return filter;
     const storeList: Store[] = await this.storeService.getAllStore(filter);
-    //console.log(storeList);
     return storeList;
   }
 
@@ -71,19 +70,19 @@ export class StoreController {
 
   @ApiOperation({ summary: 'Update Store' })
   @ApiResponse({ status: 200, description: 'update the store info' })
-  @Put(':id')
+  @Put(':cip')
   @UseGuards(AuthGuard())
   async update(
-    @Param('id') id: number,
+    @Param('cip') cip: number,
     @Body() body: EditStoreOwnerDto,
   ): Promise<Store> {
     const { store, owner, permissions } = body;
-    return await this.storeService.updateStore(id, store, owner, permissions);
+    return await this.storeService.updateStore(cip, store, owner, permissions);
   }
 
-  @Delete(':id')
+  @Delete(':cip')
   @UseGuards(AuthGuard())
-  async remove(@Param('id') id: number) {
-    return await this.storeService.removeStore(id);
+  async remove(@Param('cip') cip: number) {
+    return await this.storeService.removeStore(cip);
   }
 }

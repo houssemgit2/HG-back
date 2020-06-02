@@ -12,21 +12,23 @@ import { Type } from 'class-transformer';
 import { AddOwnerDto } from './add-owner.dto';
 
 export class StoreOwnerDto {
-  @ApiProperty()
-  @ValidateNested({ each: true, always: true })
-  @Type(() => AddStoreDto)
-  public store: AddStoreDto;
+         @ApiProperty()
+         @ValidateNested({ each: true, always: true })
+         @Type(() => AddStoreDto)
+         public store: AddStoreDto;
 
-  @ApiProperty()
-  @ValidateNested({ each: true })
-  @Type(() => AddOwnerDto)
-  public owner: AddOwnerDto;
+         @ApiProperty()
+         @ValidateNested({ each: true })
+         @Type(() => AddOwnerDto)
+         public owner: AddOwnerDto;
 
-  @ApiProperty({ isArray: true, type: StorePermissionDto })
-  @IsArrayOfObject(
-       {
-      message: 'permissions must be an array of permission',
-    },
-  )
-  public permissions: StorePermissionDto[];
-}
+         @ApiProperty({ isArray: true, type: StorePermissionDto })
+         // @IsArrayOfObject(
+         //      {
+         //     message: 'permissions must be an array of permission',
+         //   },
+         // )
+         @ValidateNested({ each: true })
+         @Type(() => StorePermissionDto)
+         public permissions: StorePermissionDto[];
+       }

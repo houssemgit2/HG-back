@@ -18,47 +18,50 @@ import { EditUserCredentialDto } from '../user/dto/edit-user.dto';
 import { AddOwnerDto } from './dto/add-owner.dto';
 import { InjectEventEmitter } from 'nest-emitter';
 import { MyEventEmitter } from './store.events';
-import { getConnection } from 'typeorm';
-import { PromoCluster } from 'src/entities/PromoCluster';
+import { getConnection,  getRepository } from 'typeorm';
 import { StorePromoMea } from '../entities/StorePromoMea';
 import { NotFoundException } from '@nestjs/common';
+import { Resource } from '../entities/Resource';
+import { StorePromoMeaRepository } from 'src/store-promo-mea/store-promo-mea.repository';
 @Injectable()
 export class StoreService implements OnModuleInit {
   constructor(
     private storeRepository: StoreRepository,
     private userRepository: UserRepository,
+    private storePromoMeaRepository: StorePromoMeaRepository,
     @InjectEventEmitter() private readonly emitter: MyEventEmitter,
   ) {}
   onModuleInit() {
     this.emitter.on('storeCreated', async (clusterId, storeId) => {
-      const testCluster = await this.findMeaByStore(clusterId, storeId);
-      console.log('----------promo mea added----------', testCluster);
+      const testCluster = await this.findMeaByStore(storeId);
+      console.log(testCluster);
     });
   }
   logger = new Logger('Store service');
-  async findMeaByStore(clusterId: number, storeId: number) {
-    const promosIds = await getConnection()
-      .createQueryBuilder()
-      .select('promoCluster.promoId')
-      .from(PromoCluster, 'promoCluster')
-      .where('promoCluster.clusterId = :id', { id: clusterId })
-      .getMany();
+  async findMeaByStore(storeId: number) {
+    let promosIds: StorePromoMea[];
+    await this.storePromoMeaRepository
+      .findPromoMeaByIdPromoStore(null, null, storeId)
+      .then(data => {
+        promosIds = data;
+      });
     console.log('promos list to add to the store', storeId);
     return await getConnection()
       .createQueryBuilder()
       .insert()
       .into(StorePromoMea)
-      .values(promosIds.map(promo => ({ storeId, promoId: promo.promoId })))
+      .values(promosIds)
       .execute();
   }
   async createOne(
     addStore: AddStoreDto,
     owner: AddOwnerDto,
     permissions: StorePermissionDto[],
-  ): Promise<Store> {
+  ): Promise<any> {
+    const resources = await getRepository(Resource).find();
     const store: Store = new Store();
     store.clusterId = addStore.clu_id;
-    store.id = addStore.cip;
+    store.cip = addStore.cip;
     store.name = addStore.descr;
     const newOwner: User = new User();
     newOwner.storeId = addStore.cip;
@@ -74,12 +77,14 @@ export class StoreService implements OnModuleInit {
     console.log('the generated password is ------->', password_salt);
     newOwner.password = password_salt.password;
     newOwner.salt = password_salt.salt;
-
     const storePermissions = permissions.map(item => {
       const permis = new StorePermission();
-      permis.resourceId = item.resource;
+
+      const resourceId = resources.find(res => res.name === item.resource);
+      console.log('resource ', resourceId);
+      permis.resourceId = resourceId.id;
       permis.allow = item.allow;
-      permis.storeId = store.id;
+      permis.storeId = store.cip;
       return permis;
     });
     const result = await this.storeRepository.add(
@@ -98,28 +103,27 @@ export class StoreService implements OnModuleInit {
       return e;
     }
   }
-  async getStore(id: number) {
+  async getStore(cip: number) {
     const store = await this.storeRepository.findOne(
-      { id },
+      { cip },
       { relations: ['storePermissions', 'owner'] },
     );
-    if (!store) throw new NotFoundException(`there is no store with id ${id}`);
+    if (!store) throw new NotFoundException(`there is no store with id ${cip}`);
     return store;
   }
   async updateStore(
-    id: number,
+    cip: number,
     addStore: EditStoreDto,
     owner: EditUserCredentialDto,
     permissions: StorePermissionDto[],
   ) {
     const store: Store = new Store();
-    store.id = id;
+    store.cip = cip;
     store.cip = addStore.cip;
     if (addStore.clu_id) store.clusterId = addStore.clu_id;
     if (addStore.descr) store.name = addStore.descr;
     const newOwner: User = new User();
     if (owner) {
-      newOwner.id = addStore.cip;
       newOwner.firstName = owner.fst_name;
       newOwner.lastName = owner.lst_name;
       newOwner.email = owner.email;
@@ -138,7 +142,7 @@ export class StoreService implements OnModuleInit {
       ? permissions.map(item => {
           const permis = new StorePermission();
           permis.storeId = store.cip;
-          permis.resourceId = item.resource;
+          // permis.resourceId = item.resource;
           permis.allow = item.allow;
           return permis;
         })
@@ -164,14 +168,19 @@ export class StoreService implements OnModuleInit {
   }
   storeV1Key(store: Store): any {
     const storeV1: any = {};
-    storeV1.cip = store.id;
-    storeV1.owner_id = store.cip;
+    storeV1.cip = store.cip;
     storeV1.descr = store.name;
     storeV1.clu_id = store.clusterId;
-
-    delete store.id;
-    delete store.cip;
+    console.debug(store);
+    const owner: any = store.owner;
+    delete store.owner;
+    if (owner) owner.lst_name = owner.lastName;
+    if (owner) owner.fst_name = owner.lastName;
+    if (owner) owner.phone_num = owner.phone;
+    // delete store.cip;
     delete store.name;
+    if (owner) delete owner.firstName;
+    if (owner) delete owner.lastName;
     delete store.clusterId;
     return { ...storeV1, ...store };
   }

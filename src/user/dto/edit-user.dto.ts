@@ -25,7 +25,7 @@ export class EditUserCredentialDto {
 
   @ApiProperty({ required: true })
   @IsEmail()
-  email?: string;
+  email: string;
 
   @ApiPropertyOptional({ required: true })
   @IsOptional()

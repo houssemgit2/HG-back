@@ -10,7 +10,7 @@ export class AddStoreDto {
     {
       message: `Store cip  already exists. Choose another cip.`,
     },
-    { entityName: 'store', entity: Store, key: 'id' },
+    { entityName: 'store', entity: Store, key: 'cip' },
   )
   public cip: number;
 

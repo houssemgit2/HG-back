@@ -13,15 +13,15 @@ import { isArray } from 'util';
 export class DatesListValidationPipe implements PipeTransform {
   logger = new Logger('Validation Dates');
   transform(value: any, metadata: ArgumentMetadata) {
-    this.logger.warn(
-      `month: ${value.month} year: ${value.year} value.dates ${value.dates_list}`,
-    );
-    if (!(value.month && value.year) && !value.dates_list) {
+    if (value && !(value.month && value.year) && !value.dates_list) {
       throw new BadRequestException(
         'month and year or dates list are required',
       );
     }
-    if (value.dates_list) {
+    if (value && value.dates_list) {
+      this.logger.warn(
+        `month: ${value.month} year: ${value.year} value.dates ${value.dates_list}`,
+      );
       value.dates_list = isArray(value.dates_list)
         ? value.dates_list.map(item => JSON.parse(item))
         : JSON.parse(value.dates_list);
@@ -31,12 +31,14 @@ export class DatesListValidationPipe implements PipeTransform {
             value.dates_list.month,
             value.dates_list.year,
           );
-    } else if (value.month && value.year && !value.dates_list) {
+    } else if (value && value.month && value.year && !value.dates_list) {
       value.dates = this.monthToStartEndDate(value.month, value.year);
     }
-    value.end_date = value.dates.end_date;
-    value.start_date = value.dates.start_date;
-    delete value.dates;
+    if (value) {
+      value.end_date = value.dates.end_date;
+      value.start_date = value.dates.start_date;
+      delete value.dates;
+    }
     return value;
   }
   private monthToStartEndDate(month: number, year: number): any {
