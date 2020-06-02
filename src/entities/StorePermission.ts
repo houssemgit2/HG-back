@@ -8,7 +8,7 @@ import {
   BaseEntity,
 } from 'typeorm';
 import { Store } from './Store';
-import { Resource } from './resource';
+import { Resource } from './Resource';
 
 @Index('store_permission_store_id_fk', ['storeId'], {})
 @Index('store_permission_resource_id_fk', ['resourceId'], {})
@@ -45,7 +45,7 @@ export class StorePermission extends BaseEntity {
     store => store.storePermissions,
     { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
   )
-  @JoinColumn([{ name: 'store_id', referencedColumnName: 'id' }])
+  @JoinColumn([{ name: 'store_id', referencedColumnName: 'cip' }])
   store: Store;
 
   @ManyToOne(

@@ -24,6 +24,9 @@ export class User extends BaseEntity {
   @Column('int', { name: 'store_id' })
   storeId: number;
 
+  @Column('boolean', { name: 'is_owner', select: false })
+  isOwner: number;
+
   @Column('int', { name: 'user_role_id' })
   userRoleId: number;
 
@@ -73,7 +76,7 @@ export class User extends BaseEntity {
     store => store.users,
     { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
   )
-  @JoinColumn([{ name: 'store_id', referencedColumnName: 'id' }])
+  @JoinColumn([{ name: 'store_id', referencedColumnName: 'cip' }])
   store: Store;
 
   @ManyToOne(
@@ -86,7 +89,7 @@ export class User extends BaseEntity {
 
   @OneToOne(
     () => Store,
-    store => store.id,
+    store => store.cip,
     { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
   )
   async validatePassword(password: string): Promise<boolean> {

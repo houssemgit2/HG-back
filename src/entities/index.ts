@@ -22,7 +22,7 @@ import { StorePermission } from './StorePermission';
 import { StorePromoMea } from './StorePromoMea';
 import { StorePromoSelected } from './StorePromoSelected';
 import { UserRole } from './UserRole';
-import { Resource } from './resource';
+import { Resource } from './Resource';
 
 const entities = [
   Brand,
