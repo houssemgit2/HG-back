@@ -16,25 +16,23 @@ export class AccessPermissionsService {
     storeId: number,
     updateAccessPermissionDto: UpdateAccessPermissionDto,
   ): Promise<StorePermission> {
-    const { allow, resource_id } = updateAccessPermissionDto;
-    try {
-      const storePermissionToUpdate = await this.storePermissionRepository.findOne(
-        {
-          where: { storeId, resourceId: resource_id },
-        },
+    const { allow, resource } = updateAccessPermissionDto;
+    const resourceId = await this.storePermissionRepository.getResourceId(
+      resource,
+    );
+
+    const storePermissionToUpdate = await this.storePermissionRepository.findOne(
+      {
+        where: { storeId, resourceId },
+      },
+    );
+    if (storePermissionToUpdate) {
+      storePermissionToUpdate.allow = allow;
+      return await this.storePermissionRepository.save(storePermissionToUpdate);
+    } else {
+      throw new BadRequestException(
+        `the store id:${storeId} has no access registered for the resource ${resource}`,
       );
-      if (storePermissionToUpdate) {
-        storePermissionToUpdate.allow = allow;
-        return await this.storePermissionRepository.save(
-          storePermissionToUpdate,
-        );
-      } else {
-        throw new BadRequestException(
-          `the store id:${storeId} has no access registered for the resource ${resource_id}`,
-        );
-      }
-    } catch (e) {
-      return e;
     }
   }
   async getByStore(
@@ -59,12 +57,15 @@ export class AccessPermissionsService {
   async create(
     storePermission: CreateAccessPermissionDto,
   ): Promise<StorePermission> {
-    const { resource_id, allow, store_cip } = storePermission;
+    const { resource, allow, store_cip } = storePermission;
+    const resourceId = await this.storePermissionRepository.getResourceId(
+      resource,
+    ); //.then(id => id);
     const oldStorePermission = await this.storePermissionRepository.findOne({
-      where: { storeId: store_cip, resourceId: resource_id },
+      where: { storeId: store_cip, resourceId },
     });
     const newStorePermission = new StorePermission();
-    newStorePermission.resourceId = resource_id;
+    newStorePermission.resourceId = resourceId;
     newStorePermission.allow = allow; // save allow as boolean todo: fix this
     newStorePermission.storeId = store_cip;
     if (oldStorePermission) newStorePermission.id = oldStorePermission.id;

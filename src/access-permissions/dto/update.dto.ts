@@ -1,11 +1,11 @@
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 export class UpdateAccessPermissionDto {
   @ApiProperty()
-  @IsNumber()
+  @IsString()
   @IsNotEmpty()
   // @IsEnum()
-  public resource_id: number;
+  public resource: string;
 
   @ApiProperty()
   @IsNotEmpty()
