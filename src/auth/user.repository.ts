@@ -66,12 +66,21 @@ export class UserRepository extends Repository<User> {
     const { email, password } = loginCredentialDto;
     const user = await this.findOne({
       where: { email },
-      relations: ['store'],
+      // relations: ['store'],
+      join: {
+        alias: 'user',
+        leftJoinAndSelect: {
+          userRole: 'user.userRole',
+          store: 'user.store',
+          accessPermissions: 'store.storePermissions',
+        },
+      },
       select: [
         'id',
         'firstName',
         'lastName',
         'email',
+        'address',
         'storeId',
         'userRoleId',
         'password',
@@ -80,10 +89,11 @@ export class UserRepository extends Repository<User> {
     });
 
     if (user && (await user.validatePassword(password))) {
-      return await this.findOne({
-        where: { email },
-        relations: ['store'],
-      });
+      // return await this.findOne({
+      //   where: { email },
+      //   relations: ['store'],
+      // });
+      return user;
     }
   }
   async generateSaltPassword(password: string): Promise<any> {

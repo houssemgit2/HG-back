@@ -24,7 +24,7 @@ export class User extends BaseEntity {
   @Column('int', { name: 'store_id' })
   storeId: number;
 
-  @Column('boolean', { name: 'is_owner', select: false })
+  @Column('boolean', { name: 'is_owner', select: true })
   isOwner: number;
 
   @Column('int', { name: 'user_role_id' })
