@@ -54,18 +54,18 @@ export class StoreController {
   @ApiResponse({ status: 200, description: 'store list' })
   @Get()
   @UseGuards(AuthGuard(), AdminGuard)
-  async findAll(@Query() filter: PaginationDto): Promise<Store[]> {
+  async findAll(@Query() filter: PaginationDto): Promise<any> {
     // return filter;
-    const storeList: Store[] = await this.storeService.getAllStore(filter);
+    const storeList = await this.storeService.getAllStore(filter);
     return storeList;
   }
 
   @ApiOperation({ summary: 'Store info' })
   @ApiResponse({ status: 200, description: 'Get the store info by id' })
-  @Get(':id')
+  @Get(':cip')
   @UseGuards(AuthGuard())
-  async findOne(@Param('id') id: number): Promise<Store> {
-    return await this.storeService.getStore(id);
+  async findOne(@Param('cip') cip: number): Promise<any> {
+    return await this.storeService.getStore(cip);
   }
 
   @ApiOperation({ summary: 'Update Store' })

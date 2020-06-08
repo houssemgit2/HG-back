@@ -8,13 +8,14 @@ import {
 } from 'typeorm';
 import { Store } from '../entities/Store';
 import { InjectRepository } from '@nestjs/typeorm';
-import { InternalServerErrorException } from '@nestjs/common';
+import { InternalServerErrorException, Logger } from '@nestjs/common';
 import { PaginationDto } from './dto/pagination.dto';
 import { User } from '../entities/User';
 import { StorePermission } from '../entities/StorePermission';
 
 @EntityRepository(Store)
 export class StoreRepository extends Repository<Store> {
+  logger = new Logger('Store Repository');
   constructor(
     @InjectRepository(Store)
     private readonly storeRepository: Repository<Store>,
@@ -22,17 +23,41 @@ export class StoreRepository extends Repository<Store> {
   ) {
     super();
   }
+  async getOne(cip: number) {
+    this.logger.debug(`fetching store cip where cip = ${cip}`);
+    return await this.createQueryBuilder('store')
+      .leftJoinAndSelect(
+        'store.users',
+        'owner',
+        'owner.store_id=store.cip && is_owner=true',
+      )
+      .leftJoinAndSelect(
+        'store.clusters',
+        'clusters',
+        'clusters.id=store.cluster_id',
+      )
+      .leftJoinAndSelect('store.storePermissions', 'storePermissions')
+      .where('store.cip = :cip', { cip })
+      .getOne();
+  }
   async findAll(filter: PaginationDto): Promise<any> {
-    const queryOption: FindManyOptions = {
-      relations: ['owner'],
-      where: { owner: { isOwner: true } },
-    };
-    if (filter.perPage && filter.page) {
-      queryOption.skip = filter.perPage * (filter.page - 1);
-      queryOption.take = filter.perPage;
-    }
     try {
-      const result: Store[] = await this.find(queryOption);
+      const query = this.createQueryBuilder('store')
+        .leftJoinAndSelect(
+          'store.users',
+          'owner',
+          'owner.store_id=store.cip && is_owner=true',
+        )
+        .leftJoinAndSelect(
+          'store.clusters',
+          'clusters',
+          'clusters.id=store.cluster_id',
+        );
+      if (filter.perPage && filter.page) {
+        query.skip(filter.perPage * (filter.page - 1)).take(filter.perPage);
+      }
+      query.getMany();
+      const result = await query.getMany();
       return result;
     } catch (e) {
       return e;
@@ -55,7 +80,6 @@ export class StoreRepository extends Repository<Store> {
       owner.isOwner = 1;
       const addedOwner = await queryRunner.manager.save(owner);
       console.log('addedOwner', addedOwner);
-      // store.ownerId = addedOwner.id;
       const newStore = await queryRunner.manager.save(store);
       console.log('newStore', newStore);
       if (update && permissions)
@@ -98,14 +122,15 @@ export class StoreRepository extends Repository<Store> {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     console.log('start transaction');
+    let newStore;
     try {
-      const newStore = await queryRunner.manager.update(
-        Store,
-        store.cip,
-        store,
-      );
-      const userIn = await queryRunner.manager.update(User, owner.id, owner);
-      await queryRunner.manager.save(permissions);
+      newStore = await queryRunner.manager.update(Store, store.cip, store);
+      await queryRunner.manager.update(User, owner.id, owner);
+      if (permissions)
+        await queryRunner.manager.delete(StorePermission, {
+          storeId: store.cip,
+        });
+      if (permissions) await queryRunner.manager.save(permissions);
       await queryRunner.commitTransaction();
     } catch (err) {
       // since we have errors lets rollback the changes we made
@@ -114,8 +139,7 @@ export class StoreRepository extends Repository<Store> {
     } finally {
       // you need to release a queryRunner which was manually instantiated
       await queryRunner.release();
-      console.log(store, 'added store-------------------*');
-      return store;
+      return newStore;
     }
   }
 

@@ -79,7 +79,7 @@ export class StorePromoMeaService {
     filter?: ListMeaDto,
     user?: User,
     toImportExcel = false,
-  ): Promise<StorePromoMea[]> {
+  ): Promise<any> {
     const {
       start_date,
       end_date,
@@ -103,11 +103,11 @@ export class StorePromoMeaService {
       .leftJoinAndSelect('sp.rejectedReason', 'rejectedReason');
     const sqlQuery = /* toImportExcel ? sqlQueryToImportExcel :*/ sqlQueryForSelect;
     if (user && user.userRoleId === 1)
-    sqlQuery.leftJoinAndSelect(
-      'store.owner',
-      'owner',
-      'owner.store_id=store.cip',
-    );
+      sqlQuery.leftJoinAndSelect(
+        'store.users',
+        'owner',
+        'owner.store_id=store.cip && is_owner=true',
+      );
     if (start_date && end_date)
       sqlQuery.where(
         `(promo.start_date BETWEEN :start_date AND :end_date
@@ -124,8 +124,7 @@ export class StorePromoMeaService {
           start_date,
           end_date,
         });
-    if (user && user.userRoleId === 1)
-      sqlQuery.andHaving(`store.owner.is_owner=1`);
+    // if (user && user.userRoleId === 1) sqlQuery.andWhere(`owner.is_owner=1`);
     if (state) {
       if (state === 'UNJUSTIFIED')
         sqlQuery.andWhere('sp.state IN(:...states)', {
@@ -153,10 +152,11 @@ export class StorePromoMeaService {
       sqlQuery.skip(filter.perPage * (page - 1)).take(perPage);
     }
     try {
-      const promos: StorePromoMea[] = await sqlQuery.getMany();
+      const promos: StorePromoMea[] = await sqlQuery.getRawMany();
+      const totalItem = await sqlQuery.getCount();
       // if (!promos.length)
       //   throw new NotFoundException('there is no promos with this filters');
-      return promos;
+      return { data: promos, totalItem };
     } catch (e) {
       throw new InternalServerErrorException(e, 'error during fetch promos');
     }
@@ -385,7 +385,10 @@ export class StorePromoMeaService {
       : '';
     const storeId: number = promoMea.storeId;
     const officineName: string =
-      promoMea.store.owner.firstName + ' ' + promoMea.store.owner.lastName;
+      promoMea.store.users[0].firstName +
+      ' ' +
+      promoMea.store.users[0].lastName;
+    // promoMea.store.owner.firstName + ' ' + promoMea.store.owner.lastName;
     const cluster: string = promoMea.store.clusters
       ? promoMea.store.clusters.name
       : '';
@@ -501,46 +504,6 @@ export class StorePromoMeaService {
       console.log(e);
       throw new InternalServerErrorException(e);
     }
-  }
-  async afterPromoClusterChanged(promoId: number) {
-    const promoStoreList: StorePromoMea[] = await this.storePromoMeaRepository.findPromoMeaByIdPromoStore(
-      promoId,
-    );
-    const storesIds: number[] = promoStoreList.map(promo => promo.storeId);
-    await this.storePromoMeaRepository.removeNotConcerned(promoId, storesIds);
-    const concernedStore: {
-      storeId: number;
-    }[] = await this.storePromoMeaRepository.find({
-      select: ['storeId'],
-      where: { promoId },
-    });
-    const promoStoreToInsert: StorePromoMea[] = promoStoreList.filter(promo => {
-      return !concernedStore.some(mea => mea.storeId === promo.storeId);
-    });
-    // todo remove this and make the promoId and storeId a primary key after removing the id in StorePromoMea
-    // and use save with onDuplicate : ignore
-    return await this.storePromoMeaRepository.save(promoStoreToInsert);
-  }
-  async afterStoreClusterChanged(storeId: number) {
-    const promoStoreList: StorePromoMea[] = await this.storePromoMeaRepository.findPromoMeaByIdPromoStore(
-      null,
-      null,
-      storeId,
-    );
-    const promosIds: number[] = promoStoreList.map(promo => promo.promoId);
-    await this.storePromoMeaRepository.removeNotConcerned(promosIds, storeId);
-    const concernedStore: {
-      promoId: number;
-    }[] = await this.storePromoMeaRepository.find({
-      select: ['promoId'],
-      where: { storeId },
-    });
-    const promoStoreToInsert: StorePromoMea[] = promoStoreList.filter(promo => {
-      return !concernedStore.some(mea => mea.promoId === promo.promoId);
-    });
-    // todo remove this and make the promoId and storeId a primary key after removing the id in StorePromoMea
-    // and use save with onDuplicate : ignore
-    return await this.storePromoMeaRepository.save(promoStoreToInsert);
   }
 }
 // repository.find({

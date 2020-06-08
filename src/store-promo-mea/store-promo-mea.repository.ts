@@ -104,5 +104,50 @@ export class StorePromoMeaRepository extends Repository<StorePromoMea> {
     }
   }
 
-  // async saveNewConcerned() {}
+  @Transaction()
+  async afterPromoClusterChanged(promoId: number) {
+    const promoStoreList: StorePromoMea[] = await this.findPromoMeaByIdPromoStore(
+      promoId,
+    );
+    this.logger.log(`new promoMea ${promoStoreList.toString()}`);
+    const storesIds: number[] = promoStoreList.map(promo => promo.storeId);
+    await this.removeNotConcerned(promoId, storesIds);
+    const concernedStore: {
+      storeId: number;
+    }[] = await this.find({
+      select: ['storeId'],
+      where: { promoId },
+    });
+    const promoStoreToInsert: StorePromoMea[] = promoStoreList.filter(promo => {
+      return !concernedStore.some(mea => mea.storeId === promo.storeId);
+    });
+    // todo remove this and make the promoId and storeId a primary key after removing the id in StorePromoMea
+    // and use save with onDuplicate : ignore
+    return await this.save(promoStoreToInsert);
+  }
+  async afterStoreClusterChanged(storeId: number) {
+    const promoStoreList: StorePromoMea[] = await this.findPromoMeaByIdPromoStore(
+      null,
+      null,
+      storeId,
+    );
+    this.logger.log(`new promoMea`); // ${promoStoreList.toString()}`);
+    console.log(promoStoreList);
+    const promosIds: number[] = promoStoreList.map(promo => promo.promoId);
+    await this.removeNotConcerned(promosIds, storeId);
+    const concernedStore: {
+      promoId: number;
+    }[] = await this.find({
+      select: ['promoId'],
+      where: { storeId },
+    });
+    const promoStoreToInsert: StorePromoMea[] = promoStoreList.filter(promo => {
+      return !concernedStore.some(mea => mea.promoId === promo.promoId);
+    });
+    this.logger.log(` promoMea to insert `); //${promoStoreToInsert.toString()}`);
+    console.log(promoStoreToInsert);
+    // todo remove this and make the promoId and storeId a primary key after removing the id in StorePromoMea
+    // and use save with onDuplicate : ignore
+    return await this.save(promoStoreToInsert);
+  }
 }

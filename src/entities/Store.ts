@@ -76,11 +76,15 @@ export class Store extends BaseEntity {
   )
   users: User[];
 
-  @OneToOne(
-    () => User,
-    user => user.id,
-    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' /* eager: true */ },
-  )
-  @JoinColumn([{ name: 'owner_id', referencedColumnName: 'id' }])
-  owner: User;
+  // @OneToOne(
+  //   () => User,
+  //   user => user.id,
+  //   {
+  //     onDelete: 'RESTRICT',
+  //     onUpdate: 'RESTRICT',
+  //     primary: true /* eager: true */,
+  //   },
+  // )
+  // @JoinColumn([{ name: 'cip', referencedColumnName: 'storeId' }])
+  // owner: User;
 }

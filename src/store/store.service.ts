@@ -18,9 +18,9 @@ import { EditUserCredentialDto } from '../user/dto/edit-user.dto';
 import { AddOwnerDto } from './dto/add-owner.dto';
 import { InjectEventEmitter } from 'nest-emitter';
 import { MyEventEmitter } from './store.events';
-import { getConnection,  getRepository } from 'typeorm';
+import { getConnection, getRepository } from 'typeorm';
 import { StorePromoMea } from '../entities/StorePromoMea';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { Resource } from '../entities/Resource';
 import { StorePromoMeaRepository } from 'src/store-promo-mea/store-promo-mea.repository';
 @Injectable()
@@ -58,7 +58,6 @@ export class StoreService implements OnModuleInit {
     owner: AddOwnerDto,
     permissions: StorePermissionDto[],
   ): Promise<any> {
-    const resources = await getRepository(Resource).find();
     const store: Store = new Store();
     store.clusterId = addStore.clu_id;
     store.cip = addStore.cip;
@@ -77,10 +76,19 @@ export class StoreService implements OnModuleInit {
     console.log('the generated password is ------->', password_salt);
     newOwner.password = password_salt.password;
     newOwner.salt = password_salt.salt;
+    const resources = await getRepository(Resource).find();
     const storePermissions = permissions.map(item => {
       const permis = new StorePermission();
 
       const resourceId = resources.find(res => res.name === item.resource);
+      if (!resourceId)
+        throw new BadRequestException(
+          `the ${
+            item.resource
+          } is not a defined resource, it has to be in ${resources
+            .map(item => item.name)
+            .toString()}`,
+        );
       console.log('resource ', resourceId);
       permis.resourceId = resourceId.id;
       permis.allow = item.allow;
@@ -98,16 +106,22 @@ export class StoreService implements OnModuleInit {
   }
   async getAllStore(filter: PaginationDto) {
     try {
-      return await this.storeRepository.findAll(filter);
+      const stores = await this.storeRepository
+        .findAll(filter)
+        .then(data => data.map(store => this.storeV1Key(store)));
+      return stores;
     } catch (e) {
-      return e;
+      throw new InternalServerErrorException(e);
     }
   }
   async getStore(cip: number) {
-    const store = await this.storeRepository.findOne(
-      { cip },
-      { relations: ['storePermissions', 'owner'] },
-    );
+    this.logger.debug(`fetching store cip where cip = ${cip}`);
+    const store = await this.storeRepository.getOne(cip).then(store => {
+      if (store) {
+        return this.storeV1Key(store);
+      }
+      return store;
+    });
     if (!store) throw new NotFoundException(`there is no store with id ${cip}`);
     return store;
   }
@@ -130,29 +144,38 @@ export class StoreService implements OnModuleInit {
       newOwner.phone = owner.phone_num;
       newOwner.address = owner.address;
     }
-    if (owner.password) {
+    if (owner && owner.password) {
       const password_salt: any = this.userRepository.generateSaltPassword(
         owner.password,
       );
-      console.log('the generated password is ------->', password_salt);
       newOwner.password = password_salt.password;
       newOwner.salt = password_salt.salt;
     }
+    const resources = await getRepository(Resource).find();
     const storePermissions = permissions
       ? permissions.map(item => {
           const permis = new StorePermission();
+          const resourceId = resources.find(res => res.name === item.resource);
+          permis.resourceId = resourceId.id;
           permis.storeId = store.cip;
-          // permis.resourceId = item.resource;
           permis.allow = item.allow;
           return permis;
         })
       : null;
-    const result = await this.storeRepository.add(
+    const oldStore = await this.storeRepository.findOne(store.cip);
+
+    const result = await this.storeRepository.edit(
       store,
       newOwner,
       storePermissions,
-      true,
     );
+    if (oldStore.clusterId !== store.clusterId) {
+      this.logger.debug(`updating promo mea for the store ${store.cip}`);
+     // await this.storePromoMeaRepository.afterStoreClusterChanged(store.cip);
+    } else
+      this.logger.debug(
+        `store ${store.cip} updated but kept the same cluster we don't need to check mea promo `,
+      );
     return result;
   }
   async findByCip(cip: number): Promise<Store> {
@@ -167,20 +190,25 @@ export class StoreService implements OnModuleInit {
     return await this.storeRepository.deleteStore(id);
   }
   storeV1Key(store: Store): any {
-    const storeV1: any = {};
-    storeV1.cip = store.cip;
+    const storeV1: any = { cip: store.cip };
     storeV1.descr = store.name;
     storeV1.clu_id = store.clusterId;
-    console.debug(store);
-    const owner: any = store.owner;
-    delete store.owner;
+    if (store.clusters) {
+      storeV1.cluster = store.clusters;
+      storeV1.cluster.descr = store.clusters.name;
+      delete storeV1.cluster.name;
+      delete store.clusters;
+    }
+    // const owner: any = store.owner;
+    const owner: any = store.users[0];
+    delete store.users;
     if (owner) owner.lst_name = owner.lastName;
     if (owner) owner.fst_name = owner.lastName;
     if (owner) owner.phone_num = owner.phone;
-    // delete store.cip;
     delete store.name;
     if (owner) delete owner.firstName;
     if (owner) delete owner.lastName;
+    storeV1.owner = owner;
     delete store.clusterId;
     return { ...storeV1, ...store };
   }
