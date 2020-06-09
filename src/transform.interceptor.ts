@@ -22,13 +22,22 @@ export class TransformInterceptor implements NestInterceptor {
     next: CallHandler,
   ): Observable<Response<any>> {
     const pathRequest = context.switchToHttp().getRequest().path;
+    console.log(pathRequest);
     if (!pathRequest.includes('login')) {
+      if (pathRequest === '/v1/promos/promo-mea')
+        return next.handle().pipe(
+          map(data => ({
+            statusCode: context.switchToHttp().getResponse().statusCode,
+            data: convertToSnakeCase(data.data),
+            totlaItem: data.totalItem,
+          })),
+        );
       return next.handle().pipe(
         map(data => ({
           statusCode: context.switchToHttp().getResponse().statusCode,
           data: convertToSnakeCase(data),
         })),
       );
-    } else return next.handle().pipe(map(data => convertToSnakeCase(data)));
+    } else return next.handle().pipe(map(data => data));
   }
 }

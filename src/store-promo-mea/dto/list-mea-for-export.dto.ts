@@ -7,5 +7,5 @@ export class ListMeaToExportDto extends ListMeaDto {
   @ApiProperty({ required: false })
   @IsString()
   @IsEnum(validType, { message: `the available type are in ${validType}` })
-  type?: BookType;
+  type: BookType = 'xlsx';
 }

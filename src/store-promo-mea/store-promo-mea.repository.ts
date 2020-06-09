@@ -16,9 +16,7 @@ export class StorePromoMeaRepository extends Repository<StorePromoMea> {
     super();
   }
   logger = new Logger('PromoMea Repository');
-  async findAll() {
-    return await this.find({ relations: [] });
-  }
+
   async rejectPromo(
     queryCondition: FindConditions<StorePromoMea>,
     toSetObject: any,

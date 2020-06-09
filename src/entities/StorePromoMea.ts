@@ -15,7 +15,16 @@ import { Promo } from './Promo';
 
 @Index('store_promo_mea_store_id_fk', ['storeId'], {})
 @Index('store_promo_mea_promo_id_fk', ['promoId'], {})
-@Index('store_promo_mea_rejected_reason_id_fk', ['rejectedReasonId'], {})
+@Index(
+  'store_promo_mea_officine_rejected_reason_id_fk',
+  ['officineRejectedReasonId'],
+  {},
+)
+@Index(
+  'store_promo_mea_siege_rejected_reason_id_fk',
+  ['siegeRejectedReasonId'],
+  {},
+)
 @Entity('store_promo_mea', { schema: 'hg_promo_beta' })
 export class StorePromoMea extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
@@ -27,8 +36,11 @@ export class StorePromoMea extends BaseEntity {
   @Column('int', { name: 'promo_id' })
   promoId: number;
 
-  @Column('int', { name: 'rejected_reason_id' })
-  rejectedReasonId: number;
+  @Column('int', { name: 'officine_rejected_reason_id' })
+  officineRejectedReasonId: number;
+
+  @Column('int', { name: 'siege_rejected_reason_id' })
+  siegeRejectedReasonId: number;
 
   @Column('tinyint', { name: 'active', nullable: true, width: 1 })
   active: boolean | null;
@@ -78,7 +90,7 @@ export class StorePromoMea extends BaseEntity {
   createdAt: Date;
 
   @AfterLoad()
-  fixProofUrl() {
+  public loaded() {
     if (this.urlPicture)
       this.urlPicture = process.env.AWS_S3_BASE_URL + this.urlPicture;
   }
@@ -99,9 +111,11 @@ export class StorePromoMea extends BaseEntity {
     rejectionReason => rejectionReason.storePromoMeas,
     { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
   )
-  @JoinColumn([{ name: 'rejected_reason_id', referencedColumnName: 'id' }])
+  @JoinColumn([
+    { name: 'siege_rejected_reason_id', referencedColumnName: 'id' },
+    { name: 'officine_rejected_reason_id', referencedColumnName: 'id' },
+  ])
   rejectedReason: RejectionReason;
-
   @ManyToOne(
     () => Store,
     store => store.storePromoMeas,

@@ -16,6 +16,7 @@ import {
   Res,
   UploadedFile,
   UseInterceptors,
+  Logger,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AdminGuard, StoreAdminGuard } from '../auth/guards/admin.guard';
@@ -50,6 +51,7 @@ import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer
 import { User } from 'src/entities/User';
 import { UserReq } from '../auth/get-user.decorator';
 import { Transform } from 'stream';
+import { Laboratory } from '../entities/Laboratory';
 
 const multerOptionsForMeaExcel: MulterOptions = multerOptions(
   /xlsm|xlsx|xlsb|xls|xla|xlml|ods|csv|.xlsx|csv/,
@@ -67,6 +69,8 @@ export class PromoController {
     private storePromoMeaService: StorePromoMeaService,
     private meaUploadService: MeaUploadService,
   ) {}
+  logger = new Logger('promo controller');
+
   @Get()
   @UseGuards(AuthGuard(), AdminGuard)
   async findAll(@Query() getPromoDto: GetPromoDto) {
@@ -172,7 +176,10 @@ export class PromoController {
   @Get('promo-mea/labs')
   @UseGuards(AuthGuard())
   async listLabs() {
-    return await this.storePromoMeaService.listLabs();
+    const results = await this.storePromoMeaService
+      .listLabs()
+      .then(data => data.map(item => item.name));
+    return { results, labLength: results.length };
   }
 
   @ApiOperation({ summary: 'list promo mea' })
@@ -352,6 +359,16 @@ export class PromoController {
     @Query('store_id') store_id = user.storeId,
   ) {
     const storeId = store_id || user.storeId;
-    return await this.storePromoMeaService.findPromo(promoId, storeId, user);
+    const filter = new ListMeaDto();
+    filter.store_id = storeId;
+    this.logger.debug(
+      `fetching promo_mea_id ${promoId} for the store cip ${storeId}`,
+    );
+    return await this.storePromoMeaService.findPromos(
+      filter,
+      user,
+      false,
+      promoId,
+    );
   }
 }

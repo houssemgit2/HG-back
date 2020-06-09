@@ -79,6 +79,7 @@ export class StorePromoMeaService {
     filter?: ListMeaDto,
     user?: User,
     toImportExcel = false,
+    promoId?: number,
   ): Promise<any> {
     const {
       start_date,
@@ -94,6 +95,32 @@ export class StorePromoMeaService {
     } = filter;
     const sqlQueryForSelect = this.storePromoMeaRepository
       .createQueryBuilder('sp')
+      .select('sp.promo_id', 'promoId')
+      .addSelect('promo.id', 'ID')
+      .addSelect('sp.state', 'state')
+      .addSelect('sp.active', 'active')
+      .addSelect('sp.siege_rejected_reason_id', 'siege_rejected_reason')
+      .addSelect('sp.officine_rejected_reason_id', 'officine_rejected_reason')
+      .addSelect('sp.uploaded_at', 'uploadedAt')
+      .addSelect('sp.store_id', 'id_cip')
+      .addSelect('sp.url_picture', 'url_picture')
+      .addSelect('sp.url_sells_listing', 'url_sells_listing')
+      .addSelect('operationType.name', 'type_off')
+      .addSelect('gamme.name', 'gamme')
+      .addSelect('promo.end_date', 'endDate')
+      .addSelect('promo.start_date', 'startDate')
+      .addSelect('store.cluster_id', 'cluster_id')
+      .addSelect('clusters.name', 'cluster')
+
+      // .addSelect('sp.laboratory.name', 'lab')
+      // .addSelect('sp.laboratory.name', 'libelle')
+      // .addSelect('sp.laboratory.name', 'det_mis')
+      // .addSelect('sp.laboratory.name', 'zone_mis')
+      // .addSelect('sp.laboratory.name', 'justif')
+      // .addSelect('sp.laboratory.name', 'achat_vente')
+      // .addSelect('sp.laboratory.name', 'type_ren')
+      // .addSelect('sp.laboratory.name', 'det_ren')
+      // .addSelect('sp.laboratory.name', 'detail_compe')
       .leftJoinAndSelect('sp.promo', 'promo', 'promo.id = sp.promo_id')
       .leftJoinAndSelect('sp.store', 'store', 'store.cip = sp.store_id')
       .leftJoinAndSelect('promo.gamme', 'gamme')
@@ -101,13 +128,30 @@ export class StorePromoMeaService {
       .leftJoinAndSelect('promoType.operationType', 'operationType')
       .leftJoinAndSelect('store.clusters', 'clusters')
       .leftJoinAndSelect('sp.rejectedReason', 'rejectedReason');
-    const sqlQuery = /* toImportExcel ? sqlQueryToImportExcel :*/ sqlQueryForSelect;
+    const sqlQueryToImportExcel = this.storePromoMeaRepository
+      .createQueryBuilder('sp')
+      .leftJoinAndSelect('sp.promo', 'promo', 'promo.id = sp.promo_id')
+      .leftJoinAndSelect('sp.store', 'store', 'store.cip = sp.store_id')
+      .leftJoinAndSelect('promo.gamme', 'gamme')
+      .leftJoinAndSelect('promo.promoType', 'promoType')
+      .leftJoinAndSelect('promoType.operationType', 'operationType')
+      .leftJoinAndSelect('store.clusters', 'clusters')
+      .leftJoinAndSelect('sp.rejectedReason', 'rejectedReason');
+    const sqlQuery = toImportExcel ? sqlQueryToImportExcel : sqlQueryForSelect;
+    // const sqlQuery = sqlQueryForSelect;
     if (user && user.userRoleId === 1)
-      sqlQuery.leftJoinAndSelect(
-        'store.users',
-        'owner',
-        'owner.store_id=store.cip && is_owner=true',
-      );
+      sqlQuery
+        .leftJoinAndSelect(
+          'store.users',
+          'owner',
+          'owner.store_id=store.cip && is_owner=true',
+        )
+        .addSelect('store.name', 'descr')
+        .addSelect('owner.first_name', 'fst_name')
+        .addSelect('owner.last_name', 'lst_name')
+        .addSelect('owner.email', 'email')
+        .addSelect('owner.phone', 'phone_num')
+        .addSelect('owner.address', 'address');
     if (start_date && end_date)
       sqlQuery.where(
         `(promo.start_date BETWEEN :start_date AND :end_date
@@ -119,11 +163,9 @@ export class StorePromoMeaService {
         },
       );
     else if (end_date && !start_date)
-      if (start_date && end_date)
-        sqlQuery.where(`promo.end_date<= :end_date) )`, {
-          start_date,
-          end_date,
-        });
+      sqlQuery.where(`promo.end_date<= :end_date) )`, {
+        end_date,
+      });
     // if (user && user.userRoleId === 1) sqlQuery.andWhere(`owner.is_owner=1`);
     if (state) {
       if (state === 'UNJUSTIFIED')
@@ -147,11 +189,15 @@ export class StorePromoMeaService {
     if (store_id) {
       sqlQuery.andWhere('sp.storeId = :store_id', { store_id });
     }
-
     if (perPage && page) {
       sqlQuery.skip(filter.perPage * (page - 1)).take(perPage);
     }
     try {
+      if (promoId)
+        return await sqlQuery
+          .andWhere('sp.promo_id= :promoId', { promoId })
+          .getRawOne();
+      if (toImportExcel) return await sqlQuery.getMany();
       const promos: StorePromoMea[] = await sqlQuery.getRawMany();
       const totalItem = await sqlQuery.getCount();
       // if (!promos.length)
@@ -168,9 +214,9 @@ export class StorePromoMeaService {
       .leftJoinAndSelect('sp.store', 'store', 'store.cip = sp.store_id');
     if (user && user.userRoleId === 1)
       sqlQuery.leftJoinAndSelect(
-        'store.owner',
+        'store.users',
         'owner',
-        'owner.store_id=store.cip',
+        'owner.store_id=store.cip && owner.is_owner=true',
       );
     sqlQuery.where({ promoId, storeId });
     const promo = await sqlQuery.getOne();
@@ -192,7 +238,7 @@ export class StorePromoMeaService {
     if (state === 'REJECTED' && !reasonId) {
       throw new BadRequestException('Rejected promo must has a reason');
     }
-    if (state === 'REJECTED') toSetObject.rejectedReasonId = reasonId;
+    if (state === 'REJECTED') toSetObject.siegeRejectedReasonId = reasonId;
     if (updateByState) {
       if (state === 'TO_JUSTIFY') queryCondition.state = 'NOT_JUSTIFIED';
       if (state === 'REJECTED') {
@@ -247,7 +293,7 @@ export class StorePromoMeaService {
     //  await this.updateState(promoId, storeId, state, reasonId);
     const promo: StorePromoMea = await this.doesPromoExist(promoId, storeId);
     promo.state = state;
-    promo.rejectedReasonId = reasonId;
+    promo.siegeRejectedReasonId = reasonId;
     if (promo.state === 'REJECTED' && promo.rejectionNumber >= 1)
       promo.rejectionNumber = promo.rejectionNumber - 1;
     if (promo.state === 'REJECTED' && promo.rejectionNumber < 1)
@@ -319,10 +365,15 @@ export class StorePromoMeaService {
     // if (filter.active === undefined) filter.active = true;
     if (!filter.type) filter.type = 'csv';
 
-    const promos = await this.findPromos(filter, user).then(promosMea =>
-      promosMea.map(promoMea => this.promoToExportExcel(promoMea)),
-    );
-
+    const promos = await this.findPromos(filter, user, true).then(promosMea => {
+      this.logger.debug(`promosMea is array ${Array.isArray(promosMea)}`);
+      this.logger.debug(`promosMea length ${promosMea.length}`);
+      return promosMea.map(promoMea => this.promoToExportExcel(promoMea));
+    });
+    if (!promos)
+      throw new InternalServerErrorException(
+        'no promos in the list check your date list',
+      );
     const fileName = `PromosList-${moment().format(
       moment().format('YYYYMMDD'),
     )}.${filter.type}`;
@@ -344,13 +395,13 @@ export class StorePromoMeaService {
       for (const promo of promos) {
         if (promo.state === 'REJECTED' && parseInt(promo.rejectionReason)) {
           this.logger.verbose('fetching the reason id');
-          promo.rejectedReasonId = parseInt(promo.rejectionReason);
+          promo.siegeRejectedReasonId = parseInt(promo.rejectionReason);
         } else if (promo.state === 'REJECTED') {
           this.logger.verbose('fetching the reason id');
           await this.rejectionReasonRepository
             .getReasonId(promo.rejectionReason)
             .then(data => {
-              promo.rejectedReasonId = data.id;
+              promo.siegeRejectedReasonId = data.id;
             });
         }
         if (promo.state)
@@ -358,7 +409,7 @@ export class StorePromoMeaService {
             promo.promoId,
             promo.storeId,
             promo.state,
-            promo.rejectedReasonId,
+            promo.siegeRejectedReasonId,
             false,
           );
       }
@@ -379,21 +430,25 @@ export class StorePromoMeaService {
     const idSys: string = promoMea.promoId + '--' + promoMea.storeId;
     const lab = '';
     const libelle = '';
-    const gamme: string = promoMea.promo.gamme ? promoMea.promo.gamme.name : '';
-    const promoType: string = promoMea.promo.promoType
-      ? promoMea.promo.promoType.operationType.name
-      : '';
+    const gamme: string =
+      promoMea.promo && promoMea.promo.gamme ? promoMea.promo.gamme.name : '';
+    const promoType: string =
+      promoMea.promo && promoMea.promo.promoType
+        ? promoMea.promo.promoType.operationType.name
+        : '';
     const storeId: number = promoMea.storeId;
     const officineName: string =
-      promoMea.store.users[0].firstName +
-      ' ' +
-      promoMea.store.users[0].lastName;
+      promoMea.store && promoMea.store.users[0]
+        ? promoMea.store.users[0].firstName +
+          ' ' +
+          promoMea.store.users[0].lastName
+        : '';
     // promoMea.store.owner.firstName + ' ' + promoMea.store.owner.lastName;
-    const cluster: string = promoMea.store.clusters
-      ? promoMea.store.clusters.name
-      : '';
-    const urlPicture: string =
-      process.env.AWS_S3_BASE_URL + promoMea.urlPicture;
+    const cluster: string =
+      promoMea.store && promoMea.store.clusters
+        ? promoMea.store.clusters.name
+        : '';
+    const urlPicture: string = promoMea.urlPicture;
     const state = this.stateMeaToExcel(promoMea);
     const rejectionReason = promoMea.rejectedReason
       ? promoMea.rejectedReason.name
@@ -478,18 +533,18 @@ export class StorePromoMeaService {
 
     return filePath;
   }
-  fixUrl(promo: any): any {
-    if (promo.url_picture)
-      promo.url_picture = process.env.AWS_S3_BASE_URL + promo.url_picture;
-    if (promo.url_sells_listing)
-      promo.url_sells_listing =
-        process.env.AWS_S3_BASE_URL + promo.url_sells_listing;
-    return promo;
-  }
-  async listLabs() {
+  // fixUrl(promo: any): any {
+  //   if (promo.url_picture)
+  //     promo.url_picture = process.env.AWS_S3_BASE_URL + promo.url_picture;
+  //   if (promo.url_sells_listing)
+  //     promo.url_sells_listing =
+  //       process.env.AWS_S3_BASE_URL + promo.url_sells_listing;
+  //   return promo;
+  // }
+  async listLabs(): Promise<Laboratory[]> {
     const laboRepository = getRepository(Laboratory);
     const labs = await laboRepository.find();
-    if (!labs.length) throw new NotFoundException('labs list not found');
+    // if (!labs.length) throw new NotFoundException('labs list not found');
     return labs;
   }
   async insertPromoMea(promoId?: number, clusterId?: number, storeId?: number) {
