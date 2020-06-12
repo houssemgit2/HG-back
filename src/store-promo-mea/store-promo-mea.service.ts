@@ -50,12 +50,41 @@ export class StorePromoMeaService {
       throw new InternalServerErrorException(e);
     }
   }
-  async updatePromoList(promos: StorePromoMea[]) {
-    return Promise.all(
-      promos.map(promo => this.updatePromoByState(promo.promoId)),
+  async updatePromoList(promos) {
+    if (promos && Array.isArray(promos))
+      return Promise.all(
+        promos.map(promo => {
+          if (this.isPromoExpired(promo.endDate)) {
+            this.logger.warn(
+              `the promo ${promo.promoId} are expired and his end date is ${promo.endDate}`,
+            );
+            return this.updatePromoByState(promo.promoId);
+          }
+        }),
+      );
+    this.logger.debug(
+      `error during fetching promos with expired end dates,promos is not array`,
     );
   }
+  isPromoExpired(endDate) {
+    const idealEndDate = moment(endDate)
+      .endOf('month')
+      .format('YYYY-MM-DD');
+    const difference = moment().diff(moment(idealEndDate));
+    const differenceByDays = moment.duration(difference).asDays();
+    this.logger.verbose(differenceByDays + ' the difference ');
+    if (differenceByDays >= 22) return true;
+    return false;
+  }
   async updatePromoByState(promoId: number) {
+    try {
+      await this.updateState(promoId, null, promoState.TO_JUSTIFY, null, true);
+      await this.updateState(promoId, null, promoState.REJECTED, null, true);
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
+  }
+  async afterPromoPostponed(promoId: number) {
     try {
       await this.updateState(
         promoId,
@@ -80,6 +109,7 @@ export class StorePromoMeaService {
     user?: User,
     toImportExcel = false,
     promoId?: number,
+    withTotalItem?: boolean,
   ): Promise<any> {
     const {
       start_date,
@@ -99,12 +129,24 @@ export class StorePromoMeaService {
       .addSelect('promo.id', 'ID')
       .addSelect('sp.state', 'state')
       .addSelect('sp.active', 'active')
-      .addSelect('sp.siege_rejected_reason_id', 'siege_rejected_reason')
-      .addSelect('sp.officine_rejected_reason_id', 'officine_rejected_reason')
+      .addSelect(
+        '(SELECT name FROM rejection_reason WHERE rejection_reason.id=sp.siege_rejected_reason_id)',
+        'siege_rejected_reason',
+      )
+      .addSelect(
+        '(SELECT name FROM rejection_reason WHERE rejection_reason.id=sp.officine_rejected_reason_id)',
+        'officine_rejected_reason',
+      )
       .addSelect('sp.uploaded_at', 'uploadedAt')
       .addSelect('sp.store_id', 'id_cip')
-      .addSelect('sp.url_picture', 'url_picture')
-      .addSelect('sp.url_sells_listing', 'url_sells_listing')
+      .addSelect(
+        `CONCAT('${process.env.AWS_S3_BASE_URL}',sp.url_picture)`,
+        'url_picture',
+      )
+      .addSelect(
+        `CONCAT('${process.env.AWS_S3_BASE_URL}',sp.url_sells_listing)`,
+        'url_sells_listing',
+      )
       .addSelect('operationType.name', 'type_off')
       .addSelect('gamme.name', 'gamme')
       .addSelect('promo.end_date', 'endDate')
@@ -147,8 +189,10 @@ export class StorePromoMeaService {
           'owner.store_id=store.cip && is_owner=true',
         )
         .addSelect('store.name', 'descr')
-        .addSelect('owner.first_name', 'fst_name')
-        .addSelect('owner.last_name', 'lst_name')
+        .addSelect(
+          'CONCAT(owner.first_name," ",owner.last_name)',
+          'officine_name',
+        )
         .addSelect('owner.email', 'email')
         .addSelect('owner.phone', 'phone_num')
         .addSelect('owner.address', 'address');
@@ -163,7 +207,7 @@ export class StorePromoMeaService {
         },
       );
     else if (end_date && !start_date)
-      sqlQuery.where(`promo.end_date<= :end_date) )`, {
+      sqlQuery.where(`promo.end_date<= :end_date`, {
         end_date,
       });
     // if (user && user.userRoleId === 1) sqlQuery.andWhere(`owner.is_owner=1`);
@@ -202,7 +246,8 @@ export class StorePromoMeaService {
       const totalItem = await sqlQuery.getCount();
       // if (!promos.length)
       //   throw new NotFoundException('there is no promos with this filters');
-      return { data: promos, totalItem };
+      if (withTotalItem) return { data: promos, totalItem };
+      return promos;
     } catch (e) {
       throw new InternalServerErrorException(e, 'error during fetch promos');
     }
@@ -316,11 +361,22 @@ export class StorePromoMeaService {
     const promo = await this.doesPromoExist(promoId, storeId);
     return promo;
   }
-  async toggleActive(promoId: number, storeId: number, active: boolean) {
+  async toggleActive(
+    promoId: number,
+    storeId: number,
+    active: boolean,
+    reason?: string,
+  ) {
+    const reasonId: number = reason
+      ? await this.rejectionReasonRepository
+          .getReasonId(reason)
+          .then(data => data.id)
+      : null;
+    this.logger.debug(`reason is ${reason} and the reasonId is ${reasonId}`);
     await getConnection()
       .createQueryBuilder()
       .update(StorePromoMea)
-      .set({ active: !active })
+      .set({ active: !active, officineRejectedReasonId: reasonId })
       .where('promo_id = :promoId AND store_id =:storeId', {
         promoId,
         storeId,

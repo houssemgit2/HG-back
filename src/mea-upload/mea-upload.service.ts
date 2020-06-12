@@ -36,7 +36,7 @@ export class MeaUploadService {
           .set({
             urlPicture: location,
             state: 'PENDING',
-            uploadedAt: Date.now(),
+            uploadedAt: moment().format('YYYY-MM-DD hh:mm:ss'),
           })
           .where('promo_id = :promoId AND store_id =:storeId', {
             promoId,

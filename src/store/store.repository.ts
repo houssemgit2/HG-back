@@ -124,8 +124,9 @@ export class StoreRepository extends Repository<Store> {
     console.log('start transaction');
     let newStore;
     try {
-      newStore = await queryRunner.manager.update(Store, store.cip, store);
-      await queryRunner.manager.update(User, owner.id, owner);
+      newStore = await queryRunner.manager.save(store);
+      if (owner && owner.id)
+        await queryRunner.manager.update(User, owner.id, owner);
       if (permissions)
         await queryRunner.manager.delete(StorePermission, {
           storeId: store.cip,

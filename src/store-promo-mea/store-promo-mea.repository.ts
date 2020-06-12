@@ -40,33 +40,42 @@ export class StorePromoMeaRepository extends Repository<StorePromoMea> {
     const searchQuery = getConnection()
       .createQueryBuilder()
       .select('store.cip', 'storeId')
+      .addSelect('promoClusters.promoId', 'promoId')
       .from(Store, 'store')
       // .innerJoinAndSelect('store.clusters', 'clusters')
-      .innerJoin('store.clusters', 'clusters')
-      .innerJoin('clusters.promoClusters', 'promoClusters')
-      .innerJoin('promoClusters.promo', 'promo')
-      .innerJoin('promo.promoType', 'promoType')
-      .innerJoin('promoType.operationType', 'operationType')
-      .addSelect('promoClusters.promoId', 'promoId')
+      .leftJoin('store.clusters', 'clusters')
+      .leftJoin('clusters.promoClusters', 'promoClusters')
+      .leftJoin('promoClusters.promo', 'promo')
+      .leftJoin('promo.promoType', 'promoType')
+      .leftJoin('promoType.operationType', 'operationType')
       .where("operationType.name like '%MEA%'");
     try {
       if (storeId) {
-        const byStore = searchQuery.where('store.cip = :storeId', {
-          storeId,
+        this.logger.verbose(
+          'fetching store concerned for the promoId' + promoId,
+        );
+        const byStore = searchQuery.andWhere('store.cip = :cip', {
+          cip: storeId,
         });
-        return await byStore.getRawMany();
+        const stores = await byStore.getRawMany();
+        console.log('stores', stores);
+        return stores;
       } else if (clusterId) {
-        const byCluster = searchQuery.where('store.clusterId = :id', {
+        const byCluster = searchQuery.andWhere('store.clusterId = :id', {
           id: clusterId,
         });
         return await byCluster.getRawMany();
       } else {
-        const byPromo = searchQuery.where('promoClusters.promoId = :promoId', {
-          promoId,
-        });
+        const byPromo = searchQuery.andWhere(
+          'promoClusters.promoId = :promoId',
+          {
+            promoId,
+          },
+        );
         return await byPromo.getRawMany();
       }
     } catch (e) {
+      console.log(e);
       throw new InternalServerErrorException(e);
     }
   }
@@ -82,70 +91,107 @@ export class StorePromoMeaRepository extends Repository<StorePromoMea> {
           `promosIds or storeIds must be not array,`,
         );
       let dltQuery = this.createQueryBuilder().delete();
-      if (Array.isArray(promosIds))
-        // when store cluster is updated
+      if (Array.isArray(promosIds)) {
+        this.logger.warn('when store cluster is updated');
         dltQuery = dltQuery
           .where('promo_id NOT IN (:...ids)', {
             ids: promosIds,
           })
           .andWhere('store_id = :storeId', { storeId: storeIds });
-      else if (Array.isArray(storeIds))
-        // when promo cluster is updated
+      } else if (Array.isArray(storeIds)) {
+        this.logger.warn(' // when promo cluster is updated');
         dltQuery = dltQuery
           .where('store_id NOT IN (:...ids)', {
             ids: storeIds,
           })
           .andWhere('promo_id = :promoId', { promoId: promosIds });
+      } else return null;
       return await dltQuery.execute();
     } catch (e) {
       throw new InternalServerErrorException(e);
     }
   }
-
-  @Transaction()
+  // @Transaction()
   async afterPromoClusterChanged(promoId: number) {
-    const promoStoreList: StorePromoMea[] = await this.findPromoMeaByIdPromoStore(
-      promoId,
-    );
-    this.logger.log(`new promoMea ${promoStoreList.toString()}`);
-    const storesIds: number[] = promoStoreList.map(promo => promo.storeId);
-    await this.removeNotConcerned(promoId, storesIds);
-    const concernedStore: {
-      storeId: number;
-    }[] = await this.find({
-      select: ['storeId'],
-      where: { promoId },
-    });
-    const promoStoreToInsert: StorePromoMea[] = promoStoreList.filter(promo => {
-      return !concernedStore.some(mea => mea.storeId === promo.storeId);
-    });
-    // todo remove this and make the promoId and storeId a primary key after removing the id in StorePromoMea
-    // and use save with onDuplicate : ignore
-    return await this.save(promoStoreToInsert);
+    try {
+      this.logger.debug('start checking promo mea in new cluster');
+      const promoStoreList: StorePromoMea[] = await this.findPromoMeaByIdPromoStore(
+        promoId,
+      );
+      this.logger.debug('start checking promo mea in new cluster');
+      console.log(promoStoreList);
+      const concernedStores: {
+        storeId: number;
+      }[] = await this.find({
+        select: ['storeId'],
+        where: { promoId },
+      });
+      this.logger.verbose('store already exist');
+      console.log(concernedStores);
+      const promoStoreToInsert: StorePromoMea[] = promoStoreList.filter(
+        promo => {
+          return !concernedStores.some(mea => mea.storeId === promo.storeId);
+        },
+      );
+      this.logger.verbose('store to insert');
+      console.log(promoStoreToInsert);
+      const storeToRemove = concernedStores.filter(promo => {
+        return !promoStoreList.some(mea => mea.storeId === promo.storeId);
+      });
+      this.logger.debug('store to remove');
+      console.error(storeToRemove);
+      if (storeToRemove.length)
+        await this.createQueryBuilder()
+          .delete()
+          .where('store_id  IN (:...ids)', {
+            ids: storeToRemove.map(item => item.storeId),
+          })
+          .andWhere('promo_id = :promoId', { promoId })
+          .execute();
+      else
+        this.logger.warn(`promo to remove length is ${storeToRemove.length}`);
+      return await this.save(promoStoreToInsert);
+    } catch (e) {
+      console.log(Object.keys(e));
+      throw new InternalServerErrorException(e);
+    }
   }
   async afterStoreClusterChanged(storeId: number) {
-    const promoStoreList: StorePromoMea[] = await this.findPromoMeaByIdPromoStore(
-      null,
-      null,
-      storeId,
-    );
-    this.logger.log(`new promoMea`); // ${promoStoreList.toString()}`);
-    console.log(promoStoreList);
-    const promosIds: number[] = promoStoreList.map(promo => promo.promoId);
-    await this.removeNotConcerned(promosIds, storeId);
-    const concernedStore: {
-      promoId: number;
-    }[] = await this.find({
-      select: ['promoId'],
-      where: { storeId },
-    });
-    const promoStoreToInsert: StorePromoMea[] = promoStoreList.filter(promo => {
-      return !concernedStore.some(mea => mea.promoId === promo.promoId);
-    });
-    this.logger.log(` promoMea to insert `); //${promoStoreToInsert.toString()}`);
-    console.log(promoStoreToInsert);
-    // todo remove this and make the promoId and storeId a primary key after removing the id in StorePromoMea
-    // and use save with onDuplicate : ignore
-    return await this.save(promoStoreToInsert);
+    try {
+      const promoStoreList: StorePromoMea[] = await this.findPromoMeaByIdPromoStore(
+        null,
+        null,
+        storeId,
+      );
+      const concernedPromos: {
+        promoId: number;
+      }[] = await this.find({
+        select: ['promoId'],
+        where: { storeId },
+      });
+      const promoStoreToInsert: StorePromoMea[] = promoStoreList.filter(
+        promo => {
+          return !concernedPromos.some(mea => mea.promoId === promo.promoId);
+        },
+      );
+      const promoToRemove = concernedPromos.filter(promo => {
+        return !promoStoreList.some(mea => mea.promoId === promo.promoId);
+      });
+      if (promoToRemove.length)
+        await this.createQueryBuilder()
+          .delete()
+          .where('promo_id  IN (:...ids)', {
+            ids: promoToRemove.map(item => item.promoId),
+          })
+          .andWhere('store_id = :storeId', { storeId })
+          .execute();
+      else
+        this.logger.warn(`promo to remove length is ${promoToRemove.length}`);
+      // todo remove this and make the promoId and storeId a primary key after removing the id in StorePromoMea
+      // and use save with onDuplicate : ignore
+      return await this.save(promoStoreToInsert);
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
   }
 }

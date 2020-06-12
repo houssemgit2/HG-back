@@ -106,9 +106,9 @@ export class StoreService implements OnModuleInit {
   }
   async getAllStore(filter: PaginationDto) {
     try {
-      const stores = await this.storeRepository
-        .findAll(filter)
-        .then(data => data.map(store => this.storeV1Key(store)));
+      const stores = await this.storeRepository.findAll(filter).then(data => {
+        if (data) data.map(store => this.storeV1Key(store));
+      });
       return stores;
     } catch (e) {
       throw new InternalServerErrorException(e);
@@ -117,10 +117,9 @@ export class StoreService implements OnModuleInit {
   async getStore(cip: number) {
     this.logger.debug(`fetching store cip where cip = ${cip}`);
     const store = await this.storeRepository.getOne(cip).then(store => {
-      if (store) {
-        return this.storeV1Key(store);
-      }
-      return store;
+      if (!store)
+        throw new NotFoundException(`there is no store with cip ${cip}`);
+      return this.storeV1Key(store);
     });
     if (!store) throw new NotFoundException(`there is no store with id ${cip}`);
     return store;
@@ -133,7 +132,6 @@ export class StoreService implements OnModuleInit {
   ) {
     const store: Store = new Store();
     store.cip = cip;
-    store.cip = addStore.cip;
     if (addStore.clu_id) store.clusterId = addStore.clu_id;
     if (addStore.descr) store.name = addStore.descr;
     const newOwner: User = new User();
@@ -171,7 +169,7 @@ export class StoreService implements OnModuleInit {
     );
     if (oldStore.clusterId !== store.clusterId) {
       this.logger.debug(`updating promo mea for the store ${store.cip}`);
-     // await this.storePromoMeaRepository.afterStoreClusterChanged(store.cip);
+      await this.storePromoMeaRepository.afterStoreClusterChanged(store.cip);
     } else
       this.logger.debug(
         `store ${store.cip} updated but kept the same cluster we don't need to check mea promo `,
@@ -180,7 +178,9 @@ export class StoreService implements OnModuleInit {
   }
   async findByCip(cip: number): Promise<Store> {
     try {
-      return await this.storeRepository.findOne({ cip });
+      return await this.storeRepository
+        .findOne({ cip })
+        .then(store => this.storeV1Key(store));
     } catch (e) {
       console.error(`could not find one store by id cip`);
       throw new InternalServerErrorException(e);
@@ -200,16 +200,38 @@ export class StoreService implements OnModuleInit {
       delete store.clusters;
     }
     // const owner: any = store.owner;
-    const owner: any = store.users[0];
+    const owner: any =
+      store.users && Array.isArray(store.users) ? store.users[0] : null;
     delete store.users;
     if (owner) owner.lst_name = owner.lastName;
     if (owner) owner.fst_name = owner.lastName;
     if (owner) owner.phone_num = owner.phone;
+    if (owner) owner.store_cip = owner.store_id;
     delete store.name;
     if (owner) delete owner.firstName;
     if (owner) delete owner.lastName;
+    if (owner) delete owner.store_id;
     storeV1.owner = owner;
     delete store.clusterId;
     return { ...storeV1, ...store };
   }
 }
+/**
+access_permissions: []
+cip: "670"
+clu_id: 3
+createdAt: "2020-05-27T15:48:42.000Z"
+descr: "test store"
+owner: {id: 277, fst_name: "test user", lst_name: "test userlst", email: "6670@asmaiar.fr",…}
+address: "user address"
+createdAt: "2020-05-27T15:48:42.000Z"
+email: "6670@asmaiar.fr"
+fst_name: "test user"
+id: 277
+lst_name: "test userlst"
+phone_num: "994586"
+role: "client"
+store_cip: "670"
+owner_id: 277
+updatedAt: "2020-05-27T15:48:42.000Z"
+ */

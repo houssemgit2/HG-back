@@ -72,10 +72,11 @@ export class PromoController {
   logger = new Logger('promo controller');
 
   @Get()
-  @UseGuards(AuthGuard(), AdminGuard)
+  @UseGuards(AuthGuard()) // , AdminGuard)
   async findAll(@Query() getPromoDto: GetPromoDto) {
     return await this.promoService.getAll(getPromoDto);
   }
+
   @Post('generate/promos')
   @Header('Content-Type', 'image/pdf')
   @Header('Content-Disposition', 'attachment; filename=promos.pdf')
@@ -93,7 +94,12 @@ export class PromoController {
   @Get('promo-mea-reason')
   @UseGuards(AuthGuard())
   async findRejectionReasons() {
-    return await this.rejectionReasonService.getAll();
+    return await this.rejectionReasonService.getAll().then(data =>
+      data.map(item => {
+        item.label = item.name;
+        return item;
+      }),
+    );
   }
 
   @ApiBearerAuth()
@@ -106,6 +112,7 @@ export class PromoController {
     const { name } = body;
     return await this.rejectionReasonService.add(name);
   }
+
   @ApiBearerAuth()
   @ApiOperation({ summary: 'saved promo' })
   @ApiResponse({ status: 200, description: 'saved promo' })
@@ -121,6 +128,7 @@ export class PromoController {
       promos,
     );
   }
+
   @ApiBearerAuth()
   @ApiOperation({ summary: 'saved print config' })
   @ApiResponse({ status: 200, description: 'saved print config' })
@@ -136,6 +144,7 @@ export class PromoController {
       promos,
     );
   }
+
   @ApiBearerAuth()
   @ApiOperation({ summary: 'get saved promo' })
   @ApiResponse({ status: 200, description: 'saved print config' })
@@ -195,7 +204,14 @@ export class PromoController {
     @Query() filter: ListMeaDto,
     @UserReq() user: User,
   ): Promise<StorePromoMea[]> {
-    return await this.storePromoMeaService.findPromos(filter, user);
+    if (user.userRoleId !== 1) filter.store_id = user.storeId;
+    return await this.storePromoMeaService.findPromos(
+      filter,
+      user,
+      false,
+      null,
+      true,
+    );
   }
 
   @ApiOperation({ summary: 'Download mea list' })
@@ -242,7 +258,7 @@ export class PromoController {
   @ApiResponse({ status: 400, description: 'missing reason for rejection' })
   @ApiResponse({ status: 404, description: 'promo not found' })
   @Post('promo-mea/:id/set-to')
-  @UseGuards(AuthGuard(), AdminGuard)
+  @UseGuards(AuthGuard(), StoreAdminGuard)
   @UsePipes(new RejectionReasonValidation())
   async changePromoState(@Body() body: SetStateDto, @Param('id') id: number) {
     return await this.storePromoMeaService.validateProof(
@@ -313,7 +329,12 @@ export class PromoController {
       const parsed = url.parse(req.files[0].location, true);
       const location = parsed.path;
       await this.meaUploadService.afterUpload(id, storeId, location, null);
-      const promo = await this.storePromoMeaService.doesPromoExist(id, storeId);
+      const promo = await this.storePromoMeaService
+        .doesPromoExist(id, storeId)
+        .then(data => {
+          data.urlPicture = req.files[0].location;
+          return data;
+        });
       res.status(201).json(promo);
     });
   }
@@ -336,6 +357,7 @@ export class PromoController {
       id,
       storeId,
       promo.active,
+      promo.reason,
     );
   }
 
