@@ -91,7 +91,7 @@ export class StorePromoMea extends BaseEntity {
 
   @AfterLoad()
   public loaded() {
-    if (this.urlPicture)
+    if (this.urlPicture && this.urlPicture.includes(process.env.AWS_S3_BASE_URL))
       this.urlPicture = process.env.AWS_S3_BASE_URL + this.urlPicture;
   }
   // @AfterUpdate()
