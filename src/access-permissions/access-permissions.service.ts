@@ -36,20 +36,40 @@ export class AccessPermissionsService {
     }
   }
   async getByStore(
-    resource_id: number,
+    resourceId: number,
     storeId: number,
   ): Promise<StorePermission[]> {
     try {
-      if (resource_id && storeId) {
-        const resourceId: number = resource_id;
-        return await this.storePermissionRepository.find({
-          where: { storeId, resourceId },
-        });
+      if (resourceId && storeId) {
+        // const resourceId: number = resourceId;
+        // return await this.storePermissionRepository.find({
+        //   where: { storeId, resourceId },
+        // });
+        return await this.storePermissionRepository
+          .createQueryBuilder('accessPermission')
+          .select('accessPermission.store_id', 'store_cip')
+          .addSelect('accessPermission.allow', 'allow')
+          .addSelect('accessPermission.resource_id', 'resourceId')
+          .addSelect('resource.name', 'resource')
+          .leftJoinAndSelect('accessPermission.resource', 'resource')
+          .where('accessPermission.store_cip = :storeId', { storeId })
+          .andWhere('accessPermission.resourceId = :resourceId', { resourceId })
+          .getRawMany();
       }
       if (storeId)
-        return await this.storePermissionRepository.find({
-          where: { storeId },
-        });
+        // return await this.storePermissionRepository.find({
+        //   where: { storeId },
+        // });
+        return await this.storePermissionRepository
+          .createQueryBuilder('accessPermission')
+          .select('accessPermission.store_id', 'store_cip')
+          .addSelect('accessPermission.allow', 'allow')
+          .addSelect('accessPermission.resource_id', 'resourceId')
+          .addSelect('resource.name', 'resource')
+          .leftJoinAndSelect('accessPermission.resource', 'resource')
+          .where('accessPermission.store_id = :storeId', { storeId })
+          // .andWhere('accessPermission.resourceId = :resourceId', { resourceId })
+          .getRawMany();
     } catch (e) {
       return e;
     }

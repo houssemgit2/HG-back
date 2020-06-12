@@ -63,11 +63,12 @@ export class AccessPermissionsController {
   async get(
     @Param('storeId') storeId: number,
     @Query() filter: GetAccessPermissionDto,
-  ): Promise<StorePermission[]> {
+  ): Promise<any[]> {
     return await this.accessPermissionsService.getByStore(
       filter.resource_id,
       storeId,
-    );
+    )
+// .then(data=> data.map(item=>this.accessPermissionsService.accessPermissionV1Keys(item)))
   }
 
   // todo is why we didn't use the storeId from the Req.user
