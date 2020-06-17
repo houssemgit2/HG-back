@@ -126,7 +126,11 @@ export class StorePromoMeaRepository extends Repository<StorePromoMea> {
         select: ['storeId'],
         where: { promoId },
       });
-      this.logger.verbose('store already exist');
+      this.logger.verbose(
+        `store already concerned for the promo ${promoId} are ${concernedStores
+          .map(item => item.storeId)
+          .toString()} `,
+      );
       console.log(concernedStores);
       const promoStoreToInsert: StorePromoMea[] = promoStoreList.filter(
         promo => {

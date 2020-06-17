@@ -65,6 +65,7 @@ export class StoreController {
   @Get(':cip')
   @UseGuards(AuthGuard())
   async findOne(@Param('cip') cip: number): Promise<any> {
+    if (!cip) return cip;
     return await this.storeService.getStore(cip);
   }
 

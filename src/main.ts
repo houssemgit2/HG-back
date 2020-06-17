@@ -4,6 +4,7 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as helmet from 'helmet';
 import { TransformInterceptor } from './transform.interceptor';
+import { HttpExceptionFilter } from './http-exception.filter';
 
 async function bootstrap() {
   const logger = new Logger('bootstrap_main.ts');
@@ -11,7 +12,7 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule, { cors: true });
   app.useGlobalInterceptors(new TransformInterceptor());
-
+  app.useGlobalFilters(new HttpExceptionFilter());
   // ensuring all endpoints are protected from receiving incorrect data.
   app.useGlobalPipes(
     new ValidationPipe({

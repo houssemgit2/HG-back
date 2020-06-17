@@ -107,7 +107,8 @@ export class StoreService implements OnModuleInit {
   async getAllStore(filter: PaginationDto) {
     try {
       const stores = await this.storeRepository.findAll(filter).then(data => {
-        if (data) data.map(store => this.storeV1Key(store));
+        if (data) return data.map(store => this.storeV1Key(store));
+        else return data;
       });
       return stores;
     } catch (e) {
@@ -193,6 +194,17 @@ export class StoreService implements OnModuleInit {
     const storeV1: any = { cip: store.cip };
     storeV1.descr = store.name;
     storeV1.clu_id = store.clusterId;
+    if (store.storePermissions && Array.isArray(store.storePermissions))
+      storeV1.access_permissions = store.storePermissions.map(item => {
+        if (item)
+          return {
+            allow: item.allow,
+            id: item.id,
+            resource: item.resource.name,
+            store_cip: item.storeId,
+          };
+      });
+    delete store.storePermissions;
     if (store.clusters) {
       storeV1.cluster = store.clusters;
       storeV1.cluster.descr = store.clusters.name;
@@ -203,14 +215,18 @@ export class StoreService implements OnModuleInit {
     const owner: any =
       store.users && Array.isArray(store.users) ? store.users[0] : null;
     delete store.users;
-    if (owner) owner.lst_name = owner.lastName;
-    if (owner) owner.fst_name = owner.lastName;
-    if (owner) owner.phone_num = owner.phone;
-    if (owner) owner.store_cip = owner.store_id;
-    delete store.name;
-    if (owner) delete owner.firstName;
-    if (owner) delete owner.lastName;
-    if (owner) delete owner.store_id;
+    if (owner) {
+      owner.lst_name = owner.lastName;
+      owner.fst_name = owner.lastName;
+      owner.phone_num = owner.phone;
+      owner.store_cip = owner.store_id;
+      owner.role = owner.userRoleId === 1 ? 'admin' : 'client';
+      delete store.name;
+      delete owner.firstName;
+      delete owner.lastName;
+      delete owner.store_id;
+    }
+
     storeV1.owner = owner;
     delete store.clusterId;
     return { ...storeV1, ...store };

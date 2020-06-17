@@ -37,6 +37,7 @@ export class StoreRepository extends Repository<Store> {
         'clusters.id=store.cluster_id',
       )
       .leftJoinAndSelect('store.storePermissions', 'storePermissions')
+      .leftJoinAndSelect('storePermissions.resource', 'resource')
       .where('store.cip = :cip', { cip })
       .getOne();
   }
