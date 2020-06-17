@@ -50,8 +50,7 @@ import { multerOptions } from 'src/config/multer';
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 import { User } from 'src/entities/User';
 import { UserReq } from '../auth/get-user.decorator';
-import { Transform } from 'stream';
-import { Laboratory } from '../entities/Laboratory';
+import { convertToSnakeCase } from 'src/utils/helpers';
 
 const multerOptionsForMeaExcel: MulterOptions = multerOptions(
   /xlsm|xlsx|xlsb|xls|xla|xlml|ods|csv|.xlsx|csv/,
@@ -335,7 +334,11 @@ export class PromoController {
           data.urlPicture = req.files[0].location;
           return data;
         });
-      res.status(201).json(promo);
+      res.status(201).json({
+        statusCode: 201,
+        data: convertToSnakeCase(promo),
+      });
+      // return promo;
     });
   }
 
