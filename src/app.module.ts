@@ -6,7 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { StoreModule } from './store/store.module';
 import { UserModule } from './user/user.module';
 import { PromoModule } from './promo/promo.module';
-import { LoggerMiddleware } from './middleware/logger.middleware';
+import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import entities from './entities';
 import { PdfPromoGeneratorModule } from '@app/pdf-promo-generator';
 import { LefletPeriodModule } from './leflet-period/leflet-period.module';
@@ -34,6 +34,10 @@ import { ScheduleModule } from '@nestjs/schedule';
       database: 'hg_promo_beta',
       synchronize: false,
       entities: entities,
+      migrations: ['migration/*.js'],
+      cli: {
+        migrationsDir: 'migration',
+      },
     }),
     ConfigModule.forRoot({
       isGlobal: true,

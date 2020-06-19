@@ -8,7 +8,7 @@ import {
   IsString,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsUserAlreadyExist } from '../../decorators/isUnique.validation';
+import { IsUserAlreadyExist } from '../../common/decorators/isUnique.validation';
 import { User } from '../../entities/User';
 export class AddOwnerDto {
   // @ApiProperty()

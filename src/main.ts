@@ -3,8 +3,8 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as helmet from 'helmet';
-import { TransformInterceptor } from './transform.interceptor';
-import { HttpExceptionFilter } from './http-exception.filter';
+import { TransformInterceptor } from './common/transform.interceptor';
+import { HttpExceptionFilter } from './common/http-exception.filter';
 
 async function bootstrap() {
   const logger = new Logger('bootstrap_main.ts');
