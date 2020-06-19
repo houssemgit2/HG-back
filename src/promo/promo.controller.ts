@@ -334,8 +334,8 @@ export class PromoController {
           data.urlPicture = req.files[0].location;
           return data;
         });
-      res.status(201).json({
-        statusCode: 201,
+      res.status(200).json({
+        statusCode: 200,
         data: convertToSnakeCase(promo),
       });
       // return promo;

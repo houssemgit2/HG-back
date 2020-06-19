@@ -23,15 +23,18 @@ export class TransformInterceptor implements NestInterceptor {
   ): Observable<Response<any>> {
     const pathRequest = context.switchToHttp().getRequest().path;
     const method = context.switchToHttp().getRequest().method;
+    const request = context.switchToHttp().getRequest().request;
+    let status = context.switchToHttp().getResponse().statusCode;
     console.log('TransformInterceptor');
     console.log(pathRequest);
+    if (method === 'POST') status = 200;
     if (!pathRequest.includes('login')) {
       console.log('transforming response format');
       if (pathRequest === '/v1/promos/promo-mea' && method === 'GET') {
         console.log('special transform for the get promo');
         return next.handle().pipe(
           map(data => ({
-            statusCode: context.switchToHttp().getResponse().statusCode,
+            statusCode: status,
             data: convertToSnakeCase(data.data),
             totlaItem: data.totalItem,
           })),
@@ -39,7 +42,7 @@ export class TransformInterceptor implements NestInterceptor {
       }
       return next.handle().pipe(
         map(data => ({
-          statusCode: context.switchToHttp().getResponse().statusCode,
+          statusCode: status,
           data: convertToSnakeCase(data),
         })),
       );

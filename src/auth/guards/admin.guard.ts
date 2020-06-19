@@ -29,8 +29,6 @@ export class StoreAdminGuard implements CanActivate {
   logger = new Logger('Store admin Guard canActivate');
 
   canActivate(context: ExecutionContext) {
-    // const args = context.getArgs();
-    // const storeId = args[0].query.store_id || args[0].body.store_id;
     const request = context.switchToHttp().getRequest();
     const user = request.user;
     const storeId =
