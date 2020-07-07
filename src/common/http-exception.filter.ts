@@ -9,7 +9,6 @@ import { Request, Response } from 'express';
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
   catch(exception: HttpException, host: ArgumentsHost) {
-    console.error('*****************************************');
     console.log('http expectation');
     console.log(process.env.NODE_ENV);
     const ctx = host.switchToHttp();
@@ -21,7 +20,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
     res.timestamp = new Date().toISOString();
     if (process.env.NODE_ENV === 'development') res.stack = exception.stack;
     res.message = exception.message;
-    console.log(exception);
     response.status(status).json(res);
   }
 }
