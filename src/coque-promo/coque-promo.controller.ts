@@ -9,6 +9,7 @@ import {
   Query,
   UseInterceptors,
   UploadedFiles,
+  UsePipes,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -24,6 +25,7 @@ import { CreateCoqueDto } from './dto/create-coque.dto';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { s3MulterOptions } from 'src/config/multer';
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
+import { JSONArrayValidation } from '../common/pipes/json-array.pipe';
 
 const multerOptionsS3: MulterOptions = s3MulterOptions(null, `coque-promo`);
 @ApiBearerAuth()
@@ -45,14 +47,13 @@ export class CoquePromoController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiConsumes('multipart/form-data')
   @Post('/')
-  @UseInterceptors(FilesInterceptor('coque', 100, multerOptionsS3))
+  @UsePipes(new JSONArrayValidation())
+  @UseInterceptors(FilesInterceptor('coque', 10, multerOptionsS3))
   @UseGuards(AuthGuard(), AdminGuard)
   async createCoquePromo(
     @UploadedFiles() files,
     @Query() coque: CreateCoqueDto,
   ) {
-    console.log(coque.clusters);
-    console.log(coque.periods);
     return await this.coquePromoService.addCoque(coque, files);
   }
 

@@ -236,22 +236,3 @@ export class StoreService implements OnModuleInit {
     return { ...storeV1, ...store };
   }
 }
-/**
-access_permissions: []
-cip: "670"
-clu_id: 3
-createdAt: "2020-05-27T15:48:42.000Z"
-descr: "test store"
-owner: {id: 277, fst_name: "test user", lst_name: "test userlst", email: "6670@asmaiar.fr",…}
-address: "user address"
-createdAt: "2020-05-27T15:48:42.000Z"
-email: "6670@asmaiar.fr"
-fst_name: "test user"
-id: 277
-lst_name: "test userlst"
-phone_num: "994586"
-role: "client"
-store_cip: "670"
-owner_id: 277
-updatedAt: "2020-05-27T15:48:42.000Z"
- */
