@@ -1,4 +1,4 @@
-import { CoquePromo } from 'src/entities/CoquePromo';
+import { CoquePromo } from '../entities/CoquePromo';
 import {
   EntityRepository,
   Repository,

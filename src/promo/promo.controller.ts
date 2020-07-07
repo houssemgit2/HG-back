@@ -48,7 +48,7 @@ import { ListMeaToExportDto } from 'src/store-promo-mea/dto/list-mea-for-export.
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/config/multer';
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
-import { User } from 'src/entities/User';
+import { User } from '../entities/User';
 import { UserReq } from '../auth/get-user.decorator';
 import { convertToSnakeCase } from 'src/common/utils/helpers';
 

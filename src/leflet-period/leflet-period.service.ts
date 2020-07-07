@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { LeafletPeriod } from './../entities/LeafletPeriod';
 import { UpdateResult, DeleteResult } from 'typeorm';
 import { AddLeafletPeriodDto } from './dto/add-leaflet-period.dto';
-import { User } from 'src/entities/User';
+import { User } from '../entities/User';
 
 @Injectable()
 export class LefletPeriodService {

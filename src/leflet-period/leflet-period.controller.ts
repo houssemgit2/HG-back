@@ -20,7 +20,7 @@ import {
   ApiOperation,
   ApiResponse,
 } from '@nestjs/swagger';
-import { User } from 'src/entities/User';
+import { User } from '../entities/User';
 
 @ApiBearerAuth()
 @ApiTags('leaflet-period')

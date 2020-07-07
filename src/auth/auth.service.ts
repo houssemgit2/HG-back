@@ -19,7 +19,7 @@ import * as AWS from 'aws-sdk';
 import moment = require('moment');
 import { getRepository } from 'typeorm';
 import { StorePermission } from '../entities/StorePermission';
-import { Resource } from 'src/entities/Resource';
+import { Resource } from '../entities/Resource';
 AWS.config.update({ region: 'us-east-1' });
 
 @Injectable()

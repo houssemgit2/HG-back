@@ -7,12 +7,12 @@ import {
 } from '@nestjs/common';
 import { StoreRepository } from './store.repository';
 import { AddStoreDto } from './dto/add-store.dto';
-import { User } from 'src/entities/User';
-import { Store } from 'src/entities/Store';
+import { User } from '../entities/User';
+import { Store } from '../entities/Store';
 import { PaginationDto } from './dto/pagination.dto';
-import { StorePermissionDto } from 'src/store/dto/store-permission.dto';
-import { UserRepository } from 'src/auth/user.repository';
-import { StorePermission } from 'src/entities/StorePermission';
+import { StorePermissionDto } from '../store/dto/store-permission.dto';
+import { UserRepository } from '../auth/user.repository';
+import { StorePermission } from '../entities/StorePermission';
 import { EditStoreDto } from './dto/edit-store.dto';
 import { EditUserCredentialDto } from '../user/dto/edit-user.dto';
 import { AddOwnerDto } from './dto/add-owner.dto';
@@ -22,7 +22,7 @@ import { getConnection, getRepository } from 'typeorm';
 import { StorePromoMea } from '../entities/StorePromoMea';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { Resource } from '../entities/Resource';
-import { StorePromoMeaRepository } from 'src/store-promo-mea/store-promo-mea.repository';
+import { StorePromoMeaRepository } from '../store-promo-mea/store-promo-mea.repository';
 @Injectable()
 export class StoreService implements OnModuleInit {
   constructor(

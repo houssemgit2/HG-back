@@ -8,7 +8,7 @@ import {
 import { StorePromoMea } from '../entities/StorePromoMea';
 import { Logger, InternalServerErrorException } from '@nestjs/common';
 import { getConnection } from 'typeorm';
-import { Store } from 'src/entities/Store';
+import { Store } from '../entities/Store';
 
 @EntityRepository(StorePromoMea)
 export class StorePromoMeaRepository extends Repository<StorePromoMea> {

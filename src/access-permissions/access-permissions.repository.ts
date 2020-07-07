@@ -3,7 +3,7 @@ import { Repository, EntityRepository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { StorePermission } from '../entities/StorePermission';
 import { getRepository } from 'typeorm';
-import { Resource } from 'src/entities/Resource';
+import { Resource } from '../entities/Resource';
 import { BadRequestException } from '@nestjs/common';
 @EntityRepository(StorePermission)
 export class StorePermissionRepository extends Repository<StorePermission> {

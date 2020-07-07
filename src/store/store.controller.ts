@@ -22,7 +22,7 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { StoreOwnerDto } from './dto/store-owner.dto';
-import { Store } from 'src/entities/Store';
+import { Store } from '../entities/Store';
 import { EditStoreOwnerDto } from './dto/edit-store-owner.dto';
 
 @ApiBearerAuth()

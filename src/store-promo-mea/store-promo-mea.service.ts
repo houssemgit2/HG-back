@@ -17,7 +17,7 @@ import { ListMeaToExportDto } from './dto/list-mea-for-export.dto';
 import { ImportedExcelPromosJSon } from './dto/imported-excel.dto';
 import { validateOrReject } from 'class-validator';
 import moment = require('moment');
-import { RejectionReason } from 'src/entities/RejectionReason';
+import { RejectionReason } from '../entities/RejectionReason';
 import { RejectionReasonRepository } from 'src/rejection-reason/rejection-reason.repository';
 import { Cron } from '@nestjs/schedule';
 import { promoState } from 'src/config/stateEnum';
