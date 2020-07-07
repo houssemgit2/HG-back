@@ -2,22 +2,21 @@ import { extname } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import { diskStorage } from 'multer';
 import { BadRequestException } from '@nestjs/common';
+import * as multerS3 from 'multer-s3';
+import * as AWS from 'aws-sdk';
+import * as mime from 'mime-types';
 
 // Multer upload options
+const s3 = new AWS.S3();
+
 export const multerOptions = (
   allowedType, // = /\/(jpg|jpeg|png|gif)$/,
   uploadPath,
 ) => ({
-  // // Enable file size limits
-  // limits: {
-  //     fileSize: +process.env.MAX_FILE_SIZE,
-  // },
-  // Check the mimetypes to allow for upload
   fileFilter: (req: any, file: any, cb: any) => {
     if (file.originalname.match(allowedType)) {
       cb(null, true);
     } else {
-      // Reject file
       cb(
         new BadRequestException(
           `Unsupported file type ${extname(file.originalname)}`,
@@ -52,4 +51,36 @@ export const storage = diskStorage({
   filename: (req, file, cb) => {
     cb(null, `${file.fieldname}-${Date.now()}.xlsx`);
   },
+});
+export const s3MulterOptions = (
+  allowedType, // = /\/(jpg|jpeg|png|gif)$/,
+  key,
+) => ({
+  // fileFilter: (req: any, file: any, cb: any) => {
+  //   if (file.originalname.match(allowedType)) {
+  //     cb(null, true);
+  //   } else {
+  //     cb(
+  //       new BadRequestException(
+  //         `Unsupported file type ${extname(file.originalname)}`,
+  //       ),
+  //       false,
+  //     );
+  //   }
+  // },
+  // Storage properties
+  storage: multerS3({
+    s3,
+    bucket: 'healthy-group',
+    metadata(req, file, cb) {
+      cb(null, { fieldName: file.fieldname });
+    },
+    key(req, file, cb) {
+      const ext = mime.extension(file.mimetype);
+      cb(
+        null,
+        `${process.env.NODE_ENV}/${key}/${Date.now().toString()}.${ext}`,
+      );
+    },
+  }),
 });
