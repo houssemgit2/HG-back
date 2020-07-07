@@ -39,11 +39,14 @@ export class AuthService {
   }
   async transformUserObject(user) {
     const userObject: any = {};
+
     if (user) {
       userObject.fst_name = user.firstName;
       userObject.lst_name = user.lastName;
       userObject.store_cip = user.storeId;
       userObject.phone_num = user.phone;
+      delete user.password;
+      delete user.salt;
     }
     if (user && user.userRole) userObject.role = user.userRole.name;
     userObject.store = { ...user.store };
@@ -88,19 +91,21 @@ store_cip: "3", resource: "LOT1"
       const payload: JwtPayload = { email: loginCredentialDto.email };
       const accessToken = await this.jwtService.sign(payload);
       this.logger.verbose('connected succssefly');
-      const permissions = await getRepository(StorePermission)
-        .find({
-          select: ['resourceId', 'allow'],
-          where: { storeId: user.store.cip },
-          relations: ['resource'],
-        })
-        .then(data => {
-          const result = {};
-          data.map(item => {
-            result[item.resource.name] = item.allow;
+      let permissions: any;
+      if (user && user.userRoleId !== 1)
+        permissions = await getRepository(StorePermission)
+          .find({
+            select: ['resourceId', 'allow'],
+            where: { storeId: user.store.cip },
+            relations: ['resource'],
+          })
+          .then(data => {
+            const result = {};
+            data.map(item => {
+              result[item.resource.name] = item.allow;
+            });
+            return result;
           });
-          return result;
-        });
       return {
         permissions,
         token: {

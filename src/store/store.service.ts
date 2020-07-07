@@ -131,20 +131,25 @@ export class StoreService implements OnModuleInit {
     owner: EditUserCredentialDto,
     permissions: StorePermissionDto[],
   ) {
-    const store: Store = new Store();
+    const store: Store = await this.storeRepository.getOne(cip);
+    console.log(store);
+    const oldStoreClusterId = store.clusterId;
     store.cip = cip;
     if (addStore.clu_id) store.clusterId = addStore.clu_id;
     if (addStore.descr) store.name = addStore.descr;
-    const newOwner: User = new User();
+    const newOwner: User = Array.isArray(store.users)
+      ? store.users[0]
+      : store.users;
     if (owner) {
-      newOwner.firstName = owner.fst_name;
-      newOwner.lastName = owner.lst_name;
-      newOwner.email = owner.email;
-      newOwner.phone = owner.phone_num;
-      newOwner.address = owner.address;
+      this.logger.verbose('********** owner');
+      if (owner.fst_name) newOwner.firstName = owner.fst_name;
+      if (owner.lst_name) newOwner.lastName = owner.lst_name;
+      if (owner.email) newOwner.email = owner.email;
+      if (owner.phone_num) newOwner.phone = owner.phone_num;
+      if (owner.address) newOwner.address = owner.address;
     }
     if (owner && owner.password) {
-      const password_salt: any = this.userRepository.generateSaltPassword(
+      const password_salt: any = await this.userRepository.generateSaltPassword(
         owner.password,
       );
       newOwner.password = password_salt.password;
@@ -161,14 +166,13 @@ export class StoreService implements OnModuleInit {
           return permis;
         })
       : null;
-    const oldStore = await this.storeRepository.findOne(store.cip);
 
     const result = await this.storeRepository.edit(
       store,
       newOwner,
       storePermissions,
     );
-    if (oldStore.clusterId !== store.clusterId) {
+    if (oldStoreClusterId !== store.clusterId) {
       this.logger.debug(`updating promo mea for the store ${store.cip}`);
       await this.storePromoMeaRepository.afterStoreClusterChanged(store.cip);
     } else
