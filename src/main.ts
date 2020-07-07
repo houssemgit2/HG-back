@@ -10,7 +10,10 @@ async function bootstrap() {
   const logger = new Logger('bootstrap_main.ts');
   logger.log('starting the application....');
 
-  const app = await NestFactory.create(AppModule, { cors: true });
+  const app = await NestFactory.create(AppModule, {
+    cors: true,
+    bodyParser: true,
+  });
   app.useGlobalInterceptors(new TransformInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
   // ensuring all endpoints are protected from receiving incorrect data.
