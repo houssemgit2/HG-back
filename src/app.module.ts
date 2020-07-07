@@ -19,6 +19,7 @@ import { StorePromoSelectedModule } from './store-promo-selected/store-promo-sel
 import { StorePromoMeaModule } from './store-promo-mea/store-promo-mea.module';
 import { MeaUploadModule } from './mea-upload/mea-upload.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { CoquePromoModule } from './coque-promo/coque-promo.module';
 
 @Module({
   imports: [
@@ -34,10 +35,6 @@ import { ScheduleModule } from '@nestjs/schedule';
       database: 'hg_promo_beta',
       synchronize: false,
       entities: entities,
-      migrations: ['migration/*.js'],
-      cli: {
-        migrationsDir: 'migration',
-      },
     }),
     ConfigModule.forRoot({
       isGlobal: true,
@@ -56,6 +53,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     StorePromoSelectedModule,
     StorePromoMeaModule,
     MeaUploadModule,
+    CoquePromoModule,
   ],
   controllers: [AppController],
   providers: [AppService],
