@@ -23,6 +23,10 @@ import { StorePromoMea } from './StorePromoMea';
 import { StorePromoSelected } from './StorePromoSelected';
 import { UserRole } from './UserRole';
 import { Resource } from './Resource';
+import { CoquePromoClusters } from './CoquePromoClusters';
+import { CoquePromoFiles } from './CoquePromoFiles';
+import { CoquePromoPeriods } from './CoquePromoPeriods';
+import { CoquePromo } from './CoquePromo';
 
 const entities = [
   Brand,
@@ -50,5 +54,9 @@ const entities = [
   User,
   UserRole,
   Resource,
+  CoquePromoClusters,
+  CoquePromoFiles,
+  CoquePromoPeriods,
+  CoquePromo,
 ];
 export default entities;
