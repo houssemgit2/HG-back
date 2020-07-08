@@ -6,12 +6,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { CoquePromoRepository } from './coque-promo.repository';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      CoquePromoRepository,
-    ]),
-    AuthModule,
-  ],
+  imports: [TypeOrmModule.forFeature([CoquePromoRepository]), AuthModule],
 
   controllers: [CoquePromoController],
   providers: [CoquePromoService],

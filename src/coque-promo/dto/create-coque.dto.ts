@@ -1,31 +1,10 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsString,
-  IsNotEmpty,
-  IsArray,
-  ValidateNested,
-  IsNumber,
-} from 'class-validator';
+/* eslint-disable @typescript-eslint/camelcase */
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-
-export class Periods {
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsNumber()
-  month: number;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsNumber()
-  year: number;
-}
-
-class ClusterId {
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsNumber()
-  cluster_id: number;
-}
+import { PeriodsDto } from './periods.dto';
+import { ClusterIdDto } from './clusters.dto';
+import { string } from 'joi';
 
 export class CreateCoqueDto {
   @ApiProperty()
@@ -33,21 +12,36 @@ export class CreateCoqueDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    required: true,
+    type: PeriodsDto,
+    isArray: true,
+    example: [{ month: 5, year: 2020 }],
+  })
   @IsArray()
   @IsNotEmpty()
   @ValidateNested({ each: true, always: true })
-  @Type(() => Periods)
-  periods: Periods[];
+  @Type(() => PeriodsDto)
+  periods: PeriodsDto[];
 
-  @ApiProperty()
+  @ApiProperty({
+    required: true,
+    type: ClusterIdDto,
+    isArray: true,
+    example: [{ cluster_id: 5 }],
+  })
   @IsArray()
   @IsNotEmpty()
   @ValidateNested({ each: true })
-  @Type(() => ClusterId)
-  clusters: ClusterId[];
+  @Type(() => ClusterIdDto)
+  clusters: ClusterIdDto[];
 
-  @ApiProperty()
+  @ApiProperty({
+    required: true,
+    type: string,
+    isArray: true,
+    example: ['file 1 name', 'file 2 name'],
+  })
   @IsArray()
   @IsNotEmpty()
   filesName: string[];
