@@ -11,8 +11,10 @@ import { getConnection } from 'typeorm';
 export class IsUserAlreadyExistConstraint
   implements ValidatorConstraintInterface {
   repository: any;
-  constructor(repository) {
+  errIfExist: boolean;
+  constructor(repository, errIfExist) {
     this.repository = repository;
+    this.errIfExist = errIfExist;
   }
   async validate(value: number, args: ValidationArguments) {
     const isExist = await getConnection()
@@ -23,6 +25,7 @@ export class IsUserAlreadyExistConstraint
         value,
       })
       .getOne();
+    if (!this.errIfExist) return !!isExist; // return false when not found, throw error if not exist
     return !isExist; // return false if the desired element exist
   }
 }
@@ -30,14 +33,17 @@ export class IsUserAlreadyExistConstraint
 export function IsUserAlreadyExist(
   validationOptions?: ValidationOptions,
   repository?: { entityName: string; entity: any; key: string },
+  errIfExist = true,
 ) {
+  console.log(`heyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy`);
+  console.log(repository);
   return function(object: any, propertyName: string) {
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
       constraints: [],
-      validator: new IsUserAlreadyExistConstraint(repository),
+      validator: new IsUserAlreadyExistConstraint(repository, errIfExist),
     });
   };
 }
