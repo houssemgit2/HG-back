@@ -1,24 +1,20 @@
-import {
-  IsNumber,
-  IsOptional,
-  IsString,
-  IsBoolean,
-  IsEnum,
-} from 'class-validator';
+import { IsOptional, IsBoolean } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumberString } from 'class-validator';
 import { PeriodsDto } from './periods.dto';
 import { ClusterIdDto } from './clusters.dto';
+import { IsBooleanNumber } from '../../common/decorators/isBooleanNumber.decorator';
 
 export class ListMeaDto {
   @ApiProperty({ required: false })
-  @IsBoolean()
+  @IsBooleanNumber({ message: 'must be boolean or 1/0' })
   @IsOptional()
   public coque_status: boolean;
   @ApiProperty({ required: false })
-  @IsNumberString()
+  @IsBooleanNumber({ message: 'must be boolean or 1/0' })
   @IsOptional()
   public file_status: boolean;
+
   @ApiProperty({
     required: false,
     type: PeriodsDto,
