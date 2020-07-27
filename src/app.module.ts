@@ -25,7 +25,7 @@ import { ClustersModule } from './clusters/clusters.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      logging: true,
+      logging: false,
       name: 'default',
       type: 'mysql',
       host:

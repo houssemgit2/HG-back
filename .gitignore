@@ -42,6 +42,8 @@ output/PDFBadges/*
 !output/PDFBadges/.gitkeep
 output/ordersZips/*
 !output/ordersZips/.gitkeep
+output/coqueZips/*
+!output/coqueZips/.gitkeep
 uploads/*
 uploads/mea-state/*
 !uploads/.gitkeep
