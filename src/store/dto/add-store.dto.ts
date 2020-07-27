@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsNumber, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsUserAlreadyExist } from '../../common/decorators/isUnique.validation';
-import { Store } from 'src/entities/Store';
+import { Store } from '../../entities/Store';
 export class AddStoreDto {
   @ApiProperty()
   @IsNumber()
