@@ -20,6 +20,7 @@ import { StorePromoMeaModule } from './store-promo-mea/store-promo-mea.module';
 import { MeaUploadModule } from './mea-upload/mea-upload.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CoquePromoModule } from './coque-promo/coque-promo.module';
+import { ClustersModule } from './clusters/clusters.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { CoquePromoModule } from './coque-promo/coque-promo.module';
     StorePromoMeaModule,
     MeaUploadModule,
     CoquePromoModule,
+    ClustersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

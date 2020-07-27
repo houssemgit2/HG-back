@@ -5,6 +5,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as helmet from 'helmet';
 import { TransformInterceptor } from './common/transform.interceptor';
 import { HttpExceptionFilter } from './common/http-exception.filter';
+import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
   const logger = new Logger('bootstrap_main.ts');
@@ -25,6 +26,8 @@ async function bootstrap() {
     }),
   );
   app.use(helmet());
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded());
   app.setGlobalPrefix('v1');
   // swagger initialization
   const options = new DocumentBuilder()
