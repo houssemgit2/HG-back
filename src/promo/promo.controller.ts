@@ -57,7 +57,6 @@ const multerOptionsForMeaExcel: MulterOptions = multerOptions(
   `${__dirname}/../uploads/mea-state/`,
 );
 @ApiBearerAuth()
-@ApiTags('Promo')
 @Controller('promos')
 export class PromoController {
   constructor(
@@ -69,13 +68,13 @@ export class PromoController {
     private meaUploadService: MeaUploadService,
   ) {}
   logger = new Logger('promo controller');
-
+  @ApiTags('Promo')
   @Get()
   @UseGuards(AuthGuard()) // , AdminGuard)
   async findAll(@Query() getPromoDto: GetPromoDto) {
     return await this.promoService.getAll(getPromoDto);
   }
-
+  @ApiTags('Promo')
   @Post('generate/promos')
   @Header('Content-Type', 'image/pdf')
   @Header('Content-Disposition', 'attachment; filename=promos.pdf')
@@ -90,6 +89,7 @@ export class PromoController {
   @ApiOperation({ summary: 'Reasons List' })
   @ApiResponse({ status: 200, description: 'list all rejection reason' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiTags('Promo-Mea')
   @Get('promo-mea-reason')
   @UseGuards(AuthGuard())
   async findRejectionReasons() {
@@ -105,6 +105,7 @@ export class PromoController {
   @ApiOperation({ summary: 'Add reason' })
   @ApiResponse({ status: 200, description: 'add new rejection reason' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiTags('Promo-Mea')
   @Post('promo-mea-reason')
   @UseGuards(AuthGuard())
   async addRejectionReasons(@Body() body: any) {
@@ -116,6 +117,7 @@ export class PromoController {
   @ApiOperation({ summary: 'saved promo' })
   @ApiResponse({ status: 200, description: 'saved promo' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiTags('Promo')
   @Post('saved')
   @UseGuards(AuthGuard())
   async saveSelected(@Body() body: SaveSelectedDto, @UserReq() user: User) {
@@ -132,6 +134,7 @@ export class PromoController {
   @ApiOperation({ summary: 'saved print config' })
   @ApiResponse({ status: 200, description: 'saved print config' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiTags('Promo')
   @Put('saved')
   @UseGuards(AuthGuard())
   async savePrintConfigs(@Body() body: SaveSelectedDto, @UserReq() user: User) {
@@ -148,6 +151,7 @@ export class PromoController {
   @ApiOperation({ summary: 'get saved promo' })
   @ApiResponse({ status: 200, description: 'saved print config' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiTags('Promo')
   @Get('saved')
   @UseGuards(AuthGuard())
   async getSaved(@Query() filter: GetSelectedDto, @UserReq() user: User) {
@@ -181,6 +185,7 @@ export class PromoController {
   @ApiOperation({ summary: 'list labs' })
   @ApiResponse({ status: 200, description: 'list laboratories' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiTags('Promo-Mea')
   @Get('promo-mea/labs')
   @UseGuards(AuthGuard())
   async listLabs() {
@@ -196,6 +201,7 @@ export class PromoController {
     description:
       'List promo Mea with month year or dates list,array of month & year',
   })
+  @ApiTags('Promo-Mea')
   @Get('promo-mea')
   @UseGuards(AuthGuard(), StoreAdminGuard)
   @UsePipes(new DatesListValidationPipe())
@@ -218,6 +224,7 @@ export class PromoController {
     status: 200,
     description: 'Download promo mea excel to update state (reject or confirm)',
   })
+  @ApiTags('Promo-Mea')
   @Get('promo-mea/xl')
   @UseGuards(AuthGuard(), AdminGuard)
   @UsePipes(new DatesListValidationPipe())
@@ -241,6 +248,7 @@ export class PromoController {
     description: 'Download promo mea excel to update state (reject or confirm)',
   })
   @ApiConsumes('multipart/form-data')
+  @ApiTags('Promo-Mea')
   @Post('promo-mea/xl')
   @UseGuards(AuthGuard(), AdminGuard)
   @UseInterceptors(FileInterceptor('promosMeaFile', multerOptionsForMeaExcel))
@@ -256,6 +264,7 @@ export class PromoController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 400, description: 'missing reason for rejection' })
   @ApiResponse({ status: 404, description: 'promo not found' })
+  @ApiTags('Promo-Mea')
   @Post('promo-mea/:id/set-to')
   @UseGuards(AuthGuard(), StoreAdminGuard)
   @UsePipes(new RejectionReasonValidation())
@@ -281,6 +290,7 @@ export class PromoController {
     required: false,
     type: Number,
   })
+  @ApiTags('Promo-Mea')
   @Post('promo-mea/:id/upload-xl')
   @UseGuards(AuthGuard(), StoreAdminGuard)
   async uploadPromoMeaProofSellsList(
@@ -309,6 +319,7 @@ export class PromoController {
     description: 'upload photo for promo mea as proof',
   })
   @ApiConsumes('multipart/form-data')
+  @ApiTags('Promo-Mea')
   @Post('promo-mea/:id')
   @UseGuards(AuthGuard(), StoreAdminGuard)
   async uploadPromoMeaProofImage(
@@ -348,6 +359,7 @@ export class PromoController {
     description: 'toggle promo mea active true/false',
   })
   @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiTags('Promo-Mea')
   @Put('promo-mea/:id')
   @UseGuards(AuthGuard(), StoreAdminGuard)
   async togglePromosMeaActive(
@@ -376,6 +388,7 @@ export class PromoController {
     required: false,
     type: Number,
   })
+  @ApiTags('Promo-Mea')
   @Get('promo-mea/:id')
   @UseGuards(AuthGuard(), StoreAdminGuard)
   async getPromoDetails(
