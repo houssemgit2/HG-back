@@ -1,12 +1,11 @@
 import { CoquePromo } from '../entities/CoquePromo';
-import { EntityRepository, Repository, Transaction } from 'typeorm';
+import { Brackets, EntityRepository, Repository, Transaction } from 'typeorm';
 import { Logger, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { getConnection, In } from 'typeorm';
 import { CoquePromoFiles } from '../entities/CoquePromoFiles';
 import { CoquePromoClusters } from '../entities/CoquePromoClusters';
 import { CoquePromoPeriods } from '../entities/CoquePromoPeriods';
-import { Cluster } from '../entities/Cluster';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 @EntityRepository(CoquePromo)
@@ -18,42 +17,78 @@ export class CoquePromoRepository extends Repository<CoquePromo> {
   ) {
     super();
   }
-  @Transaction()
+  // @Transaction()
   async deleteCoque(coqueId: number) {
-    await getConnection()
-      .getRepository(CoquePromoFiles)
-      .delete({ coquePromoId: coqueId });
-    await getConnection()
-      .getRepository(CoquePromoPeriods)
-      .delete({ coquePromoId: coqueId });
-    await getConnection()
-      .getRepository(CoquePromoClusters)
-      .delete({ coquePromoId: coqueId });
-    await this.delete({ id: coqueId });
-    return 'deleted successfully';
+    try {
+      await getConnection()
+        .getRepository(CoquePromoFiles)
+        .delete({ coquePromoId: coqueId });
+      await getConnection()
+        .getRepository(CoquePromoPeriods)
+        .delete({ coquePromoId: coqueId });
+      await getConnection()
+        .getRepository(CoquePromoClusters)
+        .delete({ coquePromoId: coqueId });
+      await this.delete({ id: coqueId });
+      return 'deleted successfully';
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
   }
-
-  async findAllCoque(
+  async findCoque(
     status: boolean,
     fileStatus: boolean,
     periods: { month: number; year: number }[],
-    cluster: { cluster_id: number }[],
+    clusters: { cluster_id: number }[],
+    getOne = false,
+    id?: number,
   ) {
-    const findConditions: any = {};
-    if (status || status === false) findConditions.status = status;
+    let query = this.createQueryBuilder('coque')
+      .leftJoinAndSelect('coque.coquePromoClusters', 'coquePromoClusters')
+      .leftJoinAndSelect('coque.coquePromoPeriods', 'coquePromoPeriods')
+      .leftJoinAndSelect('coque.coquePromoFiles', 'coquePromoFiles')
+      .leftJoinAndSelect('coquePromoClusters.cluster', 'cluster');
+    if (getOne) query.where('coque.id =:id', { id });
+    if (status || status === false)
+      query = query.andWhere('coque.status = :status', { status });
     if (fileStatus || fileStatus === false)
-      findConditions.clusterPromoFiles = { status: fileStatus };
-    if (periods) findConditions.coquePromoPeriods = In(periods);
-    if (cluster) findConditions.coquePromoClusters = In(cluster);
-    return await this.find({
-      where: findConditions,
-      relations: [
-        'coquePromoClusters',
-        'coquePromoClusters.cluster',
-        'coquePromoFiles',
-        'coquePromoPeriods',
-      ],
-    });
+      query = query.andWhere('coquePromoFiles.status = :status', {
+        status: fileStatus,
+      });
+    if (periods && periods.length)
+      query = query.andWhere(
+        new Brackets(subQb => {
+          periods.forEach((item, index) => {
+            if (!index)
+              subQb.where(
+                'coquePromoPeriods.month = :month and coquePromoPeriods.month = :year',
+                { ...item },
+              );
+            else
+              subQb.orWhere(
+                'coquePromoPeriods.month = :month and coquePromoPeriods.month = :year',
+                { ...item },
+              );
+          });
+        }),
+      );
+    if (clusters && clusters.length)
+      query = query.andWhere(
+        new Brackets(subQb => {
+          clusters.forEach((item, index) => {
+            if (!index)
+              subQb.where('coquePromoClusters.clusterId = :cluster_id', {
+                ...item,
+              });
+            else
+              subQb.orWhere('coquePromoClusters.clusterId = :cluster_id', {
+                ...item,
+              });
+          });
+        }),
+      );
+    if (getOne) return await query.getOne();
+    return await query.getMany();
   }
   async addNew(
     coquePromo: CoquePromo,
@@ -78,7 +113,7 @@ export class CoquePromoRepository extends Repository<CoquePromo> {
       const newFiles: CoquePromoFiles[] = files.map(item => {
         const coqueFile = new CoquePromoFiles();
         coqueFile.coquePromoId = coquePromoId;
-        coqueFile.status = true;
+        coqueFile.status = false;
         coqueFile.fileUrl = item.fileUrl;
         return coqueFile;
       });
@@ -134,12 +169,13 @@ export class CoquePromoRepository extends Repository<CoquePromo> {
     await queryRunner.startTransaction();
     console.log('start transaction ::');
     try {
-      const newCoque = await queryRunner.manager.update(
-        CoquePromo,
-        { id: coqueId },
-        coquePromo,
-      );
-      if (filesToRemove) {
+      if (coquePromo)
+        await queryRunner.manager.update(
+          CoquePromo,
+          { id: coqueId },
+          coquePromo,
+        );
+      if (filesToRemove && filesToRemove.length) {
         await queryRunner.manager.delete(CoquePromoFiles, {
           where: { id: In(filesToRemove) },
         });
@@ -156,8 +192,8 @@ export class CoquePromoRepository extends Repository<CoquePromo> {
           where: { coquePromoId: coqueId },
         });
         await Promise.all(
-          coquePromoFiles.map(item =>
-            queryRunner.manager.insert(CoquePromoClusters, coquePromoClusters),
+          coquePromoClusters.map(item =>
+            queryRunner.manager.insert(CoquePromoClusters, item),
           ),
         );
       }
@@ -167,8 +203,8 @@ export class CoquePromoRepository extends Repository<CoquePromo> {
           where: { coquePromoId: coqueId },
         });
         await Promise.all(
-          coquePromoFiles.map(item =>
-            queryRunner.manager.insert(CoquePromoPeriods, coquePromoPeriods),
+          coquePromoPeriods.map(item =>
+            queryRunner.manager.insert(CoquePromoPeriods, item),
           ),
         );
       }

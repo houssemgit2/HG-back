@@ -2,7 +2,6 @@
 import {
   Controller,
   Post,
-  Header,
   Get,
   UseGuards,
   Put,
@@ -13,6 +12,8 @@ import {
   UsePipes,
   Param,
   UploadedFile,
+  Req,
+  Body,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -35,9 +36,15 @@ import { ListMeaDto } from './dto/list-coque.dto';
 import { UserReq } from '../auth/get-user.decorator';
 import { User } from '../entities/User';
 import { UpdateCoqueDto } from './dto/update.dto';
-import { CoqueExistenceDto } from './dto/coqueId.dto';
+import { CoqueIdDto } from './dto/coqueId.dto';
 import { GetFilesDto } from './dto/list-files.dto';
-import { query } from 'winston';
+import { JsonValidationPipe } from '../common/pipes/json.pipe';
+import { Logger, Res } from '@nestjs/common';
+import { CoqueFileIdDto } from './dto/coqueFileId.dto';
+import { UpdateCoqueFileDto } from './dto/update-file.dto';
+import { ValidationPipe } from '../common/pipes/validation.pipe';
+import { DownloadFilterDto } from './dto/ids-list-downloads.dto';
+import { compressFiles } from 'src/common/utils/helpers';
 
 const multerOptionsS3: MulterOptions = s3MulterOptions(null, `coque-promo`);
 @ApiBearerAuth()
@@ -45,10 +52,13 @@ const multerOptionsS3: MulterOptions = s3MulterOptions(null, `coque-promo`);
 @Controller('coque-promo')
 export class CoquePromoController {
   constructor(private coquePromoService: CoquePromoService) {}
+  logger = new Logger('coque coontroller');
   @ApiOperation({ summary: 'COQUE PROMO LIST' })
   @ApiResponse({ status: 200, description: 'list all coque promo' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @Get('/')
+  @UsePipes(new JSONArrayValidation())
+  @UsePipes(new JsonValidationPipe())
   @UseGuards(AuthGuard())
   async getCoquePromo(@Query() filter: ListMeaDto, @UserReq() user: User) {
     if (user.userRoleId !== 1) {
@@ -77,8 +87,10 @@ export class CoquePromoController {
   async createCoquePromo(
     @UploadedFile() files,
     @Query() coque: CreateCoqueDto,
+    @Req() req: any,
   ) {
-    return await this.coquePromoService.addCoque(coque, files);
+    console.log(req);
+    return await this.coquePromoService.addCoque(coque, req.files);
   }
 
   @ApiOperation({ summary: 'UPDATE COQUE PROMO' })
@@ -86,15 +98,18 @@ export class CoquePromoController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @Put('/:coqueId')
   @ApiConsumes('multipart/form-data')
+  @UsePipes(new JsonValidationPipe())
   @UsePipes(new JSONArrayValidation())
   @UseInterceptors(FilesInterceptor('coque', 10, multerOptionsS3))
   @ApiMultiFile('coque')
   @UseGuards(AuthGuard(), AdminGuard)
   async updateCoque(
     @Query() coque: UpdateCoqueDto,
-    @Param() coqueCred: CoqueExistenceDto,
+    @Param() coqueCred: CoqueIdDto,
     @UploadedFiles() files,
   ) {
+    console.log('files test');
+    console.log(files);
     return await this.coquePromoService.updateCoque(
       coqueCred.coqueId,
       coque,
@@ -102,12 +117,20 @@ export class CoquePromoController {
     );
   }
 
+  @ApiOperation({ summary: 'Get one COQUE' })
+  @ApiResponse({ status: 200, description: 'coque promo' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @Get('/:coqueId')
+  @UseGuards(AuthGuard())
+  async getCoqueById(@Param() coqueCred: CoqueIdDto, @UserReq() user: User) {
+    return await this.coquePromoService.getCoque(coqueCred.coqueId, user);
+  }
   @ApiOperation({ summary: 'delete COQUE PROMO' })
   @ApiResponse({ status: 200, description: 'the created coque promo' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @Delete('/:coqueId')
   @UseGuards(AuthGuard(), AdminGuard)
-  async deleteCoque(@Param() coqueCred: CoqueExistenceDto) {
+  async deleteCoque(@Param() coqueCred: CoqueIdDto) {
     return await this.coquePromoService.delete(coqueCred.coqueId);
   }
 
@@ -117,7 +140,7 @@ export class CoquePromoController {
   @Get('/:coqueId/files')
   @UseGuards(AuthGuard())
   async listCoqueFiles(
-    @Param() coqueCred: CoqueExistenceDto,
+    @Param() coqueCred: CoqueIdDto,
     @Query() filter: GetFilesDto,
     @UserReq() user: User,
   ) {
@@ -138,7 +161,7 @@ export class CoquePromoController {
   @ApiFile('coque')
   @UseGuards(AuthGuard(), AdminGuard)
   async addCoqueFile(
-    @Param() coqueCred: CoqueExistenceDto,
+    @Param() coqueCred: CoqueIdDto,
     @UploadedFile() file,
     @Query('fileName') fileName: string,
   ) {
@@ -148,21 +171,32 @@ export class CoquePromoController {
     });
   }
 
-  @ApiOperation({ summary: 'NEW COQUE PROMO' })
+  @ApiFile('coque')
+  @ApiOperation({ summary: 'NEW COQUE PROMO File' })
   @ApiResponse({ status: 200, description: 'the created coque promo' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  @Put('/:coqueId/files/fileId')
-  @UseGuards(AuthGuard())
-  async updateCoqueFile(@Param() coqueCred: CoqueExistenceDto) {
-    return 'updateCoqueFile';
+  @UsePipes(new ValidationPipe())
+  @Put('/:coqueId/files/:fileId')
+  @UseGuards(AuthGuard(), AdminGuard)
+  async updateCoqueFile(
+    @Param() coqueCred: CoqueFileIdDto,
+    @Query() query: UpdateCoqueFileDto,
+  ) {
+    const updated = await this.coquePromoService.editCoqueFile(
+      coqueCred,
+      query,
+    );
+    return updated.raw.changedRows
+      ? 'file updated successfully'
+      : 'file status/name not affected';
   }
 
   @ApiOperation({ summary: 'NEW COQUE PROMO' })
   @ApiResponse({ status: 200, description: 'the created coque promo' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  @Delete('/:coqueId/files/fileId')
+  @Delete('/:coqueId/files/:fileId')
   @UseGuards(AuthGuard())
-  async deleteCoqueFile(@Param() coqueCred: CoqueExistenceDto) {
+  async deleteCoqueFile(@Param() coqueCred: CoqueFileIdDto) {
     return await this.coquePromoService.deleteFiles(coqueCred.fileId);
   }
 
@@ -171,7 +205,17 @@ export class CoquePromoController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @Post('/:coqueId/files/downloads')
   @UseGuards(AuthGuard())
-  async downloadsCoqueFile() {
-    return 'downloadsCoqueFile';
+  async downloadsCoqueFile(
+    @Body() filter: GetFilesDto,
+    @Param() coqueCred: CoqueIdDto,
+    @UserReq() user: User,
+    @Res() response,
+  ) {
+    const path = await this.coquePromoService.downloadFiles(
+      coqueCred.coqueId,
+      filter,
+      user,
+    );
+    compressFiles(response, path, 'coque');
   }
 }
