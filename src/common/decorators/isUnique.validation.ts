@@ -35,8 +35,6 @@ export function IsUserAlreadyExist(
   repository?: { entityName: string; entity: any; key: string },
   errIfExist = true,
 ) {
-  console.log(`heyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy`);
-  console.log(repository);
   return function(object: any, propertyName: string) {
     registerDecorator({
       target: object.constructor,
