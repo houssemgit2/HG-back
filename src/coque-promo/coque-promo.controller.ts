@@ -43,7 +43,6 @@ import { Logger, Res } from '@nestjs/common';
 import { CoqueFileIdDto } from './dto/coqueFileId.dto';
 import { UpdateCoqueFileDto } from './dto/update-file.dto';
 import { ValidationPipe } from '../common/pipes/validation.pipe';
-import { DownloadFilterDto } from './dto/ids-list-downloads.dto';
 import { compressFiles } from 'src/common/utils/helpers';
 
 const multerOptionsS3: MulterOptions = s3MulterOptions(null, `coque-promo`);
@@ -74,10 +73,6 @@ export class CoquePromoController {
   @ApiOperation({ summary: 'NEW COQUE PROMO' })
   @ApiResponse({ status: 200, description: 'the created coque promo' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiResponse({
-    status: 400,
-    description: 'verify you upload files with names',
-  })
   @ApiConsumes('multipart/form-data')
   @Post('/')
   @UsePipes(new JSONArrayValidation())
@@ -85,7 +80,7 @@ export class CoquePromoController {
   @ApiMultiFile('coque')
   @UseGuards(AuthGuard(), AdminGuard)
   async createCoquePromo(
-    @UploadedFile() files,
+    @UploadedFiles() files,
     @Query() coque: CreateCoqueDto,
     @Req() req: any,
   ) {
