@@ -13,7 +13,7 @@ import { getConnection } from 'typeorm';
 import moment = require('moment');
 import * as url from 'url';
 
-const AWS_S3_BUCKET_NAME = 'healthy-group';
+const AWS_S3_BUCKET_NAME = process.env.BUCKET || 'healthy-group-v2';
 
 const s3 = new AWS.S3();
 
@@ -92,7 +92,7 @@ export class MeaUploadService {
   upload = multer({
     storage: multerS3({
       s3: s3,
-      bucket: AWS_S3_BUCKET_NAME,
+      bucket: process.env.BUCKET || 'healthy-group-v2',
       acl: 'public-read',
       key: function(request, file, cb) {
         const ext = mime.extension(file.mimetype);

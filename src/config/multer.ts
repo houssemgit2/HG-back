@@ -14,7 +14,7 @@ export const multerOptions = (
   uploadPath,
 ) => ({
   fileFilter: (req: any, file: any, cb: any) => {
-    if (file.originalname.match(allowedType)) {
+    if (!allowedType || file.originalname.match(allowedType)) {
       cb(null, true);
     } else {
       cb(
@@ -71,7 +71,7 @@ export const s3MulterOptions = (
   // Storage properties
   storage: multerS3({
     s3,
-    bucket: 'healthy-group',
+    bucket: process.env.BUCKET || 'healthy-group-v2',
     metadata(req, file, cb) {
       cb(null, { fieldName: file.fieldname });
     },
