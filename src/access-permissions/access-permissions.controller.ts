@@ -7,6 +7,7 @@ import {
   Query,
   Param,
   Body,
+  UsePipes,
 } from '@nestjs/common';
 import { AccessPermissionsService } from './access-permissions.service';
 import {
@@ -22,7 +23,9 @@ import { PaginationDto } from 'src/store/dto/pagination.dto';
 import { GetAccessPermissionDto } from './dto/list.dto';
 import { CreateAccessPermissionDto } from './dto/create.dto';
 import { UpdateAccessPermissionDto } from './dto/update.dto';
-// import { ReqWithUser } from 'src/auth/interface/user.interface';
+import { UserReq } from '../auth/get-user.decorator';
+import { User } from '../entities/User';
+import { RequiredGroupsValidationPipe } from '../common/pipes/requiredGroups.validation.pipe';
 
 @ApiBearerAuth()
 @ApiTags('Access-permissions')
@@ -36,6 +39,13 @@ export class AccessPermissionsController {
   @ApiResponse({ status: 200, description: 'store access permissions list' })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @UseGuards(AuthGuard(), AdminGuard)
+  @UsePipes(
+    new RequiredGroupsValidationPipe(
+      ['perPage', 'page'],
+      'withPagination',
+      PaginationDto,
+    ),
+  )
   @Get()
   async list(@Query() filter: PaginationDto): Promise<StorePermission[]> {
     return await this.accessPermissionsService.listAll(filter);
@@ -67,8 +77,8 @@ export class AccessPermissionsController {
     return await this.accessPermissionsService.getByStore(
       filter.resource_id,
       storeId,
-    )
-// .then(data=> data.map(item=>this.accessPermissionsService.accessPermissionV1Keys(item)))
+    );
+    // .then(data=> data.map(item=>this.accessPermissionsService.accessPermissionV1Keys(item)))
   }
 
   // todo is why we didn't use the storeId from the Req.user
@@ -80,7 +90,7 @@ export class AccessPermissionsController {
   update(
     @Param('storeId') storeId: number,
     @Body() updateAccessPermissionDto: UpdateAccessPermissionDto,
-    // @Req() request: ReqWithUser,
+    @UserReq() user: User,
   ): Promise<StorePermission> {
     // console.log(request);
     return this.accessPermissionsService.update(

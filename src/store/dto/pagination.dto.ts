@@ -1,13 +1,24 @@
-import { IsOptional, IsNumberString } from 'class-validator';
+import {
+  IsOptional,
+  IsNumberString,
+  IsNotEmpty,
+  IsNumber,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 export class PaginationDto {
-  @ApiProperty({ required: false })
-  @IsNumberString()
-  @IsOptional()
-  perPage: number;
+  @ApiProperty()
+  @Type(() => Number)
+  @IsNumber()
+  @IsNotEmpty({ groups: ['withPagination'] })
+  @IsOptional({ always: false })
+  perPage?: number;
 
-  @ApiProperty({ required: false })
-  @IsNumberString()
-  @IsOptional()
-  page: number;
+  @ApiProperty()
+  @Type(() => Number)
+  @IsNumber()
+  @IsNotEmpty({ groups: ['withPagination'] })
+  @IsOptional({ always: false })
+  page?: number;
+  // todo make this two required together
 }

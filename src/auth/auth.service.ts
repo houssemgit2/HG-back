@@ -137,8 +137,6 @@ store_cip: "3", resource: "LOT1"
       uppercase: false,
     });
 
-    // todo: remove this, debugging code
-    this.logger.debug('updating password...');
 
     const params: any = {
       Destination: {

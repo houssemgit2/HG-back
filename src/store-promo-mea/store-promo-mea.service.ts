@@ -488,10 +488,11 @@ export class StorePromoMeaService {
     const libelle = '';
     const gamme: string =
       promoMea.promo && promoMea.promo.gamme ? promoMea.promo.gamme.name : '';
-    const promoType: string =
+    const promoType: any = //todo fix this type related to promo type
       promoMea.promo && promoMea.promo.promoType
-        ? promoMea.promo.promoType.operationType.name
-        : '';
+        ? promoMea.promo.promoType
+        : // todo fix this filter by the promo type
+          '';
     const storeId: number = promoMea.storeId;
     const officineName: string =
       promoMea.store && promoMea.store.users[0]

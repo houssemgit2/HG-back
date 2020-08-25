@@ -7,7 +7,6 @@ import {
   Logger,
 } from '@nestjs/common';
 import moment = require('moment');
-import { isArray } from 'util';
 
 @Injectable()
 export class DatesListValidationPipe implements PipeTransform {
@@ -24,10 +23,10 @@ export class DatesListValidationPipe implements PipeTransform {
       this.logger.warn(
         `month: ${value.month} year: ${value.year} value.dates ${value.dates_list}`,
       );
-      value.dates_list = isArray(value.dates_list)
+      value.dates_list = Array.isArray(value.dates_list)
         ? value.dates_list.map(item => JSON.parse(item))
         : JSON.parse(value.dates_list);
-      value.dates = isArray(value.dates_list)
+      value.dates = Array.isArray(value.dates_list)
         ? this.fixDatesList(value.dates_list)
         : this.monthToStartEndDate(
             value.dates_list.month,

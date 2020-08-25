@@ -15,7 +15,6 @@ export class AdminGuard implements CanActivate {
   canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
-    console.log(user); // todo
     this.logger.verbose(`the user is ${user.email}`);
     if (user && user.userRole.name === ADMIN) return true;
     this.logger.error(`you are not admin`);

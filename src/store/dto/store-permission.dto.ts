@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsNotEmpty, IsInt, IsString } from 'class-validator';
+import { IsNotEmpty, IsInt, IsString } from 'class-validator';
 
 export class StorePermissionDto {
   // @ApiProperty()

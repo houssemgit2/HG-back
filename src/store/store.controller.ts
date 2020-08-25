@@ -8,6 +8,7 @@ import {
   Query,
   Body,
   Post,
+  UsePipes,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { PaginationDto } from './dto/pagination.dto';
@@ -24,6 +25,7 @@ import {
 import { StoreOwnerDto } from './dto/store-owner.dto';
 import { Store } from '../entities/Store';
 import { EditStoreOwnerDto } from './dto/edit-store-owner.dto';
+import { RequiredGroupsValidationPipe } from '../common/pipes/requiredGroups.validation.pipe';
 
 @ApiBearerAuth()
 @ApiTags('Store')
@@ -53,6 +55,13 @@ export class StoreController {
   @ApiOperation({ summary: 'get All store' })
   @ApiResponse({ status: 200, description: 'store list' })
   @Get()
+  @UsePipes(
+    new RequiredGroupsValidationPipe(
+      ['perPage', 'page'],
+      'withPagination',
+      PaginationDto,
+    ),
+  )
   @UseGuards(AuthGuard(), AdminGuard)
   async findAll(@Query() filter: PaginationDto): Promise<any> {
     // return filter;

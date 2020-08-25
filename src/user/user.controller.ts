@@ -12,7 +12,6 @@ export class UserController {
   @Get()
   @UseGuards(AuthGuard(), AdminGuard)
   findAll(@Req() req: any) {
-    console.log(req); // todo remove it
     return this.userService.findUsers();
   }
 
