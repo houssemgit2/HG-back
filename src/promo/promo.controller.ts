@@ -120,8 +120,8 @@ export class PromoController {
     @Param('promoId') promoId: number,
     @Body() body: PromoAchatDto,
   ) {
-    // const promoAchat = await this.promoService.saveOpAchat(promoId, body);
-    return body;
+    const promoAchat = await this.promoService.saveOpAchat(promoId, body);
+    return promoAchat;
   }
 
   @ApiTags('Promo')

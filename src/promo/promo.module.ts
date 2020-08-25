@@ -11,10 +11,16 @@ import { StorePromoMeaModule } from '../store-promo-mea/store-promo-mea.module';
 import { MeaUploadModule } from 'src/mea-upload/mea-upload.module';
 import { PromoType } from '../entities/PromoType';
 import { PromoCluster } from '../entities/PromoCluster';
+import { PromoAchat } from '../entities/PromoAchat';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([PromoRepository, PromoType, PromoCluster]),
+    TypeOrmModule.forFeature([
+      PromoRepository,
+      PromoType,
+      PromoCluster,
+      PromoAchat,
+    ]),
     AuthModule,
     PdfPromoGeneratorModule,
     RejectionReasonModule,

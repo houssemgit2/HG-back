@@ -154,4 +154,5 @@ export class PromoAchatDto {
   // @ValidateNested({ each: true, always: true })
   // @Type(() => FreeUnitAchatDiscountDto)
   // free_unit_details: FreeUnitAchatDiscountDto;
+  achat_advantage_discount_type_id?: number;
 }

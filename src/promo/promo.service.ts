@@ -8,12 +8,11 @@ import { Promo } from './../entities/Promo';
 import { SaveGeneralPromoDto } from './dto/save-general-prams.dto';
 import { PromoCluster } from '../entities/PromoCluster';
 import { groupCollapsed } from 'console';
+import { PromoAchat } from '../entities/PromoAchat';
+import { PromoAchatDto } from './dto/promo.achat.dto';
 // DTO
 @Injectable()
 export class PromoService {
-  saveOpAchat(promoId: number, body: any) {
-    throw new Error('Method not implemented.');
-  }
   constructor(
     @InjectRepository(Promo)
     private promoRepository: Repository<Promo>,
@@ -22,7 +21,26 @@ export class PromoService {
 
     @InjectRepository(PromoCluster)
     private promoClusterRepository: Repository<PromoCluster>,
+    @InjectRepository(PromoAchat)
+    private promoAchatRepository: Repository<PromoAchat>,
   ) {}
+
+  async saveOpAchat(promoId: number, body: PromoAchatDto): Promise<PromoAchat> {
+    const promoAchat = new PromoAchat();
+    promoAchat.promoId = promoId;
+    promoAchat.achatAdvantageDiscountTypeId =
+      body.achat_advantage_discount_type_id;
+    promoAchat.eligibilityFranco = body.eligibility_franco;
+    promoAchat.eligibilityOther = body.eligibility_other;
+    promoAchat.eligibilityVolume = body.eligibility_volume;
+    promoAchat.eligibilityCaDetails = body.eligibility_ca_details;
+    promoAchat.eligibilityAdditionalInformation =
+      body.eligibility_additional_information;
+    promoAchat.achatAdvantageDiscountDetails =
+      body.achat_advantage_discount_details;
+
+    return await this.promoAchatRepository.save(promoAchat);
+  }
   async createPromoType(typeIds: number[]) {
     let promoId: number;
     return this.promoRepository
