@@ -50,6 +50,7 @@ import { RemunerationCaAnnualTargetType } from './RemunerationCaAnnualTargetType
 import { RemunerationFixedType } from './RemunerationFixedType';
 import { RepaymentCircuitType } from './RepaymentCircuitType';
 import { Ressource } from './Ressource';
+import { PromoMeaEmplacement } from './PromoMeaEmplacement';
 
 const entities = [
   Brand,
@@ -98,6 +99,7 @@ const entities = [
   PromoAchat,
   PromoConso,
   PromoMea,
+  PromoMeaEmplacement,
   RemunerationBaseType,
   RemunerationCaAnnualPlateType,
   RemunerationCaAnnualTargetType,

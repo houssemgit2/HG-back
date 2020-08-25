@@ -1,5 +1,11 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn, BaseEntity } from "typeorm";
-import { PromoType } from "./PromoType";
+import {
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  BaseEntity,
+} from 'typeorm';
+import { PromoType } from './PromoType';
 
 @Entity('operation_type', { schema: 'hg_promo_beta' })
 export class OperationType extends BaseEntity {

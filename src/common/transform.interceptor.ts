@@ -29,17 +29,18 @@ export class TransformInterceptor implements NestInterceptor {
     console.log(pathRequest);
     if (method === 'POST') status = 200;
     if (!pathRequest.includes('login')) {
+      // make the response standard {status,data}
       console.log('transforming response format');
-      if (pathRequest === '/v1/promos/promo-mea' && method === 'GET') {
-        console.log('special transform for the get promo');
-        return next.handle().pipe(
-          map(data => ({
-            statusCode: status,
-            data: convertToSnakeCase(data.data),
-            totlaItem: data.totalItem,
-          })),
-        );
-      }
+      // if (pathRequest === '/v1/promos/promo-mea' && method === 'GET') {
+      //   console.log('special transform for the get promo');
+      //   return next.handle().pipe(
+      //     map(data => ({
+      //       statusCode: status,
+      //       data: convertToSnakeCase(data.data),
+      //       totalItem: data.totalItem, // todo remove total item and put it inside data
+      //     })),
+      //   );
+      // }
       return next.handle().pipe(
         map(data => ({
           statusCode: status,

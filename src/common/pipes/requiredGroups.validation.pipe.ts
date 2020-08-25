@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
-import { PromoAchatDto } from '../../promo/dto/promo.achat.dto';
 
 @Injectable()
 export class RequiredGroupsValidationPipe implements PipeTransform<any> {

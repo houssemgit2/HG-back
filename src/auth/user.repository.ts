@@ -30,7 +30,7 @@ export class UserRepository extends Repository<User> {
         `we didn't find a user with this email:${email}, w're creating a new one ...`,
       );
     if (exists)
-      throw new ConflictException(`${email} already token by another user`);
+      throw new ConflictException(`${email} already taken by another user`);
 
     const user = new User();
     user.storeId = storeId;
@@ -109,3 +109,4 @@ export class UserRepository extends Repository<User> {
     return bcrypt.hash(password, salt);
   }
 }
+//todo make a email folder put inside it all the emails content

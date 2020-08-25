@@ -9,10 +9,12 @@ import { PdfPromoGeneratorModule } from '@app/pdf-promo-generator';
 import { RejectionReasonModule } from 'src/rejection-reason/rejection-reason.module';
 import { StorePromoMeaModule } from '../store-promo-mea/store-promo-mea.module';
 import { MeaUploadModule } from 'src/mea-upload/mea-upload.module';
+import { PromoType } from '../entities/PromoType';
+import { PromoCluster } from '../entities/PromoCluster';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([PromoRepository]),
+    TypeOrmModule.forFeature([PromoRepository, PromoType, PromoCluster]),
     AuthModule,
     PdfPromoGeneratorModule,
     RejectionReasonModule,

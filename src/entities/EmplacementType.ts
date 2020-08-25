@@ -6,6 +6,7 @@ import {
   BaseEntity,
 } from 'typeorm';
 import { Remuneration } from './Remuneration';
+import { PromoMeaEmplacement } from './PromoMeaEmplacement';
 
 @Entity('emplacement_type', { schema: 'hg_promo_beta' })
 export class EmplacementType extends BaseEntity {
@@ -20,4 +21,10 @@ export class EmplacementType extends BaseEntity {
     remuneration => remuneration.emplacementType,
   )
   remunerations: Remuneration[];
+
+  @OneToMany(
+    () => PromoMeaEmplacement,
+    promoMeaEmplacement => promoMeaEmplacement.emplacementType,
+  )
+  promoMeaEmplacements: PromoMeaEmplacement[];
 }

@@ -51,6 +51,13 @@ import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer
 import { User } from '../entities/User';
 import { UserReq } from '../auth/get-user.decorator';
 import { convertToSnakeCase } from 'src/common/utils/helpers';
+import { SavePromoTypeDto } from './dto/save-promo-types.dto';
+import { SaveGeneralPromoDto } from './dto/save-general-prams.dto';
+import { DateCompValidationPipe } from '../common/pipes/promo/date-compariason.pipe';
+// import { PromoConcernedValidationPipe } from '../common/pipes/promo/promo-concerned.pipe';
+import { AchatAdvantageDiscountDto } from './dto/achat-advantage-discount.dto';
+import { PromoAchatDto } from './dto/promo.achat.dto';
+import { PromoAchatValidationPipe } from '../common/pipes/promo/promo-achat.pipe';
 
 const multerOptionsForMeaExcel: MulterOptions = multerOptions(
   /xlsm|xlsx|xlsb|xls|xla|xlml|ods|csv|.xlsx|csv/,
@@ -68,12 +75,55 @@ export class PromoController {
     private meaUploadService: MeaUploadService,
   ) {}
   logger = new Logger('promo controller');
+
   @ApiTags('Promo')
   @Get()
   @UseGuards(AuthGuard()) // , AdminGuard)
   async findAll(@Query() getPromoDto: GetPromoDto) {
     return await this.promoService.getAll(getPromoDto);
   }
+
+  @ApiTags('Promo')
+  @Post()
+  @UseGuards(AuthGuard(), AdminGuard)
+  async setPromoType(@Query() query: SavePromoTypeDto, @UserReq() user: User) {
+    console.log('query****************');
+    console.log(query.type_ids);
+    return await this.promoService.createPromoType(query.type_ids);
+  }
+
+  @ApiTags('Promo')
+  @Get(':promoId')
+  @UseGuards(AuthGuard(), AdminGuard)
+  async getPromoType(@Param('promoId') promoId: number, @UserReq() user: User) {
+    return await this.promoService.getPromoType(promoId); //
+  }
+
+  @ApiTags('Promo')
+  @Post(':promoId/general')
+  @UseGuards(AuthGuard(), AdminGuard)
+  @UsePipes(new DateCompValidationPipe())
+  // @UsePipes(new PromoConcernedValidationPipe())
+  async savePromoGeneralInfo(
+    @Param('promoId') promoId: number,
+    @Body() body: SaveGeneralPromoDto,
+  ) {
+    const promo = await this.promoService.saveGeneralParams(promoId, body);
+    return promo;
+  }
+
+  @ApiTags('Promo')
+  @Post(':promoId/achat')
+  @UseGuards(AuthGuard(), AdminGuard)
+  @UsePipes(new PromoAchatValidationPipe())
+  async savePromoAchat(
+    @Param('promoId') promoId: number,
+    @Body() body: PromoAchatDto,
+  ) {
+    // const promoAchat = await this.promoService.saveOpAchat(promoId, body);
+    return body;
+  }
+
   @ApiTags('Promo')
   @Post('generate/promos')
   @Header('Content-Type', 'image/pdf')
