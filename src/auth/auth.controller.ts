@@ -69,7 +69,6 @@ export class AuthController {
     return this.authService.resetPassword(resetPasswordDto, user);
   }
 
-  // TODO this role is for development only
   @ApiBearerAuth()
   @ApiOperation({ summary: 'this user' })
   @ApiResponse({ status: 200, description: 'return the connected user' })

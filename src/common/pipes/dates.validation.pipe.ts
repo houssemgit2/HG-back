@@ -12,7 +12,7 @@ import moment = require('moment');
 export class DatesListValidationPipe implements PipeTransform {
   logger = new Logger('Validation Dates');
   transform(value: any, metadata: ArgumentMetadata) {
-    //todo check whey this called twice
+    //todo set to the type query | Body to avoid calling it twice
     if (value.constructor.name !== 'ListMeaDto') return value;
     if (value && !(value.month && value.year) && !value.dates_list) {
       throw new BadRequestException(

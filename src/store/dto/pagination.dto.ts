@@ -20,5 +20,4 @@ export class PaginationDto {
   @IsNotEmpty({ groups: ['withPagination'] })
   @IsOptional({ always: false })
   page?: number;
-  // todo make this two required together
 }
