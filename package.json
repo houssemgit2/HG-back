@@ -57,6 +57,7 @@
     "handlebars": "^4.7.6",
     "helmet": "^3.22.0",
     "lodash": "^4.17.15",
+    "mailcomposer": "^4.0.2",
     "mime-type": "^4.0.0",
     "mime-types": "^2.1.27",
     "moment": "^2.24.0",
