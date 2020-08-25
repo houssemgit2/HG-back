@@ -21,6 +21,7 @@ import { MeaUploadModule } from './mea-upload/mea-upload.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CoquePromoModule } from './coque-promo/coque-promo.module';
 import { ClustersModule } from './clusters/clusters.module';
+import { SupportModule } from './support/support.module';
 
 @Module({
   imports: [
@@ -36,6 +37,11 @@ import { ClustersModule } from './clusters/clusters.module';
       database: 'hg_promo_beta',
       synchronize: false,
       entities: entities,
+      migrationsTableName: 'custom_migration_table',
+      migrations: ['migration/*.ts'],
+      cli: {
+        migrationsDir: 'migration',
+      },
     }),
     ConfigModule.forRoot({
       isGlobal: true,
@@ -56,6 +62,7 @@ import { ClustersModule } from './clusters/clusters.module';
     MeaUploadModule,
     CoquePromoModule,
     ClustersModule,
+    SupportModule,
   ],
   controllers: [AppController],
   providers: [AppService],
