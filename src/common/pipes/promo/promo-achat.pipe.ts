@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 // PromoAchatValidationPipe
 
 import {
@@ -41,14 +42,26 @@ export class PromoAchatValidationPipe implements PipeTransform<any> {
         if (eligibilityErrors.length) errors.push(...eligibilityErrors);
       });
     }
-    if (value.achat_advantage_discount_type_id === 1) {
+    if (
+      value.achat_advantage_discount_details &&
+      value.achat_advantage_discount_details
+        .achat_advantage_discount_type_id === 1
+    ) {
       console.log('the actual group is euro');
       groups.push('euro');
-    } else if (value.achat_advantage_discount_type_id === 2) {
+    } else if (
+      value.achat_advantage_discount_details &&
+      value.achat_advantage_discount_details
+        .achat_advantage_discount_type_id === 2
+    ) {
       console.log('the actual group is freeUnit');
 
       groups.push('freeUnit');
-    } else if (value.achat_advantage_discount_type_id === 3) {
+    } else if (
+      value.achat_advantage_discount_details &&
+      value.achat_advantage_discount_details
+        .achat_advantage_discount_type_id === 3
+    ) {
       console.log('the actual group is percentage  ');
 
       groups.push('percentage');
@@ -84,6 +97,20 @@ export class PromoAchatValidationPipe implements PipeTransform<any> {
       throw new BadRequestException(
         errors.map(item => JSON.stringify(item.constraints)),
       );
+    }
+    if (value.achat_advantage_discount_details) {
+      value.achat_advantage_discount_type_id =
+        value.achat_advantage_discount_details.achat_advantage_discount_type_id;
+      if (groups.includes('euro'))
+        value.achat_advantage_discount_details =
+          value.achat_advantage_discount_details.euro_details;
+      if (groups.includes('freeUnit'))
+        value.achat_advantage_discount_details =
+          value.achat_advantage_discount_details.free_unit_details;
+      if (groups.includes('percentage'))
+        value.achat_advantage_discount_details =
+          value.achat_advantage_discount_details.percentage_details;
+     
     }
     return value;
   }
