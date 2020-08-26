@@ -128,10 +128,7 @@ export class PromoController {
   @Post(':promoId/mea')
   @UseGuards(AuthGuard(), AdminGuard)
   @UsePipes(new PromoAchatValidationPipe())
-  async savePromoMea(
-    @Param('promoId') promoId: number,
-    @Body() body: PromoAchatDto,
-  ) {
+  async savePromoMea(@Param('promoId') promoId: number, @Body() body: any) {
     // const promoAchat = await this.promoService.saveOpAchat(promoId, body);
     // return promoAchat;
   }

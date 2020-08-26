@@ -4,7 +4,6 @@ import { IsString, IsNotEmpty, IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PeriodsDto } from './periods.dto';
 import { ClusterIdDto } from './clusters.dto';
-import { string } from 'joi';
 
 export class CreateCoqueDto {
   @ApiProperty()
@@ -38,7 +37,7 @@ export class CreateCoqueDto {
 
   @ApiProperty({
     required: true,
-    type: string,
+    type: String,
     isArray: true,
     example: ['file 1 name', 'file 2 name'],
   })
