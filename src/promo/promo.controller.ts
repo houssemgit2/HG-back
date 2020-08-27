@@ -83,7 +83,7 @@ export class PromoController {
     return await this.promoService.getAll(getPromoDto);
   }
 
-  @ApiTags('Promo')
+  @ApiTags('Promo-form')
   @Post()
   @UseGuards(AuthGuard(), AdminGuard)
   async setPromoType(@Query() query: SavePromoTypeDto) {
@@ -132,8 +132,8 @@ export class PromoController {
     @Param('promoId') promoId: number,
     @Body() body: PromoMeaDto,
   ) {
-    // const meaPromo = await this.promoService.saveMeaPromo(promoId, body);
-    return body;
+    const meaPromo = await this.promoService.saveMeaPromo(promoId, body);
+    return meaPromo;
   }
 
   @ApiTags('Promo')
