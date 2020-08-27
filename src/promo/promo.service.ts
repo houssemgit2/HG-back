@@ -7,9 +7,13 @@ import { Repository, LessThan, MoreThan, Between } from 'typeorm';
 import { Promo } from './../entities/Promo';
 import { SaveGeneralPromoDto } from './dto/save-general-prams.dto';
 import { PromoCluster } from '../entities/PromoCluster';
-import { groupCollapsed } from 'console';
 import { PromoAchat } from '../entities/PromoAchat';
 import { PromoAchatDto } from './dto/promo.achat.dto';
+import { PromoMea } from '../entities/PromoMea';
+import { PromoMeaDto, PromoMeaEmplacementDto } from './dto/promo-mea.dto';
+import { PromoMeaEmplacement } from '../entities/PromoMeaEmplacement';
+import { RemunerationFixedDetailsDto } from './dto/remuneration.dto';
+import { convertToCamelCase } from '../common/utils/helpers';
 // DTO
 @Injectable()
 export class PromoService {
@@ -23,8 +27,67 @@ export class PromoService {
     private promoClusterRepository: Repository<PromoCluster>,
     @InjectRepository(PromoAchat)
     private promoAchatRepository: Repository<PromoAchat>,
+    @InjectRepository(PromoMea)
+    private promoMeaRepository: Repository<PromoMea>,
+    @InjectRepository(PromoMeaEmplacement)
+    private promoMeaEmplacementRepository: Repository<PromoMeaEmplacement>,
   ) {}
+  async saveMeaPromo(promoId: number, promo: PromoMeaDto): Promise<any> {
+    // const promoMea = new PromoMea();
+    // promoMea.promoId = promoId;
+    // promoMea.hasEligibilityMinimumOrder = promo.has_eligibility_minimum_order;
+    // if (promoMea.hasEligibilityMinimumOrder)
+    //   promoMea.eligibilityMinimumDetails = promo.eligibility_minimum_details;
 
+    // promoMea.hasEligibilityCaRange = promo.has_eligibility_ca_range;
+    // if (promoMea.hasEligibilityCaRange)
+    //   promoMea.eligibilityCaRangeDetails = promo.eligibility_ca_range_details;
+
+    // promoMea.hasEligibilityOther = promo.has_eligibility_other;
+    // if (promoMea.hasEligibilityOther)
+    //   promoMea.eligibilityOtherDetails = promo.eligibility_other_details;
+
+    // promoMea.emplacementPlvLabo = promo.emplacement_plv_labo;
+
+    // promoMea.hasRemunerationUnitProduct = promo.has_remuneration_unit_product;
+    // if (promo.has_remuneration_unit_product)
+    //   promoMea.remunerationUnitProductDetails =
+    //     promo.remuneration_unit_product_details;
+
+    // promoMea.hasRemunerationFixed = promo.has_remuneration_fixed;
+    // if (promoMea.hasRemunerationFixed)
+    //   promoMea.remunerationFixedDetails = promo.remuneration_fixed_details;
+
+    // promoMea.hasRemunerationCaAnnual = promo.has_remuneration_ca_annual;
+    // if (promoMea.hasRemunerationCaAnnual)
+    //   promoMea.remunerationCaAnnualDetails =
+    //     promo.remuneration_ca_annual_details;
+    // promoMea.hasRemunerationOther = promo.has_remuneration_other;
+    // if (promoMea.hasRemunerationOther)
+    //   promoMea.remunerationOtherDetails = promo.remuneration_other_details;
+    // const promoMea: PromoMea = { promoId, ...promo };
+    try {
+      if (
+        promo.promo_mea_emplacements &&
+        Array.isArray(promo.promo_mea_emplacements)
+      ) {
+        const emplacementList = promo.promo_mea_emplacements.map(
+          (item: PromoMeaEmplacementDto): PromoMeaEmplacement => ({
+            promoId,
+            ...convertToCamelCase(item),
+          }),
+        );
+        // await this.promoMeaEmplacementRepository.save(emplacementList);
+      }
+      delete promo.promo_mea_emplacements;
+      return await this.promoMeaRepository.save({
+        promoId,
+        ...convertToCamelCase(promo),
+      });
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
+  }
   async saveOpAchat(promoId: number, body: PromoAchatDto): Promise<PromoAchat> {
     const promoAchat = new PromoAchat();
     promoAchat.promoId = promoId;
@@ -58,10 +121,6 @@ export class PromoService {
       .catch(e => {
         throw new InternalServerErrorException(e);
       });
-    // console.log('test   ', test);
-    // const test2 = await this.promoTypeRepository.find({ where: { promoId } });
-    // console.log('test2  ', test2);
-    // return test2;
   }
   async getPromoType(promoId: number) {
     try {

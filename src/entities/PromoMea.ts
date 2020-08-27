@@ -40,7 +40,7 @@ export class PromoMea {
   hasEligibilityOther: boolean;
 
   @Column('json', { name: 'eligibility_other_details' })
-  eligibilityOtherDetails: object;
+  eligibilityOtherDetails: string;
 
   @Column('tinyint', { name: 'emplacement_plv_labo' })
   emplacementPlvLabo: boolean;

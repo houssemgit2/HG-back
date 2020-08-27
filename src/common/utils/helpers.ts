@@ -1,4 +1,5 @@
 import * as snakeCaseKeys from 'snakecase-keys';
+import * as camelCaseKeys from 'camelcase-keys';
 import { _ } from 'lodash';
 import * as fs from 'fs';
 import * as request from 'request-promise';
@@ -12,6 +13,16 @@ export function convertToSnakeCase(result) {
     return result.map(innerObj => snakeCaseKeys(innerObj));
   } else if (isObject(result)) {
     return snakeCaseKeys(result);
+  } else {
+    return result;
+  }
+}
+export function convertToCamelCase(result) {
+  const { isObject, isArray } = _;
+  if (isArray(result)) {
+    return result.map(innerObj => camelCaseKeys(innerObj));
+  } else if (isObject(result)) {
+    return camelCaseKeys(result);
   } else {
     return result;
   }

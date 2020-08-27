@@ -10,12 +10,12 @@ import {
 } from 'class-validator';
 import { EligibilityDetailsDto } from './eligibility-ca-details.dto';
 import { EligibilityMinimumDetailsDto } from './promo-mea-eligibility.dto';
-import { RemunerationCaAnnualDetailsDto } from './remuneration.dto';
-import { IsString, IsNumber } from 'class-validator';
 import {
-  QuantityRemunerationFixedDto,
-  RemunerationUnitProductDetailsDto,
+  RemunerationCaAnnualDetailsDto,
+  RemunerationFixedDetailsDto,
 } from './remuneration.dto';
+import { IsString, IsNumber } from 'class-validator';
+import { RemunerationUnitProductDetailsDto } from './remuneration.dto';
 export class PromoMeaEmplacementDto {
   emplacement_type_id: number;
   details: string;
@@ -37,7 +37,7 @@ export class PromoMeaDto {
   @ValidateIf(o => o.has_eligibility_minimum_order)
   @IsNotEmpty()
   @Type(() => EligibilityMinimumDetailsDto)
-  eligibilityMinimumDetails: EligibilityMinimumDetailsDto;
+  eligibility_minimum_details: EligibilityMinimumDetailsDto;
 
   @ApiProperty()
   @IsNotEmpty()
@@ -79,10 +79,10 @@ export class PromoMeaDto {
   @ApiProperty({
     isArray: true,
     type: EligibilityDetailsDto,
-    example: {
+    example: [{
       emplacement_type_id: 2,
       details: 'string',
-    },
+    }],
   })
   @IsArray()
   @IsNotEmpty()
@@ -111,7 +111,6 @@ export class PromoMeaDto {
   @ValidateNested({ each: true, always: true })
   @IsNotEmpty()
   @Type(() => RemunerationUnitProductDetailsDto)
-  @IsBoolean()
   remuneration_unit_product_details: RemunerationUnitProductDetailsDto;
 
   @ApiProperty()
@@ -121,51 +120,26 @@ export class PromoMeaDto {
   has_remuneration_fixed: boolean;
 
   @ApiProperty({
-    isArray: true,
-    type: Number,
-    example: [1, 2],
+    type: RemunerationFixedDetailsDto,
+    example: {
+      has_emplacement: true,
+      data_emplacement: [{ emplacement_id: 1, comment: 'test' }],
+      has_quantity: true,
+      data_quantity: [
+        {
+          equal_condition_type_id: 1,
+          value_min: 100,
+          value_max: 250,
+          comment: 'text',
+        },
+      ],
+    },
   })
+  @IsNotEmpty()
+  @ValidateNested({ each: true, always: true })
   @ValidateIf(o => o.has_remuneration_fixed)
-  @IsNotEmpty()
-  @IsArray()
-  @ValidateNested({ each: true, always: true })
-  @Type(() => Number)
-  remuneration_fixed_condition: number[];
-
-  @ApiProperty({
-    isArray: true,
-    type: QuantityRemunerationFixedDto,
-    example: [{ emplacement_id: 1, comment: 'test' }],
-  })
-  @IsArray()
-  @IsNotEmpty()
-  @ValidateNested({ each: true, always: true })
-  @ValidateIf(
-    o => o.has_remuneration_fixed && o.remuneration_fixed_condition.includes(2),
-  )
-  @Type(() => QuantityRemunerationFixedDto)
-  emplacement_remuneration_fixed_details: QuantityRemunerationFixedDto[];
-
-  @ApiProperty({
-    isArray: true,
-    type: EligibilityDetailsDto,
-    example: [
-      {
-        equal_condition_type_id: 1,
-        value_min: 100,
-        value_max: 250,
-        comment: 'text',
-      },
-    ],
-  })
-  @IsArray()
-  @IsNotEmpty()
-  @ValidateNested({ each: true, always: true })
-  @ValidateIf(
-    o => o.has_remuneration_fixed && o.remuneration_fixed_condition.includes(1),
-  )
-  @Type(() => EligibilityDetailsDto)
-  quantity_remuneration_fixed_details: EligibilityDetailsDto[];
+  @Type(() => RemunerationFixedDetailsDto)
+  remuneration_fixed_details: RemunerationFixedDetailsDto;
 
   @ApiProperty()
   @IsNotEmpty()
