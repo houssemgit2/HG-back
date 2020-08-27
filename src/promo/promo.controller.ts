@@ -55,9 +55,9 @@ import { SavePromoTypeDto } from './dto/save-promo-types.dto';
 import { SaveGeneralPromoDto } from './dto/save-general-prams.dto';
 import { DateCompValidationPipe } from '../common/pipes/promo/date-compariason.pipe';
 // import { PromoConcernedValidationPipe } from '../common/pipes/promo/promo-concerned.pipe';
-import { AchatAdvantageDiscountDto } from './dto/achat-advantage-discount.dto';
 import { PromoAchatDto } from './dto/promo.achat.dto';
 import { PromoAchatValidationPipe } from '../common/pipes/promo/promo-achat.pipe';
+import { PromoMeaDto } from './dto/promo-mea.dto';
 
 const multerOptionsForMeaExcel: MulterOptions = multerOptions(
   /xlsm|xlsx|xlsb|xls|xla|xlml|ods|csv|.xlsx|csv/,
@@ -86,7 +86,7 @@ export class PromoController {
   @ApiTags('Promo')
   @Post()
   @UseGuards(AuthGuard(), AdminGuard)
-  async setPromoType(@Query() query: SavePromoTypeDto, @UserReq() user: User) {
+  async setPromoType(@Query() query: SavePromoTypeDto) {
     console.log('query****************');
     console.log(query.type_ids);
     return await this.promoService.createPromoType(query.type_ids);
@@ -95,7 +95,7 @@ export class PromoController {
   @ApiTags('Promo')
   @Get(':promoId')
   @UseGuards(AuthGuard(), AdminGuard)
-  async getPromoType(@Param('promoId') promoId: number, @UserReq() user: User) {
+  async getPromoType(@Param('promoId') promoId: number) {
     return await this.promoService.getPromoType(promoId); //
   }
 
@@ -127,10 +127,13 @@ export class PromoController {
   @ApiTags('Promo-form')
   @Post(':promoId/mea')
   @UseGuards(AuthGuard(), AdminGuard)
-  @UsePipes(new PromoAchatValidationPipe())
-  async savePromoMea(@Param('promoId') promoId: number, @Body() body: any) {
-    // const promoAchat = await this.promoService.saveOpAchat(promoId, body);
-    // return promoAchat;
+  // @UsePipes(new PromoAchatValidationPipe())
+  async savePromoMea(
+    @Param('promoId') promoId: number,
+    @Body() body: PromoMeaDto,
+  ) {
+    // const meaPromo = await this.promoService.saveMeaPromo(promoId, body);
+    return body;
   }
 
   @ApiTags('Promo')
@@ -289,7 +292,6 @@ export class PromoController {
   @UsePipes(new DatesListValidationPipe())
   // @UseInterceptors(FileInterceptor('image'))
   async downloadFile(
-    @UploadedFile() file,
     @Query() filter: ListMeaToExportDto,
     @UserReq() user: User,
     @Res() res: any,

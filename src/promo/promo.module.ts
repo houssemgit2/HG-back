@@ -12,6 +12,7 @@ import { MeaUploadModule } from 'src/mea-upload/mea-upload.module';
 import { PromoType } from '../entities/PromoType';
 import { PromoCluster } from '../entities/PromoCluster';
 import { PromoAchat } from '../entities/PromoAchat';
+import { PromoMea } from '../entities/PromoMea';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { PromoAchat } from '../entities/PromoAchat';
       PromoType,
       PromoCluster,
       PromoAchat,
+      PromoMea,
     ]),
     AuthModule,
     PdfPromoGeneratorModule,
