@@ -114,9 +114,15 @@ export class PromoService {
           operationTypeId: item,
           promoId: promo.id,
         }));
-        return this.promoTypeRepository.save(promoTypes).catch(e => {
-          throw new InternalServerErrorException(e);
-        });
+        return this.promoTypeRepository
+          .save(promoTypes)
+          .catch(e => {
+            throw new InternalServerErrorException(e);
+          })
+          .then(data => ({
+            promoId,
+            promoOperationTypeId: data.map(item => item.operationTypeId),
+          }));
       })
       .catch(e => {
         throw new InternalServerErrorException(e);
