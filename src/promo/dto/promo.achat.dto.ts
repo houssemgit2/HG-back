@@ -2,21 +2,10 @@
 import { EligibilityDetailsDto } from './eligibility-ca-details.dto';
 import { EligibilityVolumeDto } from './eligibility-volume.dto';
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  ValidateNested,
-} from 'class-validator';
+import { IsArray, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { EligibilityFrancoDto } from './eligibility-franco.dto';
 import { AchatAdvantageDiscountDto } from './achat-advantage-discount.dto';
-import {
-  EuroAchatDiscountDto,
-  PerCentAchatDiscountDto,
-  FreeUnitAchatDiscountDto,
-} from './achat-advantage-discount-details.dto';
 
 export class PromoAchatDto {
   @ApiProperty({
