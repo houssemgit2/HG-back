@@ -1,19 +1,31 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PromoOperationType } from '../entities/PromoType';
 // import { PromoType } from 'src/entities/PromoType';
-import { Repository, LessThan, MoreThan, Between } from 'typeorm';
+import {
+  Repository,
+  LessThan,
+  MoreThan,
+  Between,
+  getConnection,
+} from 'typeorm';
 // Entity
 import { Promo } from './../entities/Promo';
-import { SaveGeneralPromoDto } from './dto/save-general-prams.dto';
+import { PromoGeneralPromoDto } from './dto/promo-general.dto';
 import { PromoCluster } from '../entities/PromoCluster';
 import { PromoAchat } from '../entities/PromoAchat';
 import { PromoAchatDto } from './dto/promo.achat.dto';
 import { PromoMea } from '../entities/PromoMea';
 import { PromoMeaDto, PromoMeaEmplacementDto } from './dto/promo-mea.dto';
 import { PromoMeaEmplacement } from '../entities/PromoMeaEmplacement';
-import { RemunerationFixedDetailsDto } from './dto/remuneration.dto';
-import { convertToCamelCase } from '../common/utils/helpers';
+import { convertToCamelCase, arrayEquals } from '../common/utils/helpers';
+import { Gamme } from '../entities/Gamme';
+import { Products } from '../../dist/src/promo/interface/general.interface';
+import { Product } from '../entities/Product';
 // DTO
 @Injectable()
 export class PromoService {
@@ -22,7 +34,6 @@ export class PromoService {
     private promoRepository: Repository<Promo>,
     @InjectRepository(PromoOperationType)
     private promoOperationTypeRepository: Repository<PromoOperationType>,
-
     @InjectRepository(PromoCluster)
     private promoClusterRepository: Repository<PromoCluster>,
     @InjectRepository(PromoAchat)
@@ -32,52 +43,45 @@ export class PromoService {
     @InjectRepository(PromoMeaEmplacement)
     private promoMeaEmplacementRepository: Repository<PromoMeaEmplacement>,
   ) {}
+  async validPromoType(type: string, promoId: number) {
+    const isValidType = await this.promoOperationTypeRepository
+      .createQueryBuilder('promoType')
+      .leftJoinAndSelect('promoType.operationType', 'operationType')
+      .where('promoType.promoId =:promoId', { promoId })
+      .andWhere('operationType.name like :name', { name: `%${type}%` })
+      .getCount();
+    if (!isValidType)
+      throw new BadRequestException(
+        `This promo is not support ${type} type, update your promo type then retry`,
+      );
+    return true;
+  }
   async saveMeaPromo(promoId: number, promo: PromoMeaDto): Promise<any> {
-    // const promoMea = new PromoMea();
-    // promoMea.promoId = promoId;
-    // promoMea.hasEligibilityMinimumOrder = promo.has_eligibility_minimum_order;
-    // if (promoMea.hasEligibilityMinimumOrder)
-    //   promoMea.eligibilityMinimumDetails = promo.eligibility_minimum_details;
-
-    // promoMea.hasEligibilityCaRange = promo.has_eligibility_ca_range;
-    // if (promoMea.hasEligibilityCaRange)
-    //   promoMea.eligibilityCaRangeDetails = promo.eligibility_ca_range_details;
-
-    // promoMea.hasEligibilityOther = promo.has_eligibility_other;
-    // if (promoMea.hasEligibilityOther)
-    //   promoMea.eligibilityOtherDetails = promo.eligibility_other_details;
-
-    // promoMea.emplacementPlvLabo = promo.emplacement_plv_labo;
-
-    // promoMea.hasRemunerationUnitProduct = promo.has_remuneration_unit_product;
-    // if (promo.has_remuneration_unit_product)
-    //   promoMea.remunerationUnitProductDetails =
-    //     promo.remuneration_unit_product_details;
-
-    // promoMea.hasRemunerationFixed = promo.has_remuneration_fixed;
-    // if (promoMea.hasRemunerationFixed)
-    //   promoMea.remunerationFixedDetails = promo.remuneration_fixed_details;
-
-    // promoMea.hasRemunerationCaAnnual = promo.has_remuneration_ca_annual;
-    // if (promoMea.hasRemunerationCaAnnual)
-    //   promoMea.remunerationCaAnnualDetails =
-    //     promo.remuneration_ca_annual_details;
-    // promoMea.hasRemunerationOther = promo.has_remuneration_other;
-    // if (promoMea.hasRemunerationOther)
-    //   promoMea.remunerationOtherDetails = promo.remuneration_other_details;
-    // const promoMea: PromoMea = { promoId, ...promo };
     try {
+      await this.validPromoType('MEA', promoId);
       if (
         promo.promo_mea_emplacements &&
         Array.isArray(promo.promo_mea_emplacements)
       ) {
+        if (
+          promo.remuneration_fixed_details.has_emplacement &&
+          !arrayEquals(
+            promo.remuneration_fixed_details.data_emplacement.map(
+              item => item.emplacement_type_id,
+            ),
+            promo.promo_mea_emplacements.map(item => item.emplacement_type_id),
+          )
+        ) {
+          throw new BadRequestException(
+            `Remuneration emplacement should be the same emplacement you select in the Emplacement details in the previous step`,
+          );
+        }
         const emplacementList = promo.promo_mea_emplacements.map(
           (item: PromoMeaEmplacementDto): PromoMeaEmplacement => ({
             promoId,
             ...convertToCamelCase(item),
           }),
         );
-        // await this.promoMeaEmplacementRepository.save(emplacementList);
       }
       delete promo.promo_mea_emplacements;
       return await this.promoMeaRepository.save({
@@ -89,20 +93,25 @@ export class PromoService {
     }
   }
   async saveOpAchat(promoId: number, body: PromoAchatDto): Promise<PromoAchat> {
-    const promoAchat = new PromoAchat();
-    promoAchat.promoId = promoId;
-    promoAchat.achatAdvantageDiscountTypeId =
-      body.achat_advantage_discount_type_id;
-    promoAchat.eligibilityFranco = body.eligibility_franco;
-    promoAchat.eligibilityOther = body.eligibility_other;
-    promoAchat.eligibilityVolume = body.eligibility_volume;
-    promoAchat.eligibilityCaDetails = body.eligibility_ca_details;
-    promoAchat.eligibilityAdditionalInformation =
-      body.eligibility_additional_information;
-    promoAchat.achatAdvantageDiscountDetails =
-      body.achat_advantage_discount_details;
+    try {
+      await this.validPromoType('OP ACHAT', promoId);
+      const promoAchat = new PromoAchat();
+      promoAchat.promoId = promoId;
+      promoAchat.achatAdvantageDiscountTypeId =
+        body.achat_advantage_discount_type_id;
+      promoAchat.eligibilityFranco = body.eligibility_franco;
+      promoAchat.eligibilityOther = body.eligibility_other;
+      promoAchat.eligibilityVolume = body.eligibility_volume;
+      promoAchat.eligibilityCaDetails = body.eligibility_ca_details;
+      promoAchat.eligibilityAdditionalInformation =
+        body.eligibility_additional_information;
+      promoAchat.achatAdvantageDiscountDetails =
+        body.achat_advantage_discount_details;
 
-    return await this.promoAchatRepository.save(promoAchat);
+      return await this.promoAchatRepository.save(promoAchat);
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
   }
   async createPromoType(typeIds: number[]) {
     let promoId: number;
@@ -130,28 +139,16 @@ export class PromoService {
   }
   async getPromoType(promoId: number) {
     try {
-      const promo = await this.promoRepository.findOne(promoId);
-      const promoType = await this.promoOperationTypeRepository.find({
-        where: { promoId },
-      });
       return await this.promoRepository.findOne(promoId, {
-        relations: ['promoType'],
+        relations: [
+          'promoType',
+          // 'remunerations',
+          // 'promoClusters',
+          // 'promoAchat',
+          // 'promoConso',
+          // 'promoMea',
+        ],
       });
-
-      return { ...promo, promoType };
-      // .createQueryBuilder('promo')
-      // .leftJoinAndSelect(
-      //   'promo.promoType',
-      //   'promoType',
-      //   'promoType.promoId=promo.id',
-      // )
-      // .leftJoinAndSelect(
-      //   'promoType.operationType',
-      //   'operationType',
-      //   'promoType.operationTypeId=operationType.id',
-      // )
-      // .where('promo.id = :promoId', { promoId })
-      // .getOne();
     } catch (e) {
       throw new InternalServerErrorException(e);
     }
@@ -231,11 +228,23 @@ export class PromoService {
 
   async saveGeneralParams(
     promoId: number,
-    body: SaveGeneralPromoDto,
+    body: PromoGeneralPromoDto,
   ): Promise<Promo> {
     const promo = new Promo();
     promo.id = promoId;
-    promo.gammeId = body.gamme_id;
+    promo.gammeId =
+      body.gamme.id ||
+      (await await getConnection()
+        .createQueryBuilder()
+        .insert()
+        .into(Gamme)
+        .values({ name: body.gamme.name })
+        .execute()
+        .then(data => {
+          console.log('data *-*-*-*-*-*-**-*-*-*-*-');
+          console.log(data.raw.insertId);
+          return data.raw.insertId;
+        }));
     promo.endDate = body.end_date;
     promo.startDate = body.start_date;
     const promoClusters: PromoCluster[] = body.clusters_id.map(item => {
@@ -251,8 +260,25 @@ export class PromoService {
       if (body.option_product === 'exclude')
         promo.productsIdOut = body.products_out;
     } else if (body.concerned === 'product') {
-      promo.productsIdIn = [body.product_id];
-      //  ean = body.ean
+      const productId =
+        body.product.id ||
+        (await await getConnection()
+          .createQueryBuilder()
+          .insert()
+          .into(Product)
+          .values({
+            name: body.product.name,
+            ean: body.product.ean,
+            gammeId: promo.gammeId,
+          })
+          .execute()
+          .then(data => {
+            console.log('data *-*-*-*-*-*-**-*-*-*-*-');
+            console.log(data.raw.insertId);
+            return data.raw.insertId;
+          }));
+
+      promo.productsIdIn = [productId];
       // body.value_unit_capacity  // todo where to save
       // body.lot
       // if(body.lot) body.qnt_product_lot

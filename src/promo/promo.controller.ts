@@ -52,12 +52,13 @@ import { User } from '../entities/User';
 import { UserReq } from '../auth/get-user.decorator';
 import { convertToSnakeCase } from 'src/common/utils/helpers';
 import { SavePromoTypeDto } from './dto/save-promo-types.dto';
-import { SaveGeneralPromoDto } from './dto/save-general-prams.dto';
-import { DateCompValidationPipe } from '../common/pipes/promo/date-compariason.pipe';
+import { PromoGeneralPromoDto } from './dto/promo-general.dto';
+import { PromoValidationPipe } from '../common/pipes/promo/date-compariason.pipe';
 // import { PromoConcernedValidationPipe } from '../common/pipes/promo/promo-concerned.pipe';
 import { PromoAchatDto } from './dto/promo.achat.dto';
 import { PromoAchatValidationPipe } from '../common/pipes/promo/promo-achat.pipe';
 import { PromoMeaDto } from './dto/promo-mea.dto';
+import { PromoIdDto } from './dto/promo-id.dto';
 
 const multerOptionsForMeaExcel: MulterOptions = multerOptions(
   /xlsm|xlsx|xlsb|xls|xla|xlml|ods|csv|.xlsx|csv/,
@@ -95,20 +96,23 @@ export class PromoController {
   @ApiTags('Promo')
   @Get(':promoId')
   @UseGuards(AuthGuard(), AdminGuard)
-  async getPromoType(@Param('promoId') promoId: number) {
-    return await this.promoService.getPromoType(promoId); //
+  async getPromoType(@Param() param: PromoIdDto) {
+    return await this.promoService.getPromoType(param.promoId); //
   }
 
   @ApiTags('Promo-form')
   @Post(':promoId/general')
   @UseGuards(AuthGuard(), AdminGuard)
-  @UsePipes(new DateCompValidationPipe())
+  @UsePipes(new PromoValidationPipe())
   // @UsePipes(new PromoConcernedValidationPipe())
   async savePromoGeneralInfo(
-    @Param('promoId') promoId: number,
-    @Body() body: SaveGeneralPromoDto,
+    @Param() param: PromoIdDto,
+    @Body() body: PromoGeneralPromoDto,
   ) {
-    const promo = await this.promoService.saveGeneralParams(promoId, body);
+    const promo = await this.promoService.saveGeneralParams(
+      param.promoId,
+      body,
+    );
     return promo;
   }
 
@@ -117,10 +121,10 @@ export class PromoController {
   @UseGuards(AuthGuard(), AdminGuard)
   @UsePipes(new PromoAchatValidationPipe())
   async savePromoAchat(
-    @Param('promoId') promoId: number,
+    @Param() param: PromoIdDto,
     @Body() body: PromoAchatDto,
   ) {
-    const promoAchat = await this.promoService.saveOpAchat(promoId, body);
+    const promoAchat = await this.promoService.saveOpAchat(param.promoId, body);
     return promoAchat;
   }
 
@@ -128,11 +132,8 @@ export class PromoController {
   @Post(':promoId/mea')
   @UseGuards(AuthGuard(), AdminGuard)
   // @UsePipes(new PromoAchatValidationPipe())
-  async savePromoMea(
-    @Param('promoId') promoId: number,
-    @Body() body: PromoMeaDto,
-  ) {
-    const meaPromo = await this.promoService.saveMeaPromo(promoId, body);
+  async savePromoMea(@Param() param: PromoIdDto, @Body() body: PromoMeaDto) {
+    const meaPromo = await this.promoService.saveMeaPromo(param.promoId, body);
     return meaPromo;
   }
 
