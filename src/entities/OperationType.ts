@@ -5,7 +5,7 @@ import {
   PrimaryGeneratedColumn,
   BaseEntity,
 } from 'typeorm';
-import { PromoType } from './PromoType';
+import { PromoOperationType } from './PromoType';
 
 @Entity('operation_type', { schema: 'hg_promo_beta' })
 export class OperationType extends BaseEntity {
@@ -16,8 +16,8 @@ export class OperationType extends BaseEntity {
   name: string;
 
   @OneToMany(
-    () => PromoType,
+    () => PromoOperationType,
     promoType => promoType.operationType,
   )
-  promoTypes: PromoType[];
+  promoTypes: PromoOperationType[];
 }

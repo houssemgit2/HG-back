@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PromoType } from '../entities/PromoType';
+import { PromoOperationType } from '../entities/PromoType';
 // import { PromoType } from 'src/entities/PromoType';
 import { Repository, LessThan, MoreThan, Between } from 'typeorm';
 // Entity
@@ -20,8 +20,8 @@ export class PromoService {
   constructor(
     @InjectRepository(Promo)
     private promoRepository: Repository<Promo>,
-    @InjectRepository(PromoType)
-    private promoTypeRepository: Repository<PromoType>,
+    @InjectRepository(PromoOperationType)
+    private promoOperationTypeRepository: Repository<PromoOperationType>,
 
     @InjectRepository(PromoCluster)
     private promoClusterRepository: Repository<PromoCluster>,
@@ -114,7 +114,7 @@ export class PromoService {
           operationTypeId: item,
           promoId: promo.id,
         }));
-        return this.promoTypeRepository
+        return this.promoOperationTypeRepository
           .save(promoTypes)
           .catch(e => {
             throw new InternalServerErrorException(e);
@@ -130,7 +130,15 @@ export class PromoService {
   }
   async getPromoType(promoId: number) {
     try {
-      return await this.promoRepository.findOne(promoId);
+      const promo = await this.promoRepository.findOne(promoId);
+      const promoType = await this.promoOperationTypeRepository.find({
+        where: { promoId },
+      });
+      return await this.promoRepository.findOne(promoId, {
+        relations: ['promoType'],
+      });
+
+      return { ...promo, promoType };
       // .createQueryBuilder('promo')
       // .leftJoinAndSelect(
       //   'promo.promoType',

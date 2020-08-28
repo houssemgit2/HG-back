@@ -9,7 +9,7 @@ import { PdfPromoGeneratorModule } from '@app/pdf-promo-generator';
 import { RejectionReasonModule } from 'src/rejection-reason/rejection-reason.module';
 import { StorePromoMeaModule } from '../store-promo-mea/store-promo-mea.module';
 import { MeaUploadModule } from 'src/mea-upload/mea-upload.module';
-import { PromoType } from '../entities/PromoType';
+import { PromoOperationType } from '../entities/PromoType';
 import { PromoCluster } from '../entities/PromoCluster';
 import { PromoAchat } from '../entities/PromoAchat';
 import { PromoMea } from '../entities/PromoMea';
@@ -19,7 +19,7 @@ import { PromoMeaEmplacement } from '../entities/PromoMeaEmplacement';
   imports: [
     TypeOrmModule.forFeature([
       PromoRepository,
-      PromoType,
+      PromoOperationType,
       PromoCluster,
       PromoAchat,
       PromoMea,

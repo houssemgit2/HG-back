@@ -12,7 +12,7 @@ import { OperationType } from './OperationType';
 import { Product } from './Product';
 import { Promo } from './Promo';
 import { PromoCluster } from './PromoCluster';
-import { PromoType } from './PromoType';
+import { PromoOperationType } from './PromoType';
 import { RefreshToken } from './RefreshToken';
 import { RejectionReason } from './RejectionReason';
 import { Remuneration } from './Remuneration';
@@ -66,7 +66,7 @@ const entities = [
   Product,
   Promo,
   PromoCluster,
-  PromoType,
+  PromoOperationType,
   RefreshToken,
   RejectionReason,
   Remuneration,

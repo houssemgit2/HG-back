@@ -13,7 +13,7 @@ import {
 import { EligibilityCondition } from './EligibilityCondition';
 import { Emplacement } from './Emplacement';
 import { Gamme } from './Gamme';
-import { PromoType } from './PromoType';
+import { PromoOperationType } from './PromoType';
 import { Remuneration } from './Remuneration';
 import { StorePromoMea } from './StorePromoMea';
 import { StorePromoSelected } from './StorePromoSelected';
@@ -77,18 +77,18 @@ export class Promo extends BaseEntity {
   @ManyToOne(
     () => Gamme,
     gamme => gamme.promos,
-    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
   )
   @JoinColumn([{ name: 'gamme_id', referencedColumnName: 'id' }])
   gamme: Gamme;
 
   @OneToMany(
-    () => PromoType,
+    () => PromoOperationType,
     promoType => promoType.promo,
     { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
   )
   @JoinColumn([{ name: 'promo_id', referencedColumnName: 'id' }])
-  promoType: PromoType[];
+  promoType: PromoOperationType[];
 
   @OneToMany(
     () => Remuneration,
