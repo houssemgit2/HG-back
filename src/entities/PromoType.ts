@@ -17,7 +17,7 @@ export class PromoOperationType extends BaseEntity {
   @Column('int', { primary: true, name: 'promo_id' })
   promoId: number;
 
-  @Column('int', { name: 'operation_type_id' })
+  @Column('int', { primary: true, name: 'operation_type_id' })
   operationTypeId: number;
 
   @ManyToOne(

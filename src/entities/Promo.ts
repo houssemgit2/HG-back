@@ -85,7 +85,7 @@ export class Promo extends BaseEntity {
   @OneToMany(
     () => PromoOperationType,
     promoType => promoType.promo,
-    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
   )
   @JoinColumn([{ name: 'promo_id', referencedColumnName: 'id' }])
   promoType: PromoOperationType[];
