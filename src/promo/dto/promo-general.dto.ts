@@ -6,15 +6,15 @@ import {
   IsEnum,
   IsNotEmpty,
   IsOptional,
+  IsNumber,
+  ValidateIf,
+  ValidateNested,
 } from 'class-validator';
 import * as moment from 'moment';
-import { IsNull } from 'typeorm';
-// enum ProductOptions {
-//   ALL = 'all',
-//   SOME = 'some',
-//   EXCLUDE = 'exclude',
-// }
-export class SaveGeneralPromoDto {
+import { GammeDto } from './gamme.dto';
+import { ProductDto } from './product.dto';
+
+export class PromoGeneralPromoDto {
   @ApiProperty({
     required: true,
     type: Date,
@@ -45,21 +45,22 @@ export class SaveGeneralPromoDto {
 
   @ApiProperty({
     required: true,
-    type: String,
     example: 'gamme',
   })
   // @Type(() => Number)
   @IsNotEmpty()
-  @IsEnum(['gamme', 'product'])
+  // @IsEnum(['gamme', 'product'])
   public concerned: 'gamme' | 'product';
 
   @ApiProperty({
     required: true,
-    type: Number,
-    // example: [1, 3],
+    type: GammeDto,
+    example: { id: 1, name: 'gamme' },
   })
-  @Type(() => Number)
-  public gamme_id: number;
+  @Type(() => GammeDto)
+  @ValidateNested({ always: true, each: true })
+  @IsNotEmpty()
+  public gamme: GammeDto;
 
   @ApiProperty({
     required: false,
@@ -70,40 +71,37 @@ export class SaveGeneralPromoDto {
 
   @ApiProperty({
     required: false,
-    type: Number,
-    // example: [1, 3],
+    type: ProductDto,
+    example: { id: 1, ean: 3121321, name: 'product' },
   })
+  @ValidateNested({ always: true, each: true })
+  @Type(() => ProductDto)
   @IsNotEmpty({ groups: ['concerned_product'] })
   @IsOptional({ groups: ['concerned_gamme'] })
-  public product_id: number;
+  public product: ProductDto;
 
   @ApiProperty({
     required: false,
-    type: Number,
-    // example: [1, 3],
-  })
-  @IsOptional({ groups: ['concerned_product'] })
-  public ean: number;
-
-  @ApiProperty({
-    required: false,
-    type: Number,
+    type: ProductDto,
     isArray: true,
-    example: [1, 3],
+    example: [{ id: 1, name: 'product' }],
   })
+  @ValidateNested({ always: true, each: true })
+  @Type(() => ProductDto)
   @IsNotEmpty({ groups: ['concerned_gamme', 'some_product'] })
   @IsOptional({ groups: ['all_product'] })
-  public products_in: number[];
-
+  public products_in: ProductDto[];
   @ApiProperty({
     required: false,
-    type: Number,
+    type: ProductDto,
     isArray: true,
-    example: [1, 3],
+    example: [{ id: 1, name: 'product' }],
   })
-  @IsNotEmpty({ groups: ['concerned_gamme', 'exclude_product'] })
+  @ValidateNested({ always: true, each: true })
+  @Type(() => ProductDto)
+  @IsNotEmpty({ groups: ['concerned_gamme', 'some_product'] })
   @IsOptional({ groups: ['all_product'] })
-  public products_out: number[];
+  public products_out: ProductDto[];
 
   @ApiProperty({
     required: true,

@@ -92,56 +92,5 @@ export class PromoAchatDto {
   @Type(() => AchatAdvantageDiscountDto)
   achat_advantage_discount_details: AchatAdvantageDiscountDto;
 
-  // @ApiProperty()
-  // @IsNotEmpty()
-  // @Type(() => Number)
-  // achat_advantage_discount_type_id: number;
-
-  // @ApiProperty({
-  //   type: EuroAchatDiscountDto,
-  //   example: {
-  //     achat_advantage_sub_discount_type_id: 1,
-  //     value: 2,
-  //   },
-  // })
-  // @IsNotEmpty({ groups: ['euro'] })
-  // @IsOptional({ groups: ['freeUnit', 'percentage'] })
-  // @ValidateNested({ each: true, always: true })
-  // @Type(() => EuroAchatDiscountDto)
-  // euro_details: EuroAchatDiscountDto;
-
-  // @ApiProperty({
-  //   type: PerCentAchatDiscountDto,
-  //   isArray: true,
-  //   example: [
-  //     {
-  //       unity: true,
-  //       discount: false,
-  //       achat_advantage_sub_discount_type_id: 1,
-  //       variegated: true,
-  //       comment: 'comment',
-  //     },
-  //   ],
-  // })
-  // @IsArray()
-  // @IsNotEmpty({ groups: ['percentage'] })
-  // @IsOptional({ groups: ['freeUnit', 'euro'] })
-  // @ValidateNested({ each: true, always: true })
-  // @Type(() => PerCentAchatDiscountDto)
-  // percentage_details: PerCentAchatDiscountDto[];
-
-  // @ApiProperty({
-  //   type: FreeUnitAchatDiscountDto,
-  //   example: {
-  //     ordered_unity: 2,
-  //     free_unity: 1,
-  //     comment: 'text',
-  //   },
-  // })
-  // @IsNotEmpty({ groups: ['freeUnit'] })
-  // @IsOptional({ groups: ['percentage', 'euro'] })
-  // @ValidateNested({ each: true, always: true })
-  // @Type(() => FreeUnitAchatDiscountDto)
-  // free_unit_details: FreeUnitAchatDiscountDto;
   achat_advantage_discount_type_id?: number;
 }

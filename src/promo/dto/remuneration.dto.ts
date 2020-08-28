@@ -16,7 +16,7 @@ export class QuantityRemunerationFixedDto {
   @IsNumber()
   @Type(() => Number)
   @IsNotEmpty()
-  emplacement_id: number;
+  emplacement_type_id: number;
 
   @ApiProperty()
   @IsString()

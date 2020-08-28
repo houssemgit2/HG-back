@@ -17,7 +17,16 @@ import {
 import { IsString, IsNumber } from 'class-validator';
 import { RemunerationUnitProductDetailsDto } from './remuneration.dto';
 export class PromoMeaEmplacementDto {
+  @ApiProperty()
+  @IsNotEmpty()
+  @Type(() => Number)
+  @IsNumber()
   emplacement_type_id: number;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @Type(() => String)
+  @IsString()
   details: string;
 }
 export class PromoMeaDto {
@@ -79,10 +88,12 @@ export class PromoMeaDto {
   @ApiProperty({
     isArray: true,
     type: EligibilityDetailsDto,
-    example: [{
-      emplacement_type_id: 2,
-      details: 'string',
-    }],
+    example: [
+      {
+        emplacement_type_id: 2,
+        details: 'string',
+      },
+    ],
   })
   @IsArray()
   @IsNotEmpty()
@@ -174,7 +185,7 @@ export class PromoMeaDto {
   @IsString()
   remuneration_other_details: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: Number, example: 1 })
   @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
