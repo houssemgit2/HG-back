@@ -81,6 +81,7 @@ export class PromoService {
             ...convertToCamelCase(item),
           }),
         );
+        await this.promoMeaEmplacementRepository.save(emplacementList);
       }
       delete promo.promo_mea_emplacements;
       return await this.promoMeaRepository.save({
