@@ -22,6 +22,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { CoquePromoModule } from './coque-promo/coque-promo.module';
 import { ClustersModule } from './clusters/clusters.module';
 import { SupportModule } from './support/support.module';
+import { SelectModule } from './select/select.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { SupportModule } from './support/support.module';
     CoquePromoModule,
     ClustersModule,
     SupportModule,
+    SelectModule,
   ],
   controllers: [AppController],
   providers: [AppService],

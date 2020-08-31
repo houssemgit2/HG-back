@@ -24,7 +24,6 @@ import { PromoMeaDto, PromoMeaEmplacementDto } from './dto/promo-mea.dto';
 import { PromoMeaEmplacement } from '../entities/PromoMeaEmplacement';
 import { convertToCamelCase, arrayEquals } from '../common/utils/helpers';
 import { Gamme } from '../entities/Gamme';
-import { Products } from '../../dist/src/promo/interface/general.interface';
 import { Product } from '../entities/Product';
 // DTO
 @Injectable()
@@ -240,11 +239,7 @@ export class PromoService {
         .into(Gamme)
         .values({ name: body.gamme.name })
         .execute()
-        .then(data => {
-          console.log('data *-*-*-*-*-*-**-*-*-*-*-');
-          console.log(data.raw.insertId);
-          return data.raw.insertId;
-        }));
+        .then(data => data.raw.insertId));
     promo.endDate = body.end_date;
     promo.startDate = body.start_date;
     const promoClusters: PromoCluster[] = body.clusters_id.map(item => {
@@ -272,11 +267,7 @@ export class PromoService {
             gammeId: promo.gammeId,
           })
           .execute()
-          .then(data => {
-            console.log('data *-*-*-*-*-*-**-*-*-*-*-');
-            console.log(data.raw.insertId);
-            return data.raw.insertId;
-          }));
+          .then(data => data.raw.insertId));
 
       promo.productsIdIn = [productId];
       // body.value_unit_capacity  // todo where to save
