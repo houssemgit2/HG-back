@@ -7,10 +7,20 @@ import { AuthModule } from '../auth/auth.module';
 import { Gamme } from '../entities/Gamme';
 import { Laboratory } from '../entities/Laboratory';
 import { OperationType } from '../entities/OperationType';
+import { AchatAdvantageDiscountType } from '../entities/AchatAdvantageDiscountType';
+import { AchatSubAdvantageDiscountType } from '../entities/AchatSubAdvantageDiscountType';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Product, Gamme, Laboratory, OperationType]),
+    TypeOrmModule.forFeature([
+      Product,
+      Gamme,
+      Laboratory,
+      OperationType,
+      AchatAdvantageDiscountType,
+      AchatSubAdvantageDiscountType,
+      AchatSubAdvantageDiscountType,
+    ]),
     AuthModule,
   ],
   controllers: [SelectController],

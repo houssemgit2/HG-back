@@ -1,13 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Product } from '../entities/Product';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  Like,
-  Repository,
-  FindConditions,
-  getConnection,
-  ObjectType,
-} from 'typeorm';
+import { Like, Repository, getConnection, ObjectType } from 'typeorm';
 import { Gamme } from '../entities/Gamme';
 import { Laboratory } from '../entities/Laboratory';
 import { AddProductDto } from './dto/addProduct.dto';
@@ -15,6 +9,9 @@ import { GetProductDto } from './dto/get-product.dto';
 import { GetGammeDto } from './dto/get-gamme.dto';
 import { OperationType } from '../entities/OperationType';
 import { BaseEntity } from 'typeorm';
+import { AchatAdvantageDiscountType } from '../entities/AchatAdvantageDiscountType';
+import { AchatSubAdvantageDiscountType } from '../entities/AchatSubAdvantageDiscountType';
+import { DiscountDto } from './dto/discount.dto';
 
 @Injectable()
 export class SelectService {
@@ -27,8 +24,17 @@ export class SelectService {
 
     @InjectRepository(Laboratory)
     private laboratoryRepository: Repository<Laboratory>,
+
     @InjectRepository(OperationType)
     private operationTypeRepository: Repository<OperationType>,
+
+    @InjectRepository(AchatAdvantageDiscountType)
+    private achatDiscountRepository: Repository<AchatAdvantageDiscountType>,
+
+    @InjectRepository(AchatSubAdvantageDiscountType)
+    private achatSubDiscountRepository: Repository<
+      AchatSubAdvantageDiscountType
+    >,
   ) {}
 
   async getProduct(product: GetProductDto): Promise<Product[]> {
@@ -68,12 +74,18 @@ export class SelectService {
   ) {
     const query = getConnection()
       .createQueryBuilder()
-      .select() // table, Entity, key
+      .select(entity.name) // table, Entity, key
       .from(entity.entityTarget, entity.name);
     if (name)
       query.where(`name = :name`, {
         name: `%${name}%`,
       });
     return await query.getMany();
+  }
+  async getDiscount(query: DiscountDto) {
+    const condition: any = {};
+    if (query.id) condition.id = query.id;
+    if (query.name) condition.name = Like(`%${query.name}%`);
+    return await this.achatDiscountRepository.find({ where: { ...condition } });
   }
 }
