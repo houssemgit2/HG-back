@@ -85,7 +85,7 @@ export class PromoController {
   }
 
   @ApiTags('Promo-form')
-  @Post()
+  @Post('/types')
   @UseGuards(AuthGuard(), AdminGuard)
   async setPromoType(@Query() query: SavePromoTypeDto) {
     console.log('query****************');
