@@ -1,0 +1,20 @@
+{
+    "type": "mysql",
+    "host": "hg-referentiel-dev-instance-1.ceia1tvbrwoq.eu-west-3.rds.amazonaws.com",
+    "port": 3306,
+    "username": "hgbetaUser",
+    "password": "AZcLpafyKMG6HPxs",
+    "database": "hg_promo_beta",
+    "synchronize": false,
+    "logging": false,
+    "entities": [
+        "./src/entities/*.ts"
+    ],
+    "migrations": [
+        "./migrations/*.ts"
+    ],
+    "cli": {
+        "entitiesDir": "src/entities",
+        "migrationsDir": "./migrations"
+    }
+}

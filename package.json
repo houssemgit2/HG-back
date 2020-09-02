@@ -24,10 +24,10 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "typeorm": "ts-node --require ts-node/register ./node_modules/typeorm/cli.js",
-    "migration:generate": "ts-node node_modules/.bin/typeorm migration:generate --config ./orm.config.json --name",
-    "migration:create": "ts-node node_modules/.bin/typeorm migration:create --config ./orm.config.json",
-    "migration:run": "ts-node node_modules/.bin/typeorm migration:run --config ./orm.config.json",
-    "migration:revert": "ts-node node_modules/.bin/typeorm migration:revert --config ./orm.config.json"
+    "migration:generate": "ts-node node_modules/.bin/typeorm migration:generate --config ./ormconfig.json --name",
+    "migration:create": "ts-node node_modules/.bin/typeorm migration:create --config ./ormconfig.json",
+    "migration:run": "ts-node node_modules/.bin/typeorm migration:run --config ./ormconfig.json",
+    "migration:revert": "ts-node node_modules/.bin/typeorm migration:revert --config ./ormconfig.json"
   },
   "dependencies": {
     "@nestjs/common": "^7.0.0",
@@ -106,7 +106,7 @@
     "ts-loader": "^6.2.1",
     "ts-node": "^8.6.2",
     "tsconfig-paths": "^3.9.0",
-    "typescript": "^3.7.4"
+    "typescript": "^4.0.2"
   },
   "jest": {
     "moduleFileExtensions": [
