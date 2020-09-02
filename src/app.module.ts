@@ -39,9 +39,9 @@ import { SelectModule } from './select/select.module';
       synchronize: false,
       entities: entities,
       migrationsTableName: 'custom_migration_table',
-      migrations: ['migration/*.ts'],
+      migrations: ['src/migration/*.ts'],
       cli: {
-        migrationsDir: 'migration',
+        migrationsDir: 'src/migration',
       },
     }),
     ConfigModule.forRoot({

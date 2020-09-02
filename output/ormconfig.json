@@ -1,0 +1,14 @@
+[
+  {
+    "name": "default",
+    "type": "mysql",
+    "host": "hg-referentiel-dev-instance-1.ceia1tvbrwoq.eu-west-3.rds.amazonaws.com",
+    "port": 3306,
+    "username": "hgbetaUser",
+    "password": "AZcLpafyKMG6HPxs",
+    "database": "hg_promo_beta_old_structure",
+    "schema": "",
+    "synchronize": false,
+    "entities": ["entities/*.js"]
+  }
+]
