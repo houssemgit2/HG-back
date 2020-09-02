@@ -21,10 +21,10 @@ import { PromoCluster } from './PromoCluster';
 import { PromoAchat } from './PromoAchat';
 import { PromoConso } from './PromoConso';
 import { PromoMea } from './PromoMea';
-import { ManyToMany } from 'typeorm';
-import { OperationType } from './OperationType';
 
 @Index('promo_gamme_id_fk', ['gammeId'], {})
+@Index('promo_status_id_fk', ['statusId'], {})
+@Index('promo_concerned_id_fk', ['statusId'], {})
 @Entity('promo', { schema: 'hg_promo_beta' })
 export class Promo extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
@@ -39,14 +39,20 @@ export class Promo extends BaseEntity {
   @Column('date', { name: 'end_date', nullable: true })
   endDate: Date | null;
 
-  @Column('int', { name: 'offer_advantage_client', nullable: true })
-  offerAvantageClient: number;
+  @Column('int', { name: 'status_id', nullable: true })
+  statusId: number;
+
+  @Column('int', { name: 'promo_concern_type_id', nullable: true })
+  promoConcernTypeId: number;
 
   @Column('json', { name: 'products_id_in', nullable: true })
   productsIdIn: object | null;
 
   @Column('json', { name: 'products_id_out', nullable: true })
   productsIdOut: object | null;
+
+  @Column('text', { name: 'comment', nullable: true })
+  comment: string;
 
   @Column('datetime', {
     name: 'created_at',
@@ -81,6 +87,14 @@ export class Promo extends BaseEntity {
   )
   @JoinColumn([{ name: 'gamme_id', referencedColumnName: 'id' }])
   gamme: Gamme;
+
+  @ManyToOne(
+    () => Gamme,
+    gamme => gamme.promos,
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
+  )
+  @JoinColumn([{ name: 'status_id', referencedColumnName: 'id' }])
+  status: Gamme;
 
   @OneToMany(
     () => PromoOperationType,

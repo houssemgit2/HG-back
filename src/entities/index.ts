@@ -16,7 +16,6 @@ import { PromoOperationType } from './PromoType';
 import { RefreshToken } from './RefreshToken';
 import { RejectionReason } from './RejectionReason';
 import { Remuneration } from './Remuneration';
-import { RemunerationType } from './RemunerationType';
 import { Store } from './Store';
 import { StorePermission } from './StorePermission';
 import { StorePromoMea } from './StorePromoMea';
@@ -34,7 +33,6 @@ import { AchatSubAdvantageDiscountType } from './AchatSubAdvantageDiscountType';
 import { CircuitType } from './CircuitType';
 import { Customer } from './Customer';
 import { DocumentProvideType } from './DocumentProvideType';
-import { EligibilityCaRangeType } from './EligibilityCaRangeType';
 import { EligibilityFrancoType } from './EligibilityFrancoType';
 import { EqualConditionType } from './EqualConditionType';
 import { MacroType } from './MacroType';
@@ -51,6 +49,8 @@ import { RemunerationFixedType } from './RemunerationFixedType';
 import { RepaymentCircuitType } from './RepaymentCircuitType';
 import { Ressource } from './Ressource';
 import { PromoMeaEmplacement } from './PromoMeaEmplacement';
+import { PromoStatus } from './Status';
+import { PromoConcernedType } from './PromoConcernedType';
 
 const entities = [
   Brand,
@@ -70,7 +70,6 @@ const entities = [
   RefreshToken,
   RejectionReason,
   Remuneration,
-  RemunerationType,
   Store,
   StorePermission,
   StorePromoMea,
@@ -89,7 +88,6 @@ const entities = [
   CircuitType,
   Customer,
   DocumentProvideType,
-  EligibilityCaRangeType,
   EligibilityFrancoType,
   EqualConditionType,
   MacroType,
@@ -106,5 +104,7 @@ const entities = [
   RemunerationFixedType,
   RepaymentCircuitType,
   Ressource,
+  PromoStatus,
+  PromoConcernedType,
 ];
 export default entities;

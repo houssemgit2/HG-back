@@ -5,11 +5,11 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
-  BaseEntity
-} from "typeorm";
-import { EmplacementType } from "./EmplacementType";
-import { Promo } from "./Promo";
-import { RemunerationType } from "./RemunerationType";
+  BaseEntity,
+} from 'typeorm';
+import { EmplacementType } from './EmplacementType';
+import { Promo } from './Promo';
+import { RemunerationBaseType } from './RemunerationBaseType';
 
 @Index('remuneration_remuneration_type_id_fk', ['remunerationTypeId'], {})
 @Index('remuneration_emplacement_type_id_fk', ['emplacementTypeId'], {})
@@ -54,10 +54,10 @@ export class Remuneration extends BaseEntity {
   promo: Promo;
 
   @ManyToOne(
-    () => RemunerationType,
-    remunerationType => remunerationType.remunerations,
+    () => RemunerationBaseType,
+    RemunerationBaseType => RemunerationBaseType.remunerations,
     { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
   )
   @JoinColumn([{ name: 'remuneration_type_id', referencedColumnName: 'id' }])
-  remunerationType: RemunerationType;
+  remunerationBaseType: RemunerationBaseType;
 }
