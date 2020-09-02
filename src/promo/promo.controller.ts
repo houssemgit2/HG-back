@@ -101,10 +101,26 @@ export class PromoController {
   }
 
   @ApiTags('Promo-form')
+  @Put(':promoId')
+  @UseGuards(AuthGuard(), AdminGuard)
+  async updatePromoStatus(
+    @Param() param: PromoIdDto,
+    @Body('status') status: number,
+  ) {
+    return await this.promoService.updatePromo(param.promoId, status); //
+  }
+
+  @ApiTags('Promo-form')
+  @Post(':promoId')
+  @UseGuards(AuthGuard(), AdminGuard)
+  async DuplicatePromo(@Param() param: PromoIdDto) {
+    return await this.promoService.duplicatePromo(param.promoId);
+  }
+
+  @ApiTags('Promo-form')
   @Post(':promoId/general')
   @UseGuards(AuthGuard(), AdminGuard)
   @UsePipes(new PromoValidationPipe())
-  // @UsePipes(new PromoConcernedValidationPipe())
   async savePromoGeneralInfo(
     @Param() param: PromoIdDto,
     @Body() body: PromoGeneralPromoDto,

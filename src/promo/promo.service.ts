@@ -116,7 +116,7 @@ export class PromoService {
   async createPromoType(typeIds: number[]) {
     let promoId: number;
     return this.promoRepository
-      .save({ gammeId: null, status: 0 })
+      .save({ gammeId: null, statusId: 0 })
       .then(promo => {
         promoId = promo.id;
         const promoTypes = typeIds.map(item => ({
@@ -153,7 +153,9 @@ export class PromoService {
       throw new InternalServerErrorException(e);
     }
   }
-
+  async updatePromo(promoId: number, status: number) {
+    return await this.promoRepository.update(promoId, { statusId: status });
+  }
   async duplicatePromo(promoId: number) {
     const promo = await this.promoRepository.findOne(promoId, {
       relations: [
@@ -169,7 +171,7 @@ export class PromoService {
     delete promo.id;
     delete promo.createdAt;
     delete promo.updatedAt;
-    return await promo.save();
+    return await this.promoRepository.save(promo);
   }
   async getAll(filter): Promise<Promo[]> {
     const sqlQuery = this.promoRepository
@@ -251,11 +253,11 @@ export class PromoService {
     });
     // groups  : concerned_gamme: all,some,exclude
     // groups  : concerned_product: without_lot,with_lot
-    if (body.concerned === 'gamme') {
+    if (body.promo_concerned_id === 1) {
       if (body.option_product === 'some') promo.productsIdIn = body.products_in;
       if (body.option_product === 'exclude')
         promo.productsIdOut = body.products_out;
-    } else if (body.concerned === 'product') {
+    } else if (body.promo_concerned_id === 2) {
       const productId =
         body.product.id ||
         (await await getConnection()
@@ -271,9 +273,14 @@ export class PromoService {
           .then(data => data.raw.insertId));
 
       promo.productsIdIn = [productId];
-      // body.value_unit_capacity  // todo where to save
-      // body.lot
-      // if(body.lot) body.qnt_product_lot
+      // const product = {
+      //   productId: promo.productsIdIn[0],
+      //   promoId,
+      //   valueUnitCapacity: body.value_unit_capacity,
+      //   hasLot: body.lot,
+      //   lotProductQnt: body.qnt_product_lot,
+      // };
+
     }
     try {
       await this.promoClusterRepository.save(promoClusters);

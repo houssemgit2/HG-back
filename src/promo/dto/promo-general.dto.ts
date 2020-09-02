@@ -13,6 +13,8 @@ import {
 import * as moment from 'moment';
 import { GammeDto } from './gamme.dto';
 import { ProductDto } from './product.dto';
+import { IsUserAlreadyExist } from '../../common/decorators/isUnique.validation';
+import { PromoConcernedType } from '../../entities/PromoConcernedType';
 
 export class PromoGeneralPromoDto {
   @ApiProperty({
@@ -45,12 +47,22 @@ export class PromoGeneralPromoDto {
 
   @ApiProperty({
     required: true,
-    example: 'gamme',
+    example: 2,
   })
-  // @Type(() => Number)
+  @Type(() => Number)
   @IsNotEmpty()
-  // @IsEnum(['gamme', 'product'])
-  public concerned: 'gamme' | 'product';
+  @IsUserAlreadyExist(
+    {
+      message: 'concerned id not found',
+    },
+    {
+      entityName: 'PromoConcernedType',
+      entity: PromoConcernedType,
+      key: 'id',
+    },
+    false,
+  )
+  public promo_concerned_id: number;
 
   @ApiProperty({
     required: true,
