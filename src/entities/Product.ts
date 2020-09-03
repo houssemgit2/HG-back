@@ -8,6 +8,7 @@ import {
   BaseEntity,
 } from 'typeorm';
 import { Gamme } from './Gamme';
+import { MeasureType } from './MeasureType';
 
 @Index('product_gamme_id_fk', ['gammeId'], {})
 @Index('product_measure_type_id_fk', ['measureTypeId'], {})
@@ -58,4 +59,12 @@ export class Product extends BaseEntity {
   )
   @JoinColumn([{ name: 'gamme_id', referencedColumnName: 'id' }])
   gamme: Gamme;
+
+  @ManyToOne(
+    () => MeasureType,
+    measureType => measureType.products,
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
+  )
+  @JoinColumn([{ name: 'gamme_id', referencedColumnName: 'id' }])
+  measureType: MeasureType;
 }

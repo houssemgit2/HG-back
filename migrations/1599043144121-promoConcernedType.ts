@@ -19,11 +19,11 @@ export class PromoConcernedType1599043144121 implements MigrationInterface {
           },
         ],
       }),
-      false,
+      true,
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<any> {
-    queryRunner.query(`DROP TABLE promo_concerned_type`);
+    await queryRunner.query(`DROP TABLE promo_concerned_type`);
   }
 }

@@ -20,7 +20,7 @@ import moment = require('moment');
 import { RejectionReason } from '../entities/RejectionReason';
 import { RejectionReasonRepository } from 'src/rejection-reason/rejection-reason.repository';
 import { Cron } from '@nestjs/schedule';
-import { promoState } from 'src/config/stateEnum';
+import { promoState } from 'src/config/enum-types';
 
 @Injectable()
 export class StorePromoMeaService {

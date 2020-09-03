@@ -51,6 +51,7 @@ import { Ressource } from './Ressource';
 import { PromoMeaEmplacement } from './PromoMeaEmplacement';
 import { PromoStatus } from './Status';
 import { PromoConcernedType } from './PromoConcernedType';
+import { MeasureType } from './MeasureType';
 
 const entities = [
   Brand,
@@ -106,5 +107,6 @@ const entities = [
   Ressource,
   PromoStatus,
   PromoConcernedType,
+  MeasureType,
 ];
 export default entities;

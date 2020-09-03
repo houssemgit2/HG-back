@@ -10,6 +10,7 @@ import { RemunerationFixedType } from 'src/entities/RemunerationFixedType';
 import { RepaymentCircuitType } from 'src/entities/RepaymentCircuitType';
 import { PromoConcernedType } from '../entities/PromoConcernedType';
 import { PromoStatus } from '../entities/Status';
+import { MeasureType } from '../entities/MeasureType';
 
 export enum promoState {
   CONFIRMED = 'CONFIRMED',
@@ -27,17 +28,17 @@ export const STATIC_TABLES = [
     entityName: 'RemunerationCaAnnualTargetType',
   },
   {
-    name: 'remuneration_fixed',
+    name: 'remuneration-fixed',
     targetEntity: RemunerationFixedType,
     entityName: 'RemunerationFixedType',
   },
   {
-    name: 'ca_plate',
+    name: 'ca-plate',
     targetEntity: RemunerationCaAnnualPlateType,
     entityName: 'RemunerationCaAnnualPlateType',
   },
   {
-    name: 'remuneration_base',
+    name: 'remuneration-base',
     targetEntity: RemunerationBaseType,
     entityName: 'RemunerationBaseType',
   },
@@ -81,5 +82,10 @@ export const STATIC_TABLES = [
     name: 'promo-status',
     targetEntity: PromoStatus,
     entityName: 'PromoStatus', //promo_status
+  },
+  {
+    name: 'measure-type',
+    targetEntity: MeasureType,
+    entityName: 'MeasureType', //promo_status
   },
 ];
