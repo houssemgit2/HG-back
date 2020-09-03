@@ -5,11 +5,12 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
-  BaseEntity
-} from "typeorm";
-import { Gamme } from "./Gamme";
+  BaseEntity,
+} from 'typeorm';
+import { Gamme } from './Gamme';
 
 @Index('product_gamme_id_fk', ['gammeId'], {})
+@Index('product_measure_type_id_fk', ['measureTypeId'], {})
 @Entity('product', { schema: 'hg_promo_beta' })
 export class Product extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
@@ -21,8 +22,20 @@ export class Product extends BaseEntity {
   @Column('int', { name: 'gamme_id' })
   gammeId: number;
 
+  @Column('int', { name: 'measure_type_id' })
+  measureTypeId: number;
+
   @Column('varchar', { name: 'name', length: 64 })
   name: string;
+
+  @Column('tinyint', { name: 'is_lot', width: 1 })
+  isLot: boolean;
+
+  @Column('int', { name: 'quantity_lot' })
+  quantityLot: number;
+
+  @Column('float', { name: 'measure_value' })
+  measureValue: number;
 
   @Column('datetime', {
     name: 'created_at',

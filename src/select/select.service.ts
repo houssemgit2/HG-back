@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Product } from '../entities/Product';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Like, Repository, getConnection, ObjectType } from 'typeorm';
@@ -72,15 +72,19 @@ export class SelectService {
     entity: { entityTarget: ObjectType<BaseEntity>; name: string },
     name?: string,
   ) {
-    const query = getConnection()
-      .createQueryBuilder()
-      .select(entity.name) // table, Entity, key
-      .from(entity.entityTarget, entity.name);
-    if (name)
-      query.where(`name = :name`, {
-        name: `%${name}%`,
-      });
-    return await query.getMany();
+    try {
+      const query = getConnection()
+        .createQueryBuilder()
+        .select(entity.name) // table, Entity, key
+        .from(entity.entityTarget, entity.name);
+      if (name)
+        query.where(`name = :name`, {
+          name: `%${name}%`,
+        });
+      return await query.getMany();
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
   }
   async getDiscount(query: DiscountDto) {
     const condition: any = {};
