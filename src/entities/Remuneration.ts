@@ -1,3 +1,4 @@
+// todo to be deleted
 import {
   Column,
   Entity,
@@ -45,13 +46,13 @@ export class Remuneration extends BaseEntity {
   @JoinColumn([{ name: 'emplacement_type_id', referencedColumnName: 'id' }])
   emplacementType: EmplacementType;
 
-  @ManyToOne(
-    () => Promo,
-    promo => promo.remunerations,
-    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
-  )
-  @JoinColumn([{ name: 'promo_id', referencedColumnName: 'id' }])
-  promo: Promo;
+  // @ManyToOne(
+  //   () => Promo,
+  //   promo => promo.remunerations,
+  //   { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
+  // )
+  // @JoinColumn([{ name: 'promo_id', referencedColumnName: 'id' }])
+  // promo: Promo;
 
   @ManyToOne(
     () => RemunerationBaseType,

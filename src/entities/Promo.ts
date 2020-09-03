@@ -8,19 +8,18 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
   BaseEntity,
-  JoinTable,
 } from 'typeorm';
 import { EligibilityCondition } from './EligibilityCondition';
 import { Emplacement } from './Emplacement';
 import { Gamme } from './Gamme';
 import { PromoOperationType } from './PromoType';
-import { Remuneration } from './Remuneration';
 import { StorePromoMea } from './StorePromoMea';
 import { StorePromoSelected } from './StorePromoSelected';
 import { PromoCluster } from './PromoCluster';
 import { PromoAchat } from './PromoAchat';
 import { PromoConso } from './PromoConso';
 import { PromoMea } from './PromoMea';
+import { PromoStatus } from './Status';
 
 @Index('promo_gamme_id_fk', ['gammeId'], {})
 @Index('promo_status_id_fk', ['statusId'], {})
@@ -39,7 +38,7 @@ export class Promo extends BaseEntity {
   @Column('date', { name: 'end_date', nullable: true })
   endDate: Date | null;
 
-  @Column('int', { name: 'status_id', nullable: true })
+  @Column('int', { name: 'status_id', nullable: true, default: 0 })
   statusId: number;
 
   @Column('int', { name: 'promo_concern_type_id', nullable: true })
@@ -94,7 +93,7 @@ export class Promo extends BaseEntity {
     { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
   )
   @JoinColumn([{ name: 'status_id', referencedColumnName: 'id' }])
-  status: Gamme;
+  status: PromoStatus;
 
   @OneToMany(
     () => PromoOperationType,
@@ -104,11 +103,11 @@ export class Promo extends BaseEntity {
   @JoinColumn([{ name: 'promo_id', referencedColumnName: 'id' }])
   promoType: PromoOperationType[];
 
-  @OneToMany(
-    () => Remuneration,
-    remuneration => remuneration.promo,
-  )
-  remunerations: Remuneration[];
+  // @OneToMany(
+  //   () => Remuneration,
+  //   remuneration => remuneration.promo,
+  // )
+  // remunerations: Remuneration[];
 
   @OneToMany(
     () => StorePromoMea,
