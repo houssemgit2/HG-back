@@ -14,6 +14,8 @@ import { PromoCluster } from '../entities/PromoCluster';
 import { PromoAchat } from '../entities/PromoAchat';
 import { PromoMea } from '../entities/PromoMea';
 import { PromoMeaEmplacement } from '../entities/PromoMeaEmplacement';
+import { PromoConso } from '../entities/PromoConso';
+import { StorePromoMea } from '../entities/StorePromoMea';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { PromoMeaEmplacement } from '../entities/PromoMeaEmplacement';
       PromoAchat,
       PromoMea,
       PromoMeaEmplacement,
+      PromoConso,
+      StorePromoMea,
     ]),
     AuthModule,
     PdfPromoGeneratorModule,

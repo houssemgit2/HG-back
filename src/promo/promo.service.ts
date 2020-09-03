@@ -25,6 +25,8 @@ import { PromoMeaEmplacement } from '../entities/PromoMeaEmplacement';
 import { convertToCamelCase, arrayEquals } from '../common/utils/helpers';
 import { Gamme } from '../entities/Gamme';
 import { Product } from '../entities/Product';
+import { StorePromoMea } from '../entities/StorePromoMea';
+import { PromoConso } from '../entities/PromoConso';
 // DTO
 @Injectable()
 export class PromoService {
@@ -37,10 +39,15 @@ export class PromoService {
     private promoClusterRepository: Repository<PromoCluster>,
     @InjectRepository(PromoAchat)
     private promoAchatRepository: Repository<PromoAchat>,
+    @InjectRepository(PromoConso)
+    private promoConsoRepository: Repository<PromoConso>,
     @InjectRepository(PromoMea)
     private promoMeaRepository: Repository<PromoMea>,
     @InjectRepository(PromoMeaEmplacement)
     private promoMeaEmplacementRepository: Repository<PromoMeaEmplacement>,
+
+    @InjectRepository(StorePromoMea)
+    private storePromoMeaRepository: Repository<StorePromoMea>,
   ) {}
   async validPromoType(type: string, promoId: number) {
     const isValidType = await this.promoOperationTypeRepository
@@ -157,21 +164,93 @@ export class PromoService {
     return await this.promoRepository.update(promoId, { statusId: status });
   }
   async duplicatePromo(promoId: number) {
-    const promo = await this.promoRepository.findOne(promoId, {
-      relations: [
-        'promoType',
-        'remunerations',
-        'storePromoMeas',
-        'promoClusters',
-        'promoAchat',
-        'promoConso',
-        'promoMea',
-      ],
-    });
-    delete promo.id;
-    delete promo.createdAt;
-    delete promo.updatedAt;
-    return await this.promoRepository.save(promo);
+    try {
+      const promo = await this.promoRepository.findOne(promoId, {
+        relations: [
+          'promoType',
+          'remunerations',
+          'promoClusters',
+          'promoAchat',
+          'promoConso',
+          'promoMea',
+          'emplacements',
+          'storePromoMeas',
+        ],
+        loadEagerRelations: false,
+      });
+      delete promo.id;
+      delete promo.createdAt;
+      delete promo.updatedAt;
+
+      const promoAchat: PromoAchat = promo.promoAchat;
+      delete promo.promoAchat;
+
+      const promoConso: PromoConso = promo.promoConso;
+      delete promo.promoConso;
+
+      const promoMea: PromoMea = promo.promoMea;
+      delete promo.promoMea;
+
+      const promoType: PromoOperationType[] = promo.promoType;
+      delete promo.promoType;
+
+      const promoClusters: PromoCluster[] = promo.promoClusters;
+      delete promo.promoClusters;
+      const storePromoMeas: StorePromoMea[] = promo.storePromoMeas;
+      delete promo.storePromoMeas;
+
+      const duplicatedPromo = await this.promoRepository.save(promo);
+      if (promoAchat)
+        await this.promoAchatRepository.save({
+          ...promoAchat,
+          promoId: duplicatedPromo.id,
+        });
+      if (promoMea)
+        await this.promoMeaRepository.save({
+          ...promoMea,
+          promoId: duplicatedPromo.id,
+        });
+
+      if (promoConso)
+        await this.promoConsoRepository.save({
+          ...promoConso,
+          promoId: duplicatedPromo.id,
+        });
+      promoType.forEach(item => {
+        item.promoId = duplicatedPromo.id;
+      });
+      if (promoType)
+        await this.promoOperationTypeRepository.save(
+          promoType.map(
+            (item): PromoOperationType => {
+              item.promoId = duplicatedPromo.id;
+              return item;
+            },
+          ),
+        );
+
+      if (promoClusters)
+        await this.promoClusterRepository.save(
+          promoClusters.map(
+            (item): PromoCluster => {
+              delete item.id;
+              item.promoId = duplicatedPromo.id;
+              return item;
+            },
+          ),
+        );
+      if (promoClusters)
+        await this.storePromoMeaRepository.save(
+          storePromoMeas.map(item => ({
+            promoId: duplicatedPromo.id,
+            storeId: item.storeId,
+          })),
+        );
+
+      return duplicatedPromo;
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
   }
   async getAll(filter): Promise<Promo[]> {
     const sqlQuery = this.promoRepository

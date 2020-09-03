@@ -30,7 +30,7 @@ export class TransformInterceptor implements NestInterceptor {
     if (method === 'POST') status = 200;
     if (!pathRequest.includes('login')) {
       // make the response standard {status,data}
-      console.log('transforming response format');
+      console.log(`statusCode:${status} transforming response format`);
       return next.handle().pipe(
         map(data => ({
           statusCode: status,
