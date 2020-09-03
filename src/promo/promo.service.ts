@@ -232,57 +232,68 @@ export class PromoService {
     promoId: number,
     body: PromoGeneralPromoDto,
   ): Promise<Promo> {
-    const promo = new Promo();
-    promo.id = promoId;
-    promo.gammeId =
-      body.gamme.id ||
-      (await await getConnection()
-        .createQueryBuilder()
-        .insert()
-        .into(Gamme)
-        .values({ name: body.gamme.name })
-        .execute()
-        .then(data => data.raw.insertId));
-    promo.endDate = body.end_date;
-    promo.startDate = body.start_date;
-    const promoClusters: PromoCluster[] = body.clusters_id.map(item => {
-      const promoCluster = new PromoCluster();
-      promoCluster.promoId = promoId;
-      promoCluster.clusterId = item;
-      return promoCluster;
-    });
-    // groups  : concerned_gamme: all,some,exclude
-    // groups  : concerned_product: without_lot,with_lot
-    if (body.promo_concerned_id === 1) {
-      if (body.option_product === 'some') promo.productsIdIn = body.products_in;
-      if (body.option_product === 'exclude')
-        promo.productsIdOut = body.products_out;
-    } else if (body.promo_concerned_id === 2) {
-      const productId =
-        body.product.id ||
+    try {
+      const promo = new Promo();
+      promo.id = promoId;
+      promo.gammeId =
+        body.gamme.id ||
         (await await getConnection()
           .createQueryBuilder()
           .insert()
-          .into(Product)
-          .values({
-            name: body.product.name,
-            ean: body.product.ean,
-            gammeId: promo.gammeId,
-          })
+          .into(Gamme)
+          .values({ name: body.gamme.name })
           .execute()
           .then(data => data.raw.insertId));
-
-      promo.productsIdIn = [productId];
-      // const product = {
-      //   productId: promo.productsIdIn[0],
-      //   promoId,
-      //   valueUnitCapacity: body.value_unit_capacity,
-      //   hasLot: body.lot,
-      //   lotProductQnt: body.qnt_product_lot,
-      // };
-
-    }
-    try {
+      promo.endDate = body.end_date;
+      promo.startDate = body.start_date;
+      const promoClusters: PromoCluster[] = body.clusters_id.map(item => {
+        const promoCluster = new PromoCluster();
+        promoCluster.promoId = promoId;
+        promoCluster.clusterId = item;
+        return promoCluster;
+      });
+      // groups  : concerned_gamme: all,some,exclude
+      // groups  : concerned_product: without_lot,with_lot
+      if (body.promo_concerned_id === 1) {
+        if (body.option_product === 'some')
+          promo.productsIdIn = body.products_in;
+        if (body.option_product === 'exclude')
+          promo.productsIdOut = body.products_out;
+      } else if (body.promo_concerned_id === 2) {
+        const product = {
+          measureValue: body.value_unit_capacity,
+          isLot: body.lot,
+          quantityLot: body.qnt_product_lot,
+        };
+        let productId = body.product.id || 0;
+        if (!productId)
+          productId = await await getConnection()
+            .createQueryBuilder()
+            .insert()
+            .into(Product)
+            .values({
+              name: body.product.name,
+              ean: body.product.ean,
+              gammeId: promo.gammeId,
+              ...product,
+            })
+            .execute()
+            .then(data => data.raw.insertId);
+        else {
+          await await getConnection()
+            .createQueryBuilder()
+            .update(Product)
+            .set({
+              name: body.product.name,
+              ean: body.product.ean,
+              gammeId: promo.gammeId,
+              ...product,
+            })
+            .where('id =:id', { id: productId })
+            .execute();
+        }
+        promo.productsIdIn = [productId];
+      }
       await this.promoClusterRepository.save(promoClusters);
       return await this.promoRepository.save(promo);
     } catch (e) {
