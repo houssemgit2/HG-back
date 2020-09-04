@@ -22,7 +22,11 @@ import { PromoAchatDto } from './dto/promo.achat.dto';
 import { PromoMea } from '../entities/PromoMea';
 import { PromoMeaDto, PromoMeaEmplacementDto } from './dto/promo-mea.dto';
 import { PromoMeaEmplacement } from '../entities/PromoMeaEmplacement';
-import { convertToCamelCase, arrayEquals } from '../common/utils/helpers';
+import {
+  convertToCamelCase,
+  arrayEquals,
+  isNotEmptyArray,
+} from '../common/utils/helpers';
 import { Gamme } from '../entities/Gamme';
 import { Product } from '../entities/Product';
 import { StorePromoMea } from '../entities/StorePromoMea';
@@ -65,10 +69,7 @@ export class PromoService {
   async saveMeaPromo(promoId: number, promo: PromoMeaDto): Promise<any> {
     try {
       await this.validPromoType('MEA', promoId);
-      if (
-        promo.promo_mea_emplacements &&
-        Array.isArray(promo.promo_mea_emplacements)
-      ) {
+      if (isNotEmptyArray(promo.promo_mea_emplacements)) {
         if (
           promo.remuneration_fixed_details.has_emplacement &&
           !arrayEquals(
@@ -190,7 +191,10 @@ export class PromoService {
 
       const promoMea: PromoMea = promo.promoMea;
       delete promo.promoMea;
-
+      const promoMeaEmplacements: PromoMeaEmplacement[] = promoMea
+        ? promoMea.promoMeaEmplacements
+        : undefined;
+      if (promoMea) delete promoMea.promoMeaEmplacements;
       const promoType: PromoOperationType[] = promo.promoType;
       delete promo.promoType;
 
@@ -210,16 +214,18 @@ export class PromoService {
           ...promoMea,
           promoId: duplicatedPromo.id,
         });
-
+      if (isNotEmptyArray(promoMeaEmplacements)) {
+        promoMeaEmplacements.forEach(
+          item => (item.promoId = duplicatedPromo.id),
+        );
+        await this.promoMeaEmplacementRepository.save(promoMeaEmplacements);
+      }
       if (promoConso)
         await this.promoConsoRepository.save({
           ...promoConso,
           promoId: duplicatedPromo.id,
         });
-      promoType.forEach(item => {
-        item.promoId = duplicatedPromo.id;
-      });
-      if (promoType)
+      if (isNotEmptyArray(promoType))
         await this.promoOperationTypeRepository.save(
           promoType.map(
             (item): PromoOperationType => {
@@ -229,7 +235,7 @@ export class PromoService {
           ),
         );
 
-      if (promoClusters)
+      if (isNotEmptyArray(promoClusters))
         await this.promoClusterRepository.save(
           promoClusters.map(
             (item): PromoCluster => {
@@ -239,7 +245,7 @@ export class PromoService {
             },
           ),
         );
-      if (promoClusters)
+      if (isNotEmptyArray(promoClusters))
         await this.storePromoMeaRepository.save(
           storePromoMeas.map(item => ({
             promoId: duplicatedPromo.id,
@@ -380,8 +386,13 @@ export class PromoService {
     }
   }
 
-  async delete(id: string) {
+  async delete(id: number) {
     try {
+      // promoMea
+      // promoConso
+      // promoAchat
+      // promoClusters
+      // promoType
       return await this.promoRepository.delete(id);
     } catch (err) {
       return err;

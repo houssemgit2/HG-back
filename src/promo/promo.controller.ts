@@ -17,6 +17,7 @@ import {
   UploadedFile,
   UseInterceptors,
   Logger,
+  Delete,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AdminGuard, StoreAdminGuard } from '../auth/guards/admin.guard';
@@ -115,6 +116,13 @@ export class PromoController {
   @UseGuards(AuthGuard(), AdminGuard)
   async DuplicatePromo(@Param() param: PromoIdDto) {
     return await this.promoService.duplicatePromo(param.promoId);
+  }
+
+  @ApiTags('Promo-form')
+  @Delete(':promoId')
+  @UseGuards(AuthGuard(), AdminGuard)
+  async deletePromo(@Param() param: PromoIdDto) {
+    return await this.promoService.delete(param.promoId);
   }
 
   @ApiTags('Promo-form')
