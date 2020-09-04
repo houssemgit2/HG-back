@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional } from 'class-validator';
+import { IsEmpty, IsNotEmpty, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class EligibilityDetailsDto {
@@ -10,13 +10,13 @@ export class EligibilityDetailsDto {
 
   @ApiProperty()
   @IsNotEmpty({ groups: ['between', 'greaterThan'] })
-  @IsOptional({ groups: ['lessThan'] })
+  @IsEmpty({ groups: ['lessThan'] })
   @Type(() => Number)
   value_min: number;
 
   @ApiProperty()
   @IsNotEmpty({ groups: ['between', 'lessThan'] })
-  @IsOptional({ groups: ['greaterThan'] })
+  @IsEmpty({ groups: ['greaterThan'] })
   @Type(() => Number)
   value_max: number;
 

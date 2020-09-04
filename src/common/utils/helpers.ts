@@ -7,6 +7,9 @@ import { InternalServerErrorException } from '@nestjs/common';
 import * as archiver from 'archiver';
 import * as rimraf from 'rimraf';
 
+export const isNotEmptyArray = (array: any): boolean =>
+  array && Array.isArray(array) && !!array.length;
+
 export function arrayEquals(arr1: any[], arr2: any[]): boolean {
   return (
     Array.isArray(arr1) &&

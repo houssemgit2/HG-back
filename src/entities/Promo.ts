@@ -67,11 +67,11 @@ export class Promo extends BaseEntity {
   })
   updatedAt: Date | null;
 
-  @OneToMany(
-    () => EligibilityCondition,
-    eligibilityCondition => eligibilityCondition.promo,
-  )
-  eligibilityConditions: EligibilityCondition[];
+  // @OneToMany(
+  //   () => EligibilityCondition,
+  //   eligibilityCondition => eligibilityCondition.promo,
+  // )
+  // eligibilityConditions: EligibilityCondition[];
 
   @OneToMany(
     () => Emplacement,

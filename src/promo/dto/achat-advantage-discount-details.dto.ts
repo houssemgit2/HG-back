@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsEmpty,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class EuroAchatDiscountDto {
@@ -26,14 +32,16 @@ export class PerCentAchatDiscountDto {
 
   @ApiProperty()
   @IsNotEmpty({ groups: ['unity-discount', 'discount'] })
-  @IsOptional({ groups: ['unity'] })
+  // @IsOptional({ groups: ['unity'] })
+  @IsEmpty({ groups: ['unity'] })
   @IsNumber()
   @Type(() => Number)
   achat_advantage_sub_discount_type_id: number;
 
   @ApiProperty()
   @IsNotEmpty({ groups: ['unity-discount', 'unity'] })
-  @IsOptional({ groups: ['discount'] })
+  // @IsOptional({ groups: ['discount'] })
+  @IsEmpty({ groups: ['discount'] })
   @IsBoolean()
   @Type(() => Boolean)
   variegated: boolean;
@@ -61,5 +69,3 @@ export class FreeUnitAchatDiscountDto {
   @Type(() => String)
   comment: string;
 }
-// export class AchatAdvantageDiscountDetailsDto extends EuroAchatDiscountDto
-//  PerCentAchatDiscountDto  PerUnitAchatDiscountDto { }

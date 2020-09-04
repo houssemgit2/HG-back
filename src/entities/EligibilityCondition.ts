@@ -1,13 +1,11 @@
+// todo to be deleted
 import {
   Column,
   Entity,
   Index,
-  JoinColumn,
-  ManyToOne,
   PrimaryGeneratedColumn,
-  BaseEntity
-} from "typeorm";
-import { Promo } from "./Promo";
+  BaseEntity,
+} from 'typeorm';
 
 @Index('eligibility_condition_promo_id_fk', ['promoId'], {})
 @Entity('eligibility_condition', { schema: 'hg_promo_beta' })
@@ -33,11 +31,11 @@ export class EligibilityCondition extends BaseEntity {
   @Column('tinyint', { name: 'is_variegated', width: 1 })
   isVariegated: boolean;
 
-  @ManyToOne(
-    () => Promo,
-    promo => promo.eligibilityConditions,
-    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
-  )
-  @JoinColumn([{ name: 'promo_id', referencedColumnName: 'id' }])
-  promo: Promo;
+  // @ManyToOne(
+  //   () => Promo,
+  //   promo => promo.eligibilityConditions,
+  //   { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
+  // )
+  // @JoinColumn([{ name: 'promo_id', referencedColumnName: 'id' }])
+  // promo: Promo;
 }
