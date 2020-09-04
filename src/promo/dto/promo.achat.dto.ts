@@ -21,8 +21,6 @@ export class PromoAchatDto {
       },
     ],
   })
-  @IsArray()
-  @IsNotEmpty()
   @ValidateNested({ each: true, always: true })
   @Type(() => EligibilityDetailsDto)
   eligibility_ca_details: EligibilityDetailsDto[];
@@ -33,8 +31,6 @@ export class PromoAchatDto {
     isArray: true,
     example: [{ value_min: 100, value_max: 200 }],
   })
-  @IsArray()
-  @IsNotEmpty()
   @ValidateNested({ each: true, always: true })
   @Type(() => EligibilityVolumeDto)
   eligibility_volume: EligibilityVolumeDto[];
@@ -87,7 +83,6 @@ export class PromoAchatDto {
       },
     },
   })
-  @IsNotEmpty()
   @ValidateNested({ each: true, always: true })
   @Type(() => AchatAdvantageDiscountDto)
   achat_advantage_discount_details: AchatAdvantageDiscountDto;

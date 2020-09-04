@@ -22,7 +22,7 @@ export class AchatAdvantageDiscountDto {
   })
   @IsNotEmpty({ groups: ['euro'] })
   // @IsOptional({ groups: ['freeUnit', 'percentage'] })
-  @IsEmpty({ groups: ['freeUnit', 'percentage'] })
+  @IsOptional({ groups: ['freeUnit', 'percentage'] })
   @Type(() => EuroAchatDiscountDto)
   euro_details: EuroAchatDiscountDto;
 
@@ -42,7 +42,7 @@ export class AchatAdvantageDiscountDto {
   @IsArray()
   @IsNotEmpty({ groups: ['percentage'] })
   // @IsOptional({ groups: ['freeUnit', 'euro'] })
-  @IsEmpty({ groups: ['freeUnit', 'euro'] })
+  @IsOptional({ groups: ['freeUnit', 'euro'] })
   @Type(() => PerCentAchatDiscountDto)
   percentage_details: PerCentAchatDiscountDto[];
 
@@ -56,7 +56,7 @@ export class AchatAdvantageDiscountDto {
   })
   @IsNotEmpty({ groups: ['freeUnit'] })
   // @IsOptional({ groups: ['percentage', 'euro'] })
-  @IsEmpty({ groups: ['percentage', 'euro'] })
+  @IsOptional({ groups: ['percentage', 'euro'] })
   @Type(() => FreeUnitAchatDiscountDto)
   free_unit_details: FreeUnitAchatDiscountDto;
 }

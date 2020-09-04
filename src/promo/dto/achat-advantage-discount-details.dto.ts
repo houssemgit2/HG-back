@@ -33,7 +33,7 @@ export class PerCentAchatDiscountDto {
   @ApiProperty()
   @IsNotEmpty({ groups: ['unity-discount', 'discount'] })
   // @IsOptional({ groups: ['unity'] })
-  @IsEmpty({ groups: ['unity'] })
+  @IsOptional({ groups: ['unity'] })
   @IsNumber()
   @Type(() => Number)
   achat_advantage_sub_discount_type_id: number;
@@ -41,7 +41,7 @@ export class PerCentAchatDiscountDto {
   @ApiProperty()
   @IsNotEmpty({ groups: ['unity-discount', 'unity'] })
   // @IsOptional({ groups: ['discount'] })
-  @IsEmpty({ groups: ['discount'] })
+  @IsOptional({ groups: ['discount'] })
   @IsBoolean()
   @Type(() => Boolean)
   variegated: boolean;

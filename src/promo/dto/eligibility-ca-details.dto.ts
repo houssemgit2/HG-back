@@ -10,13 +10,13 @@ export class EligibilityDetailsDto {
 
   @ApiProperty()
   @IsNotEmpty({ groups: ['between', 'greaterThan'] })
-  @IsEmpty({ groups: ['lessThan'] })
+  @IsOptional({ groups: ['lessThan'] })
   @Type(() => Number)
   value_min: number;
 
   @ApiProperty()
   @IsNotEmpty({ groups: ['between', 'lessThan'] })
-  @IsEmpty({ groups: ['greaterThan'] })
+  @IsOptional({ groups: ['greaterThan'] })
   @Type(() => Number)
   value_max: number;
 
