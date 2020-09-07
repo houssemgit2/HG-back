@@ -11,14 +11,14 @@ export class HttpExceptionFilter implements ExceptionFilter {
   catch(exception: HttpException, host: ArgumentsHost) {
     console.log('http expectation');
     const ctx = host.switchToHttp();
-    const res: any = {};
+
     const response = ctx.getResponse<Response>();
     // const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
+    const res: any = exception.getResponse();
     res.status = status;
     res.timestamp = new Date().toISOString();
-    if (process.env.NODE_ENV === 'development') res.stack = exception.stack;
-    res.message = exception.message;
+    // if (process.env.NODE_ENV === 'development') res.message = exception.stack;
     console.log(exception);
     response.status(status).json(res);
   }
