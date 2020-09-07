@@ -1,13 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
-  IsDateString,
-  IsDate,
   IsEnum,
   IsNotEmpty,
   IsOptional,
-  IsNumber,
-  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 import * as moment from 'moment';
@@ -152,7 +148,7 @@ export class PromoGeneralPromoDto {
   @Type(() => Boolean)
   @IsNotEmpty({ groups: ['concerned_product'] })
   @IsOptional({ groups: ['concerned_gamme'] })
-  public lot: boolean;
+  public is_lot: boolean;
 
   @ApiProperty({
     required: false,

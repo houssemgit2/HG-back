@@ -89,8 +89,6 @@ export class PromoController {
   @Post('/types')
   @UseGuards(AuthGuard(), AdminGuard)
   async setPromoType(@Query() query: SavePromoTypeDto) {
-    console.log('query****************');
-    console.log(query.type_ids);
     return await this.promoService.createPromoType(query.type_ids);
   }
 

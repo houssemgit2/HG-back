@@ -7,6 +7,8 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { IsUserAlreadyExist } from '../../common/decorators/isUnique.validation';
+import { AchatAdvantageDiscountType } from '../../entities/AchatAdvantageDiscountType';
 import {
   PerCentAchatDiscountDto,
   EuroAchatDiscountDto,
@@ -16,6 +18,15 @@ export class AchatAdvantageDiscountDto {
   @ApiProperty()
   @IsNotEmpty()
   @Type(() => Number)
+  @IsUserAlreadyExist(
+    { message: 'advantage_discount_type_id not exist' },
+    {
+      entityName: 'AchatAdvantageDiscountType',
+      entity: AchatAdvantageDiscountType,
+      key: 'id',
+    },
+    false,
+  )
   achat_advantage_discount_type_id: number;
 
   @ApiProperty({
