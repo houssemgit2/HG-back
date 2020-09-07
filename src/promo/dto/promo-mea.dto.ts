@@ -96,7 +96,6 @@ export class PromoMeaDto {
     ],
   })
   @IsArray()
-  @IsNotEmpty()
   @ValidateNested({ each: true, always: true })
   @Type(() => PromoMeaEmplacementDto)
   promo_mea_emplacements: PromoMeaEmplacementDto[];

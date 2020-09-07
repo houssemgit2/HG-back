@@ -24,13 +24,19 @@ export class PromoAchatValidationPipe implements PipeTransform<any> {
     ) {
       value.eligibility_ca_details.forEach(async element => {
         const eligibilityGroups: string[] = [];
-        if (element.equal_condition_type_id === 1) {
+        if (element.equal_condition_type_id == 1) {
           eligibilityGroups.push('between');
         }
-        if (element.equal_condition_type_id === 2) {
+        if (
+          element.equal_condition_type_id == 2 ||
+          element.equal_condition_type_id == 3
+        ) {
           eligibilityGroups.push('greaterThan');
         }
-        if (element.equal_condition_type_id === 4) {
+        if (
+          element.equal_condition_type_id == 4 ||
+          element.equal_condition_type_id == 5
+        ) {
           eligibilityGroups.push('lessThan');
         }
         const entityClass = plainToClass(EligibilityDetailsDto, element, {
@@ -52,7 +58,7 @@ export class PromoAchatValidationPipe implements PipeTransform<any> {
     } else if (
       value.achat_advantage_discount_details &&
       value.achat_advantage_discount_details
-        .achat_advantage_discount_type_id === 2
+        .achat_advantage_discount_type_id === 3
     ) {
       console.log('the actual group is freeUnit');
 
@@ -60,7 +66,7 @@ export class PromoAchatValidationPipe implements PipeTransform<any> {
     } else if (
       value.achat_advantage_discount_details &&
       value.achat_advantage_discount_details
-        .achat_advantage_discount_type_id === 3
+        .achat_advantage_discount_type_id === 2
     ) {
       console.log('the actual group is percentage  ');
 
@@ -110,7 +116,6 @@ export class PromoAchatValidationPipe implements PipeTransform<any> {
       if (groups.includes('percentage'))
         value.achat_advantage_discount_details =
           value.achat_advantage_discount_details.percentage_details;
-     
     }
     return value;
   }

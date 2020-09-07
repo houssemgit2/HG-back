@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsArray, IsOptional, IsEmpty } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsArray,
+  IsOptional,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import {
   PerCentAchatDiscountDto,
@@ -21,7 +26,7 @@ export class AchatAdvantageDiscountDto {
     },
   })
   @IsNotEmpty({ groups: ['euro'] })
-  // @IsOptional({ groups: ['freeUnit', 'percentage'] })
+  @ValidateNested({ groups: ['euro'] })
   @IsOptional({ groups: ['freeUnit', 'percentage'] })
   @Type(() => EuroAchatDiscountDto)
   euro_details: EuroAchatDiscountDto;
@@ -41,7 +46,7 @@ export class AchatAdvantageDiscountDto {
   })
   @IsArray()
   @IsNotEmpty({ groups: ['percentage'] })
-  // @IsOptional({ groups: ['freeUnit', 'euro'] })
+  @ValidateNested({ each: true, groups: ['percentage'] })
   @IsOptional({ groups: ['freeUnit', 'euro'] })
   @Type(() => PerCentAchatDiscountDto)
   percentage_details: PerCentAchatDiscountDto[];
@@ -57,6 +62,7 @@ export class AchatAdvantageDiscountDto {
   @IsNotEmpty({ groups: ['freeUnit'] })
   // @IsOptional({ groups: ['percentage', 'euro'] })
   @IsOptional({ groups: ['percentage', 'euro'] })
+  @ValidateNested({ each: true, groups: ['freeUnit'] })
   @Type(() => FreeUnitAchatDiscountDto)
   free_unit_details: FreeUnitAchatDiscountDto;
 }

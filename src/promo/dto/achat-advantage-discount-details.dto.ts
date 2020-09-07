@@ -3,14 +3,13 @@ import {
   IsBoolean,
   IsNotEmpty,
   IsNumber,
-  IsOptional,
-  IsEmpty,
+  ValidateIf,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class EuroAchatDiscountDto {
   @ApiProperty()
-  @IsNotEmpty()
+  @IsNotEmpty({ groups: ['euro'] })
   @Type(() => Number)
   achat_advantage_sub_discount_type_id: number;
   @ApiProperty()
@@ -31,17 +30,15 @@ export class PerCentAchatDiscountDto {
   discount: boolean;
 
   @ApiProperty()
-  @IsNotEmpty({ groups: ['unity-discount', 'discount'] })
-  // @IsOptional({ groups: ['unity'] })
-  @IsOptional({ groups: ['unity'] })
+  @ValidateIf(o => o.discount === true)
+  @IsNotEmpty()
   @IsNumber()
   @Type(() => Number)
   achat_advantage_sub_discount_type_id: number;
 
   @ApiProperty()
-  @IsNotEmpty({ groups: ['unity-discount', 'unity'] })
-  // @IsOptional({ groups: ['discount'] })
-  @IsOptional({ groups: ['discount'] })
+  @IsNotEmpty()
+  @ValidateIf(o => o.unity === true)
   @IsBoolean()
   @Type(() => Boolean)
   variegated: boolean;

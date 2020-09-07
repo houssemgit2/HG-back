@@ -60,6 +60,7 @@ import { PromoAchatDto } from './dto/promo.achat.dto';
 import { PromoAchatValidationPipe } from '../common/pipes/promo/promo-achat.pipe';
 import { PromoMeaDto } from './dto/promo-mea.dto';
 import { PromoIdDto } from './dto/promo-id.dto';
+import { PromoAchat } from '../entities/PromoAchat';
 
 const multerOptionsForMeaExcel: MulterOptions = multerOptions(
   /xlsm|xlsx|xlsb|xls|xla|xlml|ods|csv|.xlsx|csv/,
@@ -128,10 +129,10 @@ export class PromoController {
   @ApiTags('Promo-form')
   @Post(':promoId/general')
   @UseGuards(AuthGuard(), AdminGuard)
-  @UsePipes(new PromoValidationPipe())
+  // @UsePipes(new PromoValidationPipe())
   async savePromoGeneralInfo(
     @Param() param: PromoIdDto,
-    @Body() body: PromoGeneralPromoDto,
+    @Body(new PromoValidationPipe()) body: PromoGeneralPromoDto,
   ) {
     const promo = await this.promoService.saveGeneralParams(
       param.promoId,
