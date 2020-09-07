@@ -60,7 +60,6 @@ import { PromoAchatDto } from './dto/promo.achat.dto';
 import { PromoAchatValidationPipe } from '../common/pipes/promo/promo-achat.pipe';
 import { PromoMeaDto } from './dto/promo-mea.dto';
 import { PromoIdDto } from './dto/promo-id.dto';
-import { PromoAchat } from '../entities/PromoAchat';
 
 const multerOptionsForMeaExcel: MulterOptions = multerOptions(
   /xlsm|xlsx|xlsb|xls|xla|xlml|ods|csv|.xlsx|csv/,
@@ -292,9 +291,9 @@ export class PromoController {
   @ApiTags('Store-Promo-Mea')
   @Get('promo-mea')
   @UseGuards(AuthGuard(), StoreAdminGuard)
-  @UsePipes(new DatesListValidationPipe())
+  // @UsePipes(new DatesListValidationPipe())
   async listAllMea(
-    @Query() filter: ListMeaDto,
+    @Query(new DatesListValidationPipe()) filter: ListMeaDto,
     @UserReq() user: User,
   ): Promise<StorePromoMea[]> {
     if (user.userRoleId !== 1) filter.store_id = user.storeId;
@@ -315,10 +314,10 @@ export class PromoController {
   @ApiTags('Store-Promo-Mea')
   @Get('promo-mea/xl')
   @UseGuards(AuthGuard(), AdminGuard)
-  @UsePipes(new DatesListValidationPipe())
+  // @UsePipes(new DatesListValidationPipe())
   // @UseInterceptors(FileInterceptor('image'))
   async downloadFile(
-    @Query() filter: ListMeaToExportDto,
+    @Query(new DatesListValidationPipe()) filter: ListMeaToExportDto,
     @UserReq() user: User,
     @Res() res: any,
   ) {
