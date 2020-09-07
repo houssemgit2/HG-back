@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/camelcase */
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsNotEmpty,
   IsArray,
   IsOptional,
   ValidateNested,
+  IsNumber,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { IsUserAlreadyExist } from '../../common/decorators/isUnique.validation';
@@ -17,7 +17,6 @@ import {
 export class AchatAdvantageDiscountDto {
   @ApiProperty()
   @IsNotEmpty()
-  @Type(() => Number)
   @IsUserAlreadyExist(
     { message: 'advantage_discount_type_id not exist' },
     {
@@ -27,6 +26,7 @@ export class AchatAdvantageDiscountDto {
     },
     false,
   )
+  @IsNumber()
   achat_advantage_discount_type_id: number;
 
   @ApiProperty({

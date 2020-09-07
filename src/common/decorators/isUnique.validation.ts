@@ -6,6 +6,7 @@ import {
   ValidationArguments,
 } from 'class-validator';
 import { getConnection } from 'typeorm';
+import { InternalServerErrorException } from '@nestjs/common';
 
 @ValidatorConstraint({ async: true })
 export class IsUserAlreadyExistConstraint
@@ -17,16 +18,23 @@ export class IsUserAlreadyExistConstraint
     this.errIfExist = errIfExist;
   }
   async validate(value: number, args: ValidationArguments) {
-    const isExist = await getConnection()
-      .createQueryBuilder()
-      .select(this.repository.entityName) // table, Entity, key
-      .from(this.repository.entity, this.repository.entityName)
-      .where(`${this.repository.entityName}.${this.repository.key} = :value`, {
-        value,
-      })
-      .getOne();
-    if (!this.errIfExist) return !!isExist; // return false when not found, throw error if not exist
-    return !isExist; // return false if the desired element exist
+    try {
+      const isExist = await getConnection()
+        .createQueryBuilder()
+        .select(this.repository.entityName) // table, Entity, key
+        .from(this.repository.entity, this.repository.entityName)
+        .where(
+          `${this.repository.entityName}.${this.repository.key} = :value`,
+          {
+            value,
+          },
+        )
+        .getOne();
+      if (!this.errIfExist) return !!isExist; // return false when not found, throw error if not exist
+      return !isExist; // return false if the desired element exist
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
   }
 }
 

@@ -6,7 +6,7 @@ export class LoginCredentialDto {
   @IsEmail()
   email: string;
 
-  @ApiProperty({ example: 'smalaa' })
+  @ApiProperty({ example: '****' })
   @IsNotEmpty()
   @MaxLength(255)
   password: string;

@@ -3,6 +3,7 @@ import {
   IsBoolean,
   IsNotEmpty,
   IsNumber,
+  IsString,
   ValidateIf,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -10,11 +11,13 @@ import { Type } from 'class-transformer';
 export class EuroAchatDiscountDto {
   @ApiProperty()
   @IsNotEmpty({ groups: ['euro'] })
-  @Type(() => Number)
+  // @Type(() => Number)
+  @IsNumber()
   achat_advantage_sub_discount_type_id: number;
   @ApiProperty()
   @IsNotEmpty({ groups: ['euro'] })
-  @Type(() => Number)
+  // @Type(() => Number)
+  @IsNumber()
   value: number;
 }
 export class PerCentAchatDiscountDto {
@@ -45,6 +48,7 @@ export class PerCentAchatDiscountDto {
 
   @ApiProperty()
   @IsNotEmpty()
+  @IsString()
   @Type(() => String)
   comment: string;
 }
