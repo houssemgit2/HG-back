@@ -9,7 +9,6 @@ import {
   PrimaryGeneratedColumn,
   BaseEntity,
 } from 'typeorm';
-import { EligibilityCondition } from './EligibilityCondition';
 import { Emplacement } from './Emplacement';
 import { Gamme } from './Gamme';
 import { PromoOperationType } from './PromoType';
@@ -98,7 +97,7 @@ export class Promo extends BaseEntity {
   @OneToMany(
     () => PromoOperationType,
     promoType => promoType.promo,
-    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
+    { onDelete: 'CASCADE', onUpdate: 'RESTRICT' },
   )
   @JoinColumn([{ name: 'promo_id', referencedColumnName: 'id' }])
   promoType: PromoOperationType[];

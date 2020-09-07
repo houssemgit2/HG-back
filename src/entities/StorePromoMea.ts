@@ -91,7 +91,10 @@ export class StorePromoMea extends BaseEntity {
 
   @AfterLoad()
   public loaded() {
-    if (this.urlPicture && this.urlPicture.includes(process.env.AWS_S3_BASE_URL))
+    if (
+      this.urlPicture &&
+      this.urlPicture.includes(process.env.AWS_S3_BASE_URL)
+    )
       this.urlPicture = process.env.AWS_S3_BASE_URL + this.urlPicture;
   }
   // @AfterUpdate()
@@ -127,7 +130,7 @@ export class StorePromoMea extends BaseEntity {
   @ManyToOne(
     () => Promo,
     promo => promo.storePromoMeas,
-    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
+    { onDelete: 'NO ACTION', onUpdate: 'RESTRICT' },
   )
   @JoinColumn([{ name: 'promo_id', referencedColumnName: 'id' }])
   promo: Promo;

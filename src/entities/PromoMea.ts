@@ -79,7 +79,7 @@ export class PromoMea {
     () => Promo,
     promo => promo.promoMea,
     {
-      onDelete: 'RESTRICT',
+      onDelete: 'CASCADE',
       onUpdate: 'RESTRICT',
     },
   )

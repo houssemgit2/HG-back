@@ -21,7 +21,7 @@ export class Emplacement extends BaseEntity {
   @ManyToOne(
     () => Promo,
     promo => promo.emplacements,
-    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
+    { onDelete: 'CASCADE', onUpdate: 'RESTRICT' },
   )
   @JoinColumn([{ name: 'promo_id', referencedColumnName: 'id' }])
   promo: Promo;

@@ -54,7 +54,7 @@ export class StorePromoSelected extends BaseEntity {
   @ManyToOne(
     () => Store,
     store => store.storePromoSelecteds,
-    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
+    { onDelete: 'NO ACTION', onUpdate: 'RESTRICT' },
   )
   @JoinColumn([{ name: 'store_id', referencedColumnName: 'cip' }])
   store: Store;

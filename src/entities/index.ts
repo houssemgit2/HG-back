@@ -1,7 +1,6 @@
 import { User } from './User';
 import { Brand } from './Brand';
 import { Cluster } from './Cluster';
-import { EligibilityCondition } from './EligibilityCondition';
 import { Emplacement } from './Emplacement';
 import { EmplacementType } from './EmplacementType';
 import { Gamme } from './Gamme';
@@ -15,7 +14,6 @@ import { PromoCluster } from './PromoCluster';
 import { PromoOperationType } from './PromoType';
 import { RefreshToken } from './RefreshToken';
 import { RejectionReason } from './RejectionReason';
-import { Remuneration } from './Remuneration';
 import { Store } from './Store';
 import { StorePermission } from './StorePermission';
 import { StorePromoMea } from './StorePromoMea';
@@ -56,7 +54,6 @@ import { MeasureType } from './MeasureType';
 const entities = [
   Brand,
   Cluster,
-  EligibilityCondition,
   Emplacement,
   EmplacementType,
   Gamme,
@@ -70,7 +67,6 @@ const entities = [
   PromoOperationType,
   RefreshToken,
   RejectionReason,
-  Remuneration,
   Store,
   StorePermission,
   StorePromoMea,

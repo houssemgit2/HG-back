@@ -34,7 +34,7 @@ export class PromoCluster extends BaseEntity {
   @ManyToOne(
     () => Promo,
     promo => promo.promoClusters,
-    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
+    { onDelete: 'CASCADE', onUpdate: 'RESTRICT' },
   )
   @JoinColumn([{ name: 'promo_id', referencedColumnName: 'id' }])
   promo: Promo;
