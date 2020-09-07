@@ -365,15 +365,16 @@ export class PromoService {
             .execute()
             .then(data => data.raw.insertId);
         else {
+          const productDetails: any = {
+            gammeId: promo.gammeId,
+            ...product,
+          };
+          if (body.product.name) productDetails.name = body.product.name;
+          if (body.product.ean) productDetails.ean = body.product.ean;
           await await getConnection()
             .createQueryBuilder()
             .update(Product)
-            .set({
-              name: body.product.name,
-              ean: body.product.ean,
-              gammeId: promo.gammeId,
-              ...product,
-            })
+            .set(productDetails)
             .where('id =:id', { id: productId })
             .execute();
         }
