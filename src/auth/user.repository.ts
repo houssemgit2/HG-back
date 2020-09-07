@@ -109,4 +109,3 @@ export class UserRepository extends Repository<User> {
     return bcrypt.hash(password, salt);
   }
 }
-//todo make a email folder put inside it all the emails content

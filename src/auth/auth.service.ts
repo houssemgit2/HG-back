@@ -20,6 +20,7 @@ import moment = require('moment');
 import { getRepository } from 'typeorm';
 import { StorePermission } from '../entities/StorePermission';
 import { Resource } from '../entities/Resource';
+import { updatePasswordEmail } from '../common/email-body';
 AWS.config.update({ region: 'us-east-1' });
 
 @Injectable()
@@ -137,7 +138,6 @@ store_cip: "3", resource: "LOT1"
       uppercase: false,
     });
 
-
     const params: any = {
       Destination: {
         /* required */
@@ -145,20 +145,7 @@ store_cip: "3", resource: "LOT1"
         ToAddresses: [email],
       },
       Message: {
-        Body: {
-          Html: {
-            Charset: 'UTF-8',
-            Data: `<p>Bonjour</p>
-  <p>Votre nouveau mot de passe est :  <strong>${password}</strong> </p> <p>L'équipe support</p>`,
-          },
-          Text: {
-            Charset: 'UTF-8',
-            Data: `Bonjour,
-         Votre nouveau mot de passe est : ${password}
-          
-          Equipe de support`,
-          },
-        },
+        Body: updatePasswordEmail(password),
         Subject: {
           Charset: 'UTF-8',
           Data: 'Mot de passe  oublié',
