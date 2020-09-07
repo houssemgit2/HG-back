@@ -12,6 +12,7 @@ import {
   MoreThan,
   Between,
   getConnection,
+  TransactionRepository,
 } from 'typeorm';
 // Entity
 import { Promo } from './../entities/Promo';
@@ -31,6 +32,7 @@ import { Gamme } from '../entities/Gamme';
 import { Product } from '../entities/Product';
 import { StorePromoMea } from '../entities/StorePromoMea';
 import { PromoConso } from '../entities/PromoConso';
+import { Transaction } from 'typeorm';
 // DTO
 @Injectable()
 export class PromoService {
@@ -169,7 +171,6 @@ export class PromoService {
       const promo = await this.promoRepository.findOne(promoId, {
         relations: [
           'promoType',
-          'remunerations',
           'promoClusters',
           'promoAchat',
           'promoConso',
@@ -347,7 +348,7 @@ export class PromoService {
       } else if (body.promo_concerned_id === 2) {
         const product = {
           measureValue: body.value_unit_capacity,
-          isLot: body.lot,
+          isLot: body.is_lot,
           quantityLot: body.qnt_product_lot,
         };
         let productId = body.product.id || 0;
@@ -390,6 +391,7 @@ export class PromoService {
   async delete(id: number) {
     try {
       // promoMea
+      // await this.promoMeaRepository.delete(id);
       // promoConso
       // promoAchat
       // promoClusters
@@ -399,4 +401,21 @@ export class PromoService {
       return err;
     }
   }
+  // @Transaction() async delete(
+  //   id: number,
+  //   @TransactionRepository(Promo) promoRepository: Repository<Promo>,
+  //   // @TransactionRepository(PromoMea) promoMeaRepository: Repository<PromoMea>,
+  //   // @TransactionRepository(PromoMea) promoConsoRepository: Repository<PromoMea>,
+  //   // @TransactionRepository(PromoMea) promoAchatRepository: Repository<PromoMea>,
+  //   // @TransactionRepository(PromoMea) promoTypeRepository: Repository<PromoMea>,
+  //   // @TransactionRepository(PromoMea)
+  //   // promoClusterRepository: Repository<PromoMea>,
+  //   // @TransactionRepository(PromoMea)
+  //   // promoMeaDocumentRepository: Repository<PromoMea>,
+  // ) {
+  //   // await promoMeaDocumentRepository.delete({ promoId: id });
+  //   // await promoMeaRepository.delete(id);
+
+  //   return await promoRepository.delete(id);
+  // }
 }
