@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { StorePermission } from '../entities/StorePermission';
 import { StorePermissionRepository } from './access-permissions.repository';
 import { PaginationDto } from 'src/store/dto/pagination.dto';
@@ -69,8 +73,22 @@ export class AccessPermissionsService {
           .where('accessPermission.store_id = :storeId', { storeId })
           // .andWhere('accessPermission.resourceId = :resourceId', { resourceId })
           .getRawMany();
+
+      const query = this.storePermissionRepository
+        .createQueryBuilder('ap')
+        .leftJoinAndSelect('ap.resource', 'rs')
+        .select(['ap.store_id', 'ap.allow', 'ap.resource_id'])
+        .addSelect('rs.name', 'resource')
+        .where('ap.store_id = :storeId', { storeId });
+      if (resourceId)
+        return await query
+          .andWhere('ap.resource_id = :resourceId', {
+            resourceId,
+          })
+          .getMany();
+      return await query.getRawMany();
     } catch (e) {
-      return e;
+      throw new InternalServerErrorException(e);
     }
   }
   async create(

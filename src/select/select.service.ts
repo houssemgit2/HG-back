@@ -38,34 +38,54 @@ export class SelectService {
   ) {}
 
   async getProduct(product: GetProductDto): Promise<Product[]> {
-    const productCondition: any = {};
-    if (product.name) productCondition.name = Like(`%${product.name}%`);
-    if (product.ean) productCondition.ean = Like(`%${product.ean}%`);
-    if (product.gamme_id) productCondition.gammeId = product.gamme_id;
-    return await this.productRepository.find(productCondition);
+    try {
+      const productCondition: any = {};
+      if (product.name) productCondition.name = Like(`%${product.name}%`);
+      if (product.ean) productCondition.ean = Like(`%${product.ean}%`);
+      if (product.gamme_id) productCondition.gammeId = product.gamme_id;
+      return await this.productRepository.find(productCondition);
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
   }
 
   async addProduct(product: AddProductDto): Promise<any> {
-    if (product.id) delete product.id;
-    return await this.productRepository.save(product);
+    try {
+      if (product.id) delete product.id;
+      return await this.productRepository.save(product);
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
   }
   async getGamme(gamme: GetGammeDto): Promise<Gamme[]> {
-    const gammeCondition: any = {};
-    if (gamme.name) gammeCondition.name = Like(`%${gamme.name}%`);
-    if (gamme.brand_id) gammeCondition.brandId = gamme.brand_id;
+    try {
+      const gammeCondition: any = {};
+      if (gamme.name) gammeCondition.name = Like(`%${gamme.name}%`);
+      if (gamme.brand_id) gammeCondition.brandId = gamme.brand_id;
 
-    return await this.gammeRepository.find(gammeCondition);
+      return await this.gammeRepository.find(gammeCondition);
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
   }
 
   async getLabos(name?: string): Promise<any[]> {
-    const condition: any = {};
-    if (name) condition.name = Like(`%${name}%`);
-    return await this.laboratoryRepository.find(condition);
+    try {
+      const condition: any = {};
+      if (name) condition.name = Like(`%${name}%`);
+      return await this.laboratoryRepository.find(condition);
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
   }
   async getOpTypes(name?: string): Promise<any[]> {
-    const condition: any = {};
-    if (name) condition.name = Like(`%${name}%`);
-    return await this.laboratoryRepository.find(condition);
+    try {
+      const condition: any = {};
+      if (name) condition.name = Like(`%${name}%`);
+      return await this.laboratoryRepository.find(condition);
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
   }
 
   async GetByName(
@@ -87,9 +107,15 @@ export class SelectService {
     }
   }
   async getDiscount(query: DiscountDto) {
-    const condition: any = {};
-    if (query.id) condition.id = query.id;
-    if (query.name) condition.name = Like(`%${query.name}%`);
-    return await this.achatDiscountRepository.find({ where: { ...condition } });
+    try {
+      const condition: any = {};
+      if (query.id) condition.id = query.id;
+      if (query.name) condition.name = Like(`%${query.name}%`);
+      return await this.achatDiscountRepository.find({
+        where: { ...condition },
+      });
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
   }
 }

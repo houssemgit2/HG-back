@@ -35,7 +35,7 @@ export class SelectController {
 
   @ApiTags('Select list')
   @Get('/laboratories')
-  async getLabos(@Query('name') name?: string): Promise<any[]> {
+  async getLabos(@Query() { name, id }: DiscountDto): Promise<any[]> {
     return await this.appService.getLabos(name);
   }
 
