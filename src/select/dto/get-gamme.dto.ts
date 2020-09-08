@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
-import { IsUserAlreadyExist } from '../../common/decorators/isUnique.validation';
+import { IsExist } from '../../common/decorators/isUnique.validation';
 import { Gamme } from '../../entities/Gamme';
 import { Laboratory } from '../../entities/Laboratory';
 
@@ -16,7 +16,7 @@ export class GetGammeDto {
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  @IsUserAlreadyExist(
+  @IsExist(
     { message: 'brand not exist' },
     { entityName: 'Gamme', entity: Gamme, key: 'id' },
     false,
@@ -27,7 +27,7 @@ export class GetGammeDto {
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  @IsUserAlreadyExist(
+  @IsExist(
     { message: 'laboratory not exist' },
     { entityName: 'Laboratory', entity: Laboratory, key: 'id' },
     false,

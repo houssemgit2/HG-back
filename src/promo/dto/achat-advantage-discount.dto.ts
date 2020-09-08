@@ -7,7 +7,7 @@ import {
   IsNumber,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { IsUserAlreadyExist } from '../../common/decorators/isUnique.validation';
+import { IsExist } from '../../common/decorators/isUnique.validation';
 import { AchatAdvantageDiscountType } from '../../entities/AchatAdvantageDiscountType';
 import {
   PerCentAchatDiscountDto,
@@ -17,7 +17,7 @@ import {
 export class AchatAdvantageDiscountDto {
   @ApiProperty()
   @IsNotEmpty()
-  @IsUserAlreadyExist(
+  @IsExist(
     { message: 'advantage_discount_type_id not exist' },
     {
       entityName: 'AchatAdvantageDiscountType',

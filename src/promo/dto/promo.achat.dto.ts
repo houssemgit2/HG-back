@@ -37,7 +37,7 @@ export class PromoAchatDto {
 
   @ApiProperty({
     required: true,
-    type: EligibilityVolumeDto,
+    type: EligibilityFrancoDto,
     isArray: false,
     example: { value: 200, eligibility_franco_type_id: 2 },
   })

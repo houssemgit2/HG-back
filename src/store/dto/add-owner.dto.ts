@@ -8,7 +8,7 @@ import {
   IsString,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsUserAlreadyExist } from '../../common/decorators/isUnique.validation';
+import { IsExist } from '../../common/decorators/isUnique.validation';
 import { User } from '../../entities/User';
 export class AddOwnerDto {
   // @ApiProperty()
@@ -36,7 +36,7 @@ export class AddOwnerDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsEmail()
-  @IsUserAlreadyExist(
+  @IsExist(
     {
       message: `owner email  already exists. Choose another cip.`,
     },

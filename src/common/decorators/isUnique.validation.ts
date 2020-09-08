@@ -9,8 +9,7 @@ import { getConnection } from 'typeorm';
 import { InternalServerErrorException } from '@nestjs/common';
 
 @ValidatorConstraint({ async: true })
-export class IsUserAlreadyExistConstraint
-  implements ValidatorConstraintInterface {
+export class IsExistConstraint implements ValidatorConstraintInterface {
   repository: any;
   errIfExist: boolean;
   constructor(repository, errIfExist) {
@@ -38,7 +37,7 @@ export class IsUserAlreadyExistConstraint
   }
 }
 
-export function IsUserAlreadyExist(
+export function IsExist(
   validationOptions?: ValidationOptions,
   repository?: { entityName: string; entity: any; key: string },
   errIfExist = true,
@@ -49,7 +48,7 @@ export function IsUserAlreadyExist(
       propertyName: propertyName,
       options: validationOptions,
       constraints: [],
-      validator: new IsUserAlreadyExistConstraint(repository, errIfExist),
+      validator: new IsExistConstraint(repository, errIfExist),
     });
   };
 }

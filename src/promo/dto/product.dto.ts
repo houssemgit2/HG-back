@@ -6,8 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { IsUserAlreadyExist } from 'src/common/decorators/isUnique.validation';
-import { Gamme } from '../../entities/Gamme';
+import { IsExist } from 'src/common/decorators/isUnique.validation';
 import { Product } from '../../entities/Product';
 
 export class ProductDto {
@@ -15,7 +14,7 @@ export class ProductDto {
   @ValidateIf(o => o.id || !o.name)
   @IsNotEmpty()
   @IsNumber()
-  @IsUserAlreadyExist(
+  @IsExist(
     { message: 'product id not found, use just name instead to create it' },
     { entityName: 'Product', entity: Product, key: 'id' },
     false,
@@ -26,7 +25,7 @@ export class ProductDto {
   @ValidateIf(o => !o.id)
   @IsOptional()
   @IsNumber()
-  @IsUserAlreadyExist(
+  @IsExist(
     { message: 'ean id already exist' },
     { entityName: 'Product', entity: Product, key: 'ean' },
     true,

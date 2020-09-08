@@ -9,7 +9,7 @@ import {
 import * as moment from 'moment';
 import { GammeDto } from './gamme.dto';
 import { ProductDto } from './product.dto';
-import { IsUserAlreadyExist } from '../../common/decorators/isUnique.validation';
+import { IsExist } from '../../common/decorators/isUnique.validation';
 import { PromoConcernedType } from '../../entities/PromoConcernedType';
 
 export class PromoGeneralPromoDto {
@@ -47,7 +47,7 @@ export class PromoGeneralPromoDto {
   })
   @Type(() => Number)
   @IsNotEmpty()
-  @IsUserAlreadyExist(
+  @IsExist(
     {
       message: 'concerned id not found',
     },
