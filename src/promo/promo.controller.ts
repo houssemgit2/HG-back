@@ -139,6 +139,15 @@ export class PromoController {
   }
 
   @ApiTags('Promo-form')
+  @Get(':promoId/general')
+  @UseGuards(AuthGuard(), AdminGuard)
+  // @UsePipes(new PromoValidationPipe())
+  async getPromoGeneralInfo(@Param() param: PromoIdDto) {
+    const promo = await this.promoService.getGeneralParams(param.promoId);
+    return promo;
+  }
+
+  @ApiTags('Promo-form')
   @Post(':promoId/achat')
   @UseGuards(AuthGuard(), AdminGuard)
   // @UsePipes(new PromoAchatValidationPipe())
@@ -151,11 +160,28 @@ export class PromoController {
   }
 
   @ApiTags('Promo-form')
+  @Get(':promoId/achat')
+  @UseGuards(AuthGuard(), AdminGuard)
+  // @UsePipes(new PromoAchatValidationPipe())
+  async getPromoAchat(@Param() param: PromoIdDto) {
+    const promoAchat = await this.promoService.getPromosAchat(param.promoId);
+    return promoAchat;
+  }
+
+  @ApiTags('Promo-form')
   @Post(':promoId/mea')
   @UseGuards(AuthGuard(), AdminGuard)
   // @UsePipes(new PromoAchatValidationPipe())
   async savePromoMea(@Param() param: PromoIdDto, @Body() body: PromoMeaDto) {
     const meaPromo = await this.promoService.saveMeaPromo(param.promoId, body);
+    return meaPromo;
+  }
+
+  @ApiTags('Promo-form')
+  @Get(':promoId/mea')
+  @UseGuards(AuthGuard(), AdminGuard)
+  async getPromoMea(@Param() param: PromoIdDto) {
+    const meaPromo = await this.promoService.getPromosMea(param.promoId);
     return meaPromo;
   }
 

@@ -19,6 +19,7 @@ import { PromoAchat } from './PromoAchat';
 import { PromoConso } from './PromoConso';
 import { PromoMea } from './PromoMea';
 import { PromoStatus } from './Status';
+import { PromoConcernedType } from './PromoConcernedType';
 
 @Index('promo_gamme_id_fk', ['gammeId'], {})
 @Index('promo_status_id_fk', ['statusId'], {})
@@ -87,12 +88,20 @@ export class Promo extends BaseEntity {
   gamme: Gamme;
 
   @ManyToOne(
-    () => Gamme,
+    () => PromoStatus,
     gamme => gamme.promos,
     { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
   )
   @JoinColumn([{ name: 'status_id', referencedColumnName: 'id' }])
   status: PromoStatus;
+
+  @ManyToOne(
+    () => PromoConcernedType,
+    gamme => gamme.promos,
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
+  )
+  @JoinColumn([{ name: 'promo_concern_type_id', referencedColumnName: 'id' }])
+  promoConcernType: PromoConcernedType;
 
   @OneToMany(
     () => PromoOperationType,

@@ -12,7 +12,6 @@ import {
   MoreThan,
   Between,
   getConnection,
-  TransactionRepository,
 } from 'typeorm';
 // Entity
 import { Promo } from './../entities/Promo';
@@ -32,7 +31,6 @@ import { Gamme } from '../entities/Gamme';
 import { Product } from '../entities/Product';
 import { StorePromoMea } from '../entities/StorePromoMea';
 import { PromoConso } from '../entities/PromoConso';
-import { Transaction } from 'typeorm';
 // DTO
 @Injectable()
 export class PromoService {
@@ -105,20 +103,23 @@ export class PromoService {
   async saveOpAchat(promoId: number, body: PromoAchatDto): Promise<PromoAchat> {
     try {
       await this.validPromoType('OP ACHAT', promoId);
-      const promoAchat = new PromoAchat();
-      promoAchat.promoId = promoId;
-      promoAchat.achatAdvantageDiscountTypeId =
-        body.achat_advantage_discount_type_id;
-      promoAchat.eligibilityFranco = body.eligibility_franco;
-      promoAchat.eligibilityOther = body.eligibility_other;
-      promoAchat.eligibilityVolume = body.eligibility_volume;
-      promoAchat.eligibilityCaDetails = body.eligibility_ca_details;
-      promoAchat.eligibilityAdditionalInformation =
-        body.eligibility_additional_information;
-      promoAchat.achatAdvantageDiscountDetails =
-        body.achat_advantage_discount_details;
+      // const promoAchat = new PromoAchat();
+      // promoAchat.promoId = promoId;
+      // promoAchat.achatAdvantageDiscountTypeId =
+      //   body.achat_advantage_discount_type_id;
+      // promoAchat.eligibilityFranco = body.eligibility_franco;
+      // promoAchat.eligibilityOther = body.eligibility_other;
+      // promoAchat.eligibilityVolume = body.eligibility_volume;
+      // promoAchat.eligibilityCaDetails = body.eligibility_ca_details;
+      // promoAchat.eligibilityAdditionalInformation =
+      //   body.eligibility_additional_information;
+      // promoAchat.achatAdvantageDiscountDetails =
+      //   body.achat_advantage_discount_details;
 
-      return await this.promoAchatRepository.save(promoAchat);
+      return await this.promoAchatRepository.save({
+        promoId,
+        ...convertToCamelCase(body),
+      });
     } catch (e) {
       throw new InternalServerErrorException(e);
     }
@@ -313,7 +314,27 @@ export class PromoService {
       return err;
     }
   }
-
+  async getGeneralParams(promoId: number) {
+    try {
+      return await this.promoRepository.findOne(promoId);
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
+  }
+  async getPromosAchat(promoId: number) {
+    try {
+      return await this.promoAchatRepository.findOne(promoId);
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
+  }
+  async getPromosMea(promoId: number) {
+    try {
+      return await this.promoMeaRepository.findOne(promoId);
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
+  }
   async saveGeneralParams(
     promoId: number,
     body: PromoGeneralPromoDto,
