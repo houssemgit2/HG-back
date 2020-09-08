@@ -315,7 +315,6 @@ export class PromoController {
   @ApiTags('Store-Promo-Mea')
   @Get('promo-mea')
   @UseGuards(AuthGuard(), StoreAdminGuard)
-  // @UsePipes(new DatesListValidationPipe())
   async listAllMea(
     @Query(new DatesListValidationPipe()) filter: ListMeaDto,
     @UserReq() user: User,

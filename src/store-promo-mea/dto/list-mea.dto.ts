@@ -8,6 +8,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { DatesMonthYearDto } from './datesList.dto';
 import { IsNumberString } from 'class-validator';
+import { PaginationDto } from '../../store/dto/pagination.dto';
 
 const PromoMeaStateEnum = [
   'CONFIRMED',
@@ -18,7 +19,7 @@ const PromoMeaStateEnum = [
   'OPERATION_REFUSED',
   'UNJUSTIFIED',
 ];
-export class ListMeaDto {
+export class ListMeaDto extends PaginationDto {
   @ApiProperty({ required: false })
   @IsNumberString()
   @IsOptional()
@@ -59,15 +60,6 @@ export class ListMeaDto {
   @IsOptional()
   public circuit_vers: string;
 
-  @ApiProperty({ required: false })
-  @IsNumberString()
-  @IsOptional()
-  public perPage: number;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsNumberString()
-  public page: number;
   end_date?: string;
   start_date?: string;
   @ApiProperty({ required: false })

@@ -123,46 +123,27 @@ export class StorePromoMeaService {
       page,
       store_id,
     } = filter;
+    const selectedColumn = [
+      'promo_id',
+      'promo.id as ID',
+      'state',
+      'active',
+      'uploaded_at',
+      'promo.start_date',
+      'promo.end_date',
+      'store.cluster_id',
+      '(SELECT name FROM rejection_reason WHERE rejection_reason.id=sp.siege_rejected_reason_id) as siege_rejected_reason',
+      '(SELECT name FROM rejection_reason WHERE rejection_reason.id=sp.officine_rejected_reason_id) as officine_rejected_reason',
+      'sp.store_id as id_cip',
+      `CONCAT('${process.env.AWS_S3_BASE_URL}',sp.url_picture) as url_picture`,
+      `CONCAT('${process.env.AWS_S3_BASE_URL}',sp.url_sells_listing)  as url_sells_listing`,
+      'operationType.name as type_off',
+      'gamme.name as gamme',
+      'clusters.name as cluster',
+    ];
     const sqlQueryForSelect = this.storePromoMeaRepository
       .createQueryBuilder('sp')
-      .select('sp.promo_id', 'promoId')
-      .addSelect('promo.id', 'ID')
-      .addSelect('sp.state', 'state')
-      .addSelect('sp.active', 'active')
-      .addSelect(
-        '(SELECT name FROM rejection_reason WHERE rejection_reason.id=sp.siege_rejected_reason_id)',
-        'siege_rejected_reason',
-      )
-      .addSelect(
-        '(SELECT name FROM rejection_reason WHERE rejection_reason.id=sp.officine_rejected_reason_id)',
-        'officine_rejected_reason',
-      )
-      .addSelect('sp.uploaded_at', 'uploadedAt')
-      .addSelect('sp.store_id', 'id_cip')
-      .addSelect(
-        `CONCAT('${process.env.AWS_S3_BASE_URL}',sp.url_picture)`,
-        'url_picture',
-      )
-      .addSelect(
-        `CONCAT('${process.env.AWS_S3_BASE_URL}',sp.url_sells_listing)`,
-        'url_sells_listing',
-      )
-      .addSelect('operationType.name', 'type_off')
-      .addSelect('gamme.name', 'gamme')
-      .addSelect('promo.end_date', 'endDate')
-      .addSelect('promo.start_date', 'startDate')
-      .addSelect('store.cluster_id', 'cluster_id')
-      .addSelect('clusters.name', 'cluster')
-
-      // .addSelect('sp.laboratory.name', 'lab')
-      // .addSelect('sp.laboratory.name', 'libelle')
-      // .addSelect('sp.laboratory.name', 'det_mis')
-      // .addSelect('sp.laboratory.name', 'zone_mis')
-      // .addSelect('sp.laboratory.name', 'justif')
-      // .addSelect('sp.laboratory.name', 'achat_vente')
-      // .addSelect('sp.laboratory.name', 'type_ren')
-      // .addSelect('sp.laboratory.name', 'det_ren')
-      // .addSelect('sp.laboratory.name', 'detail_compe')
+      .select(selectedColumn)
       .leftJoinAndSelect('sp.promo', 'promo', 'promo.id = sp.promo_id')
       .leftJoinAndSelect('sp.store', 'store', 'store.cip = sp.store_id')
       .leftJoinAndSelect('promo.gamme', 'gamme')
@@ -193,9 +174,7 @@ export class StorePromoMeaService {
           'CONCAT(owner.first_name," ",owner.last_name)',
           'officine_name',
         )
-        .addSelect('owner.email', 'email')
-        .addSelect('owner.phone', 'phone_num')
-        .addSelect('owner.address', 'address');
+        .addSelect(['owner.email', 'owner.phone', 'owner.address']); // todo check the front resp
     if (start_date && end_date)
       sqlQuery.where(
         `(promo.start_date BETWEEN :start_date AND :end_date

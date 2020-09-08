@@ -43,42 +43,10 @@ export class AccessPermissionsService {
     storeId: number,
   ): Promise<StorePermission[]> {
     try {
-      if (resourceId && storeId) {
-        // const resourceId: number = resourceId;
-        // return await this.storePermissionRepository.find({
-        //   where: { storeId, resourceId },
-        // });
-        return await this.storePermissionRepository
-          .createQueryBuilder('accessPermission')
-          .select('accessPermission.store_id', 'store_cip')
-          .addSelect('accessPermission.allow', 'allow')
-          .addSelect('accessPermission.resource_id', 'resourceId')
-          .addSelect('resource.name', 'resource')
-          .leftJoinAndSelect('accessPermission.resource', 'resource')
-          .where('accessPermission.store_cip = :storeId', { storeId })
-          .andWhere('accessPermission.resourceId = :resourceId', { resourceId })
-          .getRawMany();
-      }
-      if (storeId)
-        // return await this.storePermissionRepository.find({
-        //   where: { storeId },
-        // });
-        return await this.storePermissionRepository
-          .createQueryBuilder('accessPermission')
-          .select('accessPermission.store_id', 'store_cip')
-          .addSelect('accessPermission.allow', 'allow')
-          .addSelect('accessPermission.resource_id', 'resourceId')
-          .addSelect('resource.name', 'resource')
-          .leftJoinAndSelect('accessPermission.resource', 'resource')
-          .where('accessPermission.store_id = :storeId', { storeId })
-          // .andWhere('accessPermission.resourceId = :resourceId', { resourceId })
-          .getRawMany();
-
       const query = this.storePermissionRepository
         .createQueryBuilder('ap')
         .leftJoinAndSelect('ap.resource', 'rs')
-        .select(['ap.store_id', 'ap.allow', 'ap.resource_id'])
-        .addSelect('rs.name', 'resource')
+        .select(['store_id', 'allow', 'resource_id', 'rs.name as resource']) // old endpoint has store_cip
         .where('ap.store_id = :storeId', { storeId });
       if (resourceId)
         return await query
