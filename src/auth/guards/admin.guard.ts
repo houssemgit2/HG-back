@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Logger } from '@nestjs/common';
 
-export const USER_LOGGER = 'client';
+export const CLIENT = 'client';
 export const ADMIN = 'admin';
 @Injectable()
 export class AdminGuard implements CanActivate {
@@ -31,20 +31,14 @@ export class StoreAdminGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
     const storeId =
-      request.query.store_id ||
-      request.body.store_id ||
-      request.query.storeId ||
-      request.body.storeId ||
-      user.storeId;
+      request.query.store_id || request.body.store_id || user.storeId;
     this.logger.verbose(`the user is ${user.email}`);
     if (
       user &&
-      user.userRole.name === USER_LOGGER &&
+      user.userRole.name === CLIENT &&
       parseInt(storeId) !== user.storeId
     ) {
-      this.logger.error(
-        `your store id is ${user.storeId}, you can't access ${storeId} Just admin can access any store,and you are ${user.userRole.name}`,
-      );
+      this.logger.error(`you can't access to store ${storeId}`);
 
       throw new UnauthorizedException(
         `you are not allowed to visit this store`,
@@ -52,9 +46,7 @@ export class StoreAdminGuard implements CanActivate {
     }
     // if (user && user.userRole.name === ADMIN && !storeId)
     //   throw new UnauthorizedException(`please provide the store_id`);
-    this.logger.debug(
-      `Just admin can access any store,and you are ${user.userRole.name}`,
-    );
+    this.logger.debug(`access allowed to store ${storeId}`);
     return true;
   }
 }

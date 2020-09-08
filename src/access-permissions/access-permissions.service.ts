@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/camelcase */
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { StorePermission } from '../entities/StorePermission';
 import { StorePermissionRepository } from './access-permissions.repository';
@@ -77,17 +76,17 @@ export class AccessPermissionsService {
   async create(
     storePermission: CreateAccessPermissionDto,
   ): Promise<StorePermission> {
-    const { resource, allow, store_cip } = storePermission;
+    const { resource, allow, store_cip: storeId } = storePermission;
     const resourceId = await this.storePermissionRepository.getResourceId(
       resource,
     ); //.then(id => id);
     const oldStorePermission = await this.storePermissionRepository.findOne({
-      where: { storeId: store_cip, resourceId },
+      where: { storeId, resourceId },
     });
     const newStorePermission = new StorePermission();
     newStorePermission.resourceId = resourceId;
     newStorePermission.allow = allow; // save allow as boolean todo: fix this
-    newStorePermission.storeId = store_cip;
+    newStorePermission.storeId = storeId;
     if (oldStorePermission) newStorePermission.id = oldStorePermission.id;
     return await this.storePermissionRepository.save(newStorePermission);
   }
@@ -107,3 +106,5 @@ export class AccessPermissionsService {
     }
   }
 }
+
+// todo find solution for the multiple addselect
