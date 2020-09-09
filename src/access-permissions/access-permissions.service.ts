@@ -46,7 +46,12 @@ export class AccessPermissionsService {
       const query = this.storePermissionRepository
         .createQueryBuilder('ap')
         .leftJoinAndSelect('ap.resource', 'rs')
-        .select(['store_id', 'allow', 'resource_id', 'rs.name as resource']) // old endpoint has store_cip
+        .select([
+          'store_id as store_cip',
+          'allow',
+          'resource_id',
+          'rs.name as resource',
+        ])
         .where('ap.store_id = :storeId', { storeId });
       if (resourceId)
         return await query
@@ -92,5 +97,3 @@ export class AccessPermissionsService {
     }
   }
 }
-
-// todo find solution for the multiple addselect

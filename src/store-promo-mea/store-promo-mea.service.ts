@@ -169,12 +169,13 @@ export class StorePromoMeaService {
           'owner',
           'owner.store_id=store.cip && is_owner=true',
         )
-        .addSelect('store.name', 'descr')
-        .addSelect(
-          'CONCAT(owner.first_name," ",owner.last_name)',
-          'officine_name',
-        )
-        .addSelect(['owner.email', 'owner.phone', 'owner.address']); // todo check the front resp
+        .addSelect([
+          'store.name as descr',
+          'CONCAT(owner.first_name," ",owner.last_name) as officine_name',
+          'owner.email',
+          'owner.phone',
+          'owner.address',
+        ]); // todo check the front resp
     if (start_date && end_date)
       sqlQuery.where(
         `(promo.start_date BETWEEN :start_date AND :end_date

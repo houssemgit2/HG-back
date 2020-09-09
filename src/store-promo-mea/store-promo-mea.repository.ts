@@ -39,8 +39,7 @@ export class StorePromoMeaRepository extends Repository<StorePromoMea> {
       throw new Error('you must provide a promo_id or store_id or clusterId');
     const searchQuery = getConnection()
       .createQueryBuilder()
-      .select('store.cip', 'storeId')
-      .addSelect('promoClusters.promoId', 'promoId')
+      .select(['store.cip as storeId', 'promoClusters.promoId as promoId'])
       .from(Store, 'store')
       // .innerJoinAndSelect('store.clusters', 'clusters')
       .leftJoin('store.clusters', 'clusters')
