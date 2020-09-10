@@ -124,7 +124,7 @@ export class StorePromoMeaService {
       store_id,
     } = filter;
     const selectedColumn = [
-      'promo_id',
+      'promo_id as promoId',
       'promo.id as ID',
       'state',
       'active',

@@ -33,12 +33,16 @@ export class PromoValidationPipe implements PipeTransform<any> {
           );
         }
       }
-      if (value.concerned === 'gamme') {
+      if (value.promo_concerned_id === 1) {
         groups.push('concerned_gamme');
         if (value.option_product === 'all') groups.push('all_product');
         if (value.option_product === 'some') groups.push('some_product');
         if (value.option_product === 'exclude') groups.push('exclude_product');
-      } else if (value.concerned === 'product') {
+        if (value.product)
+          throw new BadRequestException(
+            'Do not send product id/name when promo concern Gamme',
+          );
+      } else if (value.promo_concerned_id === 2) {
         groups.push('concerned_product');
         if (value.lot === false) groups.push('without_lot');
         if (value.lot === true) groups.push('with_lot');
