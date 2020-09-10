@@ -21,6 +21,7 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { UserReq } from './get-user.decorator';
+import { AdminGuard } from './guards/admin.guard';
 
 @ApiTags('Authentication')
 @Controller('auth')
