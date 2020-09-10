@@ -24,6 +24,6 @@ export class PromoStatus1599055913305 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<any> {
-    queryRunner.query(`DROP TABLE promo_concerned_type`);
+    queryRunner.query(`DROP TABLE promo_concern_type`);
   }
 }
