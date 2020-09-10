@@ -1,4 +1,5 @@
-import { Column, Entity, OneToMany } from 'typeorm';
+// import { Column, Entity, OneToMany } from 'typeorm';
+import { Entity, Column, OneToMany } from 'typeorm';
 import { AchatSubAdvantageDiscountType } from './AchatSubAdvantageDiscountType';
 import { PromoAchat } from './PromoAchat';
 

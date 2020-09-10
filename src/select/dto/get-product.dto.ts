@@ -1,8 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsEmpty,
+} from 'class-validator';
 import { IsExist } from '../../common/decorators/isUnique.validation';
 import { Gamme } from '../../entities/Gamme';
+import { IsNumberString, IsInt } from 'class-validator';
 
 export class GetProductDto {
   @ApiProperty({ required: false })
@@ -18,9 +25,9 @@ export class GetProductDto {
   ean: number;
 
   @ApiProperty({ required: false })
+  // @Type(() => Number)
   @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
+  @IsInt()
   @IsExist(
     { message: 'Gamme not exist' },
     { entityName: 'Gamme', entity: Gamme, key: 'id' },

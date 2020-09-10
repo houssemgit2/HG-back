@@ -7,8 +7,8 @@ import {
 } from 'typeorm';
 import { Promo } from './Promo';
 
-@Entity('promo_concerned_type', { schema: 'hg_promo_beta' })
-export class PromoConcernedType extends BaseEntity {
+@Entity('promo_concern_type', { schema: 'hg_promo_beta' })
+export class PromoConcernType extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 

@@ -19,11 +19,12 @@ import { PromoAchat } from './PromoAchat';
 import { PromoConso } from './PromoConso';
 import { PromoMea } from './PromoMea';
 import { PromoStatus } from './Status';
-import { PromoConcernedType } from './PromoConcernedType';
+import { PromoConcernType } from './PromoConcernedType';
+import { ProductConcernType } from './ProductConcernType';
 
 @Index('promo_gamme_id_fk', ['gammeId'], {})
 @Index('promo_status_id_fk', ['statusId'], {})
-@Index('promo_concerned_id_fk', ['statusId'], {})
+@Index('promo_concern_id_fk', ['statusId'], {})
 @Entity('promo', { schema: 'hg_promo_beta' })
 export class Promo extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
@@ -44,11 +45,14 @@ export class Promo extends BaseEntity {
   @Column('int', { name: 'promo_concern_type_id', nullable: true })
   promoConcernTypeId: number;
 
-  @Column('json', { name: 'products_id_in', nullable: true })
-  productsIdIn: object | null;
+  @Column('int', { name: 'product_concern_type_id', nullable: true })
+  productConcernTypeId: number;
 
-  @Column('json', { name: 'products_id_out', nullable: true })
-  productsIdOut: object | null;
+  @Column('json', { name: 'product_ids', nullable: true })
+  productIds: object | null;
+
+  // @Column('json', { name: 'products_id_out', nullable: true })
+  // productsIdOut: object | null;
 
   @Column('text', { name: 'comment', nullable: true })
   comment: string;
@@ -89,19 +93,27 @@ export class Promo extends BaseEntity {
 
   @ManyToOne(
     () => PromoStatus,
-    gamme => gamme.promos,
+    status => status.promos,
     { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
   )
   @JoinColumn([{ name: 'status_id', referencedColumnName: 'id' }])
   status: PromoStatus;
 
   @ManyToOne(
-    () => PromoConcernedType,
-    gamme => gamme.promos,
+    () => PromoConcernType,
+    promoConcernType => promoConcernType.promos,
     { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
   )
   @JoinColumn([{ name: 'promo_concern_type_id', referencedColumnName: 'id' }])
-  promoConcernType: PromoConcernedType;
+  promoConcernType: PromoConcernType;
+
+  @ManyToOne(
+    () => ProductConcernType,
+    productConcernType => productConcernType.promos,
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
+  )
+  @JoinColumn([{ name: 'promo_concern_type_id', referencedColumnName: 'id' }])
+  productConcernType: PromoConcernType;
 
   @OneToMany(
     () => PromoOperationType,

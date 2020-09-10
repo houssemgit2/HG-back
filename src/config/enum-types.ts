@@ -8,9 +8,10 @@ import { RemunerationCaAnnualPlateType } from 'src/entities/RemunerationCaAnnual
 import { RemunerationCaAnnualTargetType } from 'src/entities/RemunerationCaAnnualTargetType';
 import { RemunerationFixedType } from 'src/entities/RemunerationFixedType';
 import { RepaymentCircuitType } from 'src/entities/RepaymentCircuitType';
-import { PromoConcernedType } from '../entities/PromoConcernedType';
+import { PromoConcernType } from '../entities/PromoConcernedType';
 import { PromoStatus } from '../entities/Status';
 import { MeasureType } from '../entities/MeasureType';
+import { ProductConcernType } from '../entities/ProductConcernType';
 
 export enum promoState {
   CONFIRMED = 'CONFIRMED',
@@ -70,8 +71,13 @@ export const STATIC_TABLES = [
   ,
   {
     name: 'concerned-type',
-    targetEntity: PromoConcernedType,
-    entityName: 'PromoConcernedType',
+    targetEntity: PromoConcernType,
+    entityName: 'PromoConcernType',
+  },
+  {
+    name: 'product-concern-type',
+    targetEntity: ProductConcernType,
+    entityName: 'ProductConcernType',
   },
   {
     name: 'franco-type',

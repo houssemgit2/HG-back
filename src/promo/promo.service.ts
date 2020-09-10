@@ -31,6 +31,7 @@ import { Gamme } from '../entities/Gamme';
 import { Product } from '../entities/Product';
 import { StorePromoMea } from '../entities/StorePromoMea';
 import { PromoConso } from '../entities/PromoConso';
+import { ProductDto } from './dto/product.dto';
 // DTO
 @Injectable()
 export class PromoService {
@@ -361,12 +362,23 @@ export class PromoService {
       });
       // groups  : concerned_gamme: all,some,exclude
       // groups  : concerned_product: without_lot,with_lot
-      if (body.promo_concerned_id === 1) {
-        if (body.option_product === 'some')
-          promo.productsIdIn = body.products_in;
-        if (body.option_product === 'exclude')
-          promo.productsIdOut = body.products_out;
-      } else if (body.promo_concerned_id === 2) {
+      const productsList: number[] = [];
+      if (body.promo_concern_id === 1) {
+        if (body.new_products && body.new_products.length) {
+          for (const element of body.new_products) {
+            const id = await this.saveProduct({
+              gammeId: promo.gammeId,
+              name: element,
+            });
+            productsList.push(id);
+          }
+        }
+        // promo.produ
+        // if (body.option_product === 'some')
+        //   promo.productIds = [...body.products_in, ...productsList];
+        // if (body.option_product === 'exclude')
+        //   promo.productsIdOut = [body.products_out, ...productsList];
+      } else if (body.promo_concern_id === 2) {
         const product = {
           measureValue: body.value_unit_capacity,
           isLot: body.is_lot,
@@ -374,18 +386,13 @@ export class PromoService {
         };
         let productId = body.product.id || 0;
         if (!productId)
-          productId = await await getConnection()
-            .createQueryBuilder()
-            .insert()
-            .into(Product)
-            .values({
-              name: body.product.name,
-              ean: body.product.ean,
-              gammeId: promo.gammeId,
-              ...product,
-            })
-            .execute()
-            .then(data => data.raw.insertId);
+          productId = await this.saveProduct({
+            name: body.product.name,
+            ean: body.product.ean,
+            gammeId: promo.gammeId,
+            ...product,
+          });
+        // .then(data => data);
         else {
           const productDetails: any = {
             gammeId: promo.gammeId,
@@ -393,14 +400,14 @@ export class PromoService {
           };
           if (body.product.name) productDetails.name = body.product.name;
           if (body.product.ean) productDetails.ean = body.product.ean;
-          await await getConnection()
+          await getConnection()
             .createQueryBuilder()
             .update(Product)
             .set(productDetails)
             .where('id =:id', { id: productId })
             .execute();
         }
-        promo.productsIdIn = [productId];
+        promo.productIds = [productId];
       }
       await this.promoClusterRepository.save(promoClusters);
       return await this.promoRepository.save(promo);
@@ -422,6 +429,19 @@ export class PromoService {
       return err;
     }
   }
+  saveProduct(product: any) {
+    return getConnection()
+      .createQueryBuilder()
+      .insert()
+      .into(Product)
+      .values(product)
+      .execute()
+      .then(data => data.raw.insertId)
+      .catch(e => {
+        throw new InternalServerErrorException(e);
+      });
+  }
+
   // @Transaction() async delete(
   //   id: number,
   //   @TransactionRepository(Promo) promoRepository: Repository<Promo>,

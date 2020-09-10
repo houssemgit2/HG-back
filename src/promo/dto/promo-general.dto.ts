@@ -1,8 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsEnum,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   ValidateIf,
   ValidateNested,
@@ -11,8 +13,9 @@ import * as moment from 'moment';
 import { GammeDto } from './gamme.dto';
 import { ProductDto } from './product.dto';
 import { IsExist } from '../../common/decorators/isUnique.validation';
-import { PromoConcernedType } from '../../entities/PromoConcernedType';
+import { PromoConcernType } from '../../entities/PromoConcernedType';
 import { IsEmpty, IsArray } from 'class-validator';
+import { ProductConcernType } from '../../entities/ProductConcernType';
 
 export class PromoGeneralPromoDto {
   @ApiProperty({
@@ -54,13 +57,34 @@ export class PromoGeneralPromoDto {
       message: 'concerned id not found',
     },
     {
-      entityName: 'PromoConcernedType',
-      entity: PromoConcernedType,
+      entityName: 'PromoConcernType',
+      entity: PromoConcernType,
       key: 'id',
     },
     false,
   )
-  public promo_concerned_id: number;
+  public promo_concern_id: number;
+
+  @ApiProperty({
+    required: true,
+    example: 2,
+  })
+  // @Type(() => Number)
+  @IsNotEmpty()
+  @IsExist(
+    {
+      message: 'concerned id not found',
+    },
+    {
+      entityName: 'ProductConcernType',
+      entity: ProductConcernType,
+      key: 'id',
+    },
+    false,
+  )
+  @IsNumber()
+  @ValidateIf(o => o.promo_concern_id === 1)
+  product_concern_type_id: number;
 
   @ApiProperty({
     required: true,
@@ -77,7 +101,7 @@ export class PromoGeneralPromoDto {
     example: 'all',
   })
   @IsEnum(['all', 'some', 'exclude'])
-  @ValidateIf(o => o.promo_concerned_id === 1)
+  @ValidateIf(o => o.promo_concern_id === 1)
   public option_product: 'all' | 'some' | 'exclude';
 
   @ApiProperty({
@@ -101,21 +125,9 @@ export class PromoGeneralPromoDto {
   @IsArray()
   @IsNotEmpty({ groups: ['concerned_gamme', 'some_product'] })
   @IsOptional({ groups: ['all_product'] })
-  public products_in: number[];
+  public product_ids: number[];
 
   @ApiProperty({
-    required: false,
-    type: Number,
-    isArray: true,
-    example: [1, 2],
-  })
-  @ValidateNested({ always: true, each: true })
-  @IsArray()
-  @IsNotEmpty({ groups: ['concerned_gamme', 'some_product'] })
-  @IsOptional({ groups: ['all_product'] })
-  public products_out: ProductDto[];
-  
-@ApiProperty({
     required: false,
     type: String,
     isArray: true,
@@ -125,7 +137,7 @@ export class PromoGeneralPromoDto {
   @ValidateIf(
     o =>
       ['some', 'exclude'].includes(o.option_product) &&
-      o.promo_concerned_id === 1,
+      o.promo_concern_id === 1,
   )
   @IsOptional({
     groups: ['concerned_gamme', 'some_product', 'exclude_product'],
@@ -155,7 +167,8 @@ export class PromoGeneralPromoDto {
     // isArray: true,
     // example: [1, 3],
   })
-  // @Type(() => Number)
+  @Type(() => Number)
+  @IsNumber()
   @IsNotEmpty({ groups: ['concerned_product'] })
   @IsOptional({ groups: ['concerned_gamme'] })
   public value_unit_capacity: number;
@@ -167,6 +180,7 @@ export class PromoGeneralPromoDto {
     // example: [1, 3],
   })
   @Type(() => Boolean)
+  @IsBoolean()
   @IsNotEmpty({ groups: ['concerned_product'] })
   @IsOptional({ groups: ['concerned_gamme'] })
   public is_lot: boolean;
@@ -177,7 +191,8 @@ export class PromoGeneralPromoDto {
     // isArray: true,
     // example: [1, 3],
   })
-  // @Type(() => Number)
+  @Type(() => Number)
+  @IsNumber()
   @IsNotEmpty({ groups: ['concerned_product', 'with_lot'] })
   @IsOptional({ groups: ['without_lot'] })
   public qnt_product_lot: number;

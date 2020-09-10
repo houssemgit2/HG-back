@@ -20,7 +20,11 @@ import {
   Delete,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { AdminGuard, StoreAdminGuard } from '../auth/guards/admin.guard';
+import {
+  AdminGuard,
+  StoreAdminGuard,
+  ClientGuard,
+} from '../auth/guards/admin.guard';
 import {
   ApiTags,
   ApiBearerAuth,
@@ -92,13 +96,6 @@ export class PromoController {
     return await this.promoService.createPromoType(query.type_ids);
   }
 
-  @ApiTags('Promo')
-  @Get(':promoId')
-  @UseGuards(AuthGuard(), AdminGuard)
-  async getPromoType(@Param() param: PromoIdDto) {
-    return await this.promoService.getPromoType(param.promoId); //
-  }
-
   @ApiTags('Promo-form')
   @Put(':promoId')
   @UseGuards(AuthGuard(), AdminGuard)
@@ -126,24 +123,15 @@ export class PromoController {
   @ApiTags('Promo-form')
   @Post(':promoId/general')
   @UseGuards(AuthGuard(), AdminGuard)
-  // @UsePipes(new PromoValidationPipe())
+  @UsePipes(new PromoValidationPipe())
   async savePromoGeneralInfo(
     @Param() param: PromoIdDto,
-    @Body(new PromoValidationPipe()) body: PromoGeneralPromoDto,
+    @Body() body: PromoGeneralPromoDto,
   ) {
     const promo = await this.promoService.saveGeneralParams(
       param.promoId,
       body,
     );
-    return promo;
-  }
-
-  @ApiTags('Promo-form')
-  @Get(':promoId/general')
-  @UseGuards(AuthGuard(), AdminGuard)
-  // @UsePipes(new PromoValidationPipe())
-  async getPromoGeneralInfo(@Param() param: PromoIdDto) {
-    const promo = await this.promoService.getGeneralParams(param.promoId);
     return promo;
   }
 
@@ -156,15 +144,6 @@ export class PromoController {
     @Body(new PromoAchatValidationPipe()) body: PromoAchatDto,
   ) {
     const promoAchat = await this.promoService.saveOpAchat(param.promoId, body);
-    return promoAchat;
-  }
-
-  @ApiTags('Promo-form')
-  @Get(':promoId/achat')
-  @UseGuards(AuthGuard(), AdminGuard)
-  // @UsePipes(new PromoAchatValidationPipe())
-  async getPromoAchat(@Param() param: PromoIdDto) {
-    const promoAchat = await this.promoService.getPromosAchat(param.promoId);
     return promoAchat;
   }
 
@@ -184,7 +163,28 @@ export class PromoController {
     const meaPromo = await this.promoService.getPromosMea(param.promoId);
     return meaPromo;
   }
-
+  @ApiTags('Promo-form')
+  @Get(':promoId/achat')
+  @UseGuards(AuthGuard(), AdminGuard)
+  // @UsePipes(new PromoAchatValidationPipe())
+  async getPromoAchat(@Param() param: PromoIdDto) {
+    const promoAchat = await this.promoService.getPromosAchat(param.promoId);
+    return promoAchat;
+  }
+  @ApiTags('Promo-form')
+  @Get(':promoId/general')
+  @UseGuards(AuthGuard(), AdminGuard)
+  // @UsePipes(new PromoValidationPipe())
+  async getPromoGeneralInfo(@Param() param: PromoIdDto) {
+    const promo = await this.promoService.getGeneralParams(param.promoId);
+    return promo;
+  }
+  @ApiTags('Promo')
+  @Get(':promoId')
+  @UseGuards(AuthGuard(), AdminGuard)
+  async getPromoType(@Param() param: PromoIdDto) {
+    return await this.promoService.getPromoType(param.promoId); //
+  }
   @ApiTags('Promo')
   @Post('generate/promos')
   @Header('Content-Type', 'image/pdf')
@@ -202,7 +202,7 @@ export class PromoController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiTags('Store-Promo-Mea')
   @Get('promo-mea-reason')
-  @UseGuards(AuthGuard())
+  @UseGuards(AuthGuard(), ClientGuard)
   async findRejectionReasons() {
     return await this.rejectionReasonService.getAll().then(data =>
       data.map(item => {
@@ -298,7 +298,7 @@ export class PromoController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiTags('Store-Promo-Mea')
   @Get('promo-mea/labs')
-  @UseGuards(AuthGuard())
+  @UseGuards(AuthGuard(), ClientGuard)
   async listLabs() {
     const results = await this.storePromoMeaService
       .listLabs()
@@ -314,7 +314,7 @@ export class PromoController {
   })
   @ApiTags('Store-Promo-Mea')
   @Get('promo-mea')
-  @UseGuards(AuthGuard(), StoreAdminGuard)
+  @UseGuards(AuthGuard(), ClientGuard, StoreAdminGuard)
   async listAllMea(
     @Query(new DatesListValidationPipe()) filter: ListMeaDto,
     @UserReq() user: User,

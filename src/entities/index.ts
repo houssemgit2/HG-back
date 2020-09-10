@@ -48,8 +48,9 @@ import { RepaymentCircuitType } from './RepaymentCircuitType';
 import { Ressource } from './Ressource';
 import { PromoMeaEmplacement } from './PromoMeaEmplacement';
 import { PromoStatus } from './Status';
-import { PromoConcernedType } from './PromoConcernedType';
+import { PromoConcernType } from './PromoConcernedType';
 import { MeasureType } from './MeasureType';
+import { ProductConcernType } from './ProductConcernType';
 
 const entities = [
   Brand,
@@ -102,7 +103,8 @@ const entities = [
   RepaymentCircuitType,
   Ressource,
   PromoStatus,
-  PromoConcernedType,
+  PromoConcernType,
+  ProductConcernType,
   MeasureType,
 ];
 export default entities;
