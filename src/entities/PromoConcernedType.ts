@@ -17,7 +17,7 @@ export class PromoConcernType extends BaseEntity {
 
   @OneToMany(
     () => Promo,
-    promo => promo.status,
+    promo => promo.productConcernType,
   )
   promos: Promo[];
 }
