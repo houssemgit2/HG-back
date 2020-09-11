@@ -104,19 +104,6 @@ export class PromoService {
   async saveOpAchat(promoId: number, body: PromoAchatDto): Promise<PromoAchat> {
     try {
       await this.validPromoType('OP ACHAT', promoId);
-      // const promoAchat = new PromoAchat();
-      // promoAchat.promoId = promoId;
-      // promoAchat.achatAdvantageDiscountTypeId =
-      //   body.achat_advantage_discount_type_id;
-      // promoAchat.eligibilityFranco = body.eligibility_franco;
-      // promoAchat.eligibilityOther = body.eligibility_other;
-      // promoAchat.eligibilityVolume = body.eligibility_volume;
-      // promoAchat.eligibilityCaDetails = body.eligibility_ca_details;
-      // promoAchat.eligibilityAdditionalInformation =
-      //   body.eligibility_additional_information;
-      // promoAchat.achatAdvantageDiscountDetails =
-      //   body.achat_advantage_discount_details;
-
       return await this.promoAchatRepository.save({
         promoId,
         ...convertToCamelCase(body),
@@ -352,8 +339,6 @@ export class PromoService {
           .values({ name: body.gamme.name })
           .execute()
           .then(data => data.raw.insertId));
-      promo.endDate = body.end_date;
-      promo.startDate = body.start_date;
       const promoClusters: PromoCluster[] = body.clusters_id.map(item => {
         const promoCluster = new PromoCluster();
         promoCluster.promoId = promoId;
@@ -362,23 +347,17 @@ export class PromoService {
       });
       // groups  : concerned_gamme: all,some,exclude
       // groups  : concerned_product: without_lot,with_lot
-      const productsList: number[] = [];
-      if (body.promo_concern_id === 1) {
-        if (body.new_products && body.new_products.length) {
-          for (const element of body.new_products) {
-            const id = await this.saveProduct({
-              gammeId: promo.gammeId,
-              name: element,
-            });
-            productsList.push(id);
-          }
+
+      if (body.new_products && body.new_products.length) {
+        for (const element of body.new_products) {
+          const id = await this.saveProduct({
+            gammeId: promo.gammeId,
+            name: element,
+          });
+          body.product_ids.push(id);
         }
-        // promo.produ
-        // if (body.option_product === 'some')
-        //   promo.productIds = [...body.products_in, ...productsList];
-        // if (body.option_product === 'exclude')
-        //   promo.productsIdOut = [body.products_out, ...productsList];
-      } else if (body.promo_concern_id === 2) {
+      }
+      if (body.product) {
         const product = {
           measureValue: body.value_unit_capacity,
           isLot: body.is_lot,
@@ -392,7 +371,6 @@ export class PromoService {
             gammeId: promo.gammeId,
             ...product,
           });
-        // .then(data => data);
         else {
           const productDetails: any = {
             gammeId: promo.gammeId,
@@ -410,7 +388,11 @@ export class PromoService {
         promo.productIds = [productId];
       }
       await this.promoClusterRepository.save(promoClusters);
-      return await this.promoRepository.save(promo);
+      const promoModified = {
+        ...convertToCamelCase(body),
+        ...promo,
+      };
+      return await this.promoRepository.save(promoModified);
     } catch (e) {
       throw new InternalServerErrorException(e);
     }

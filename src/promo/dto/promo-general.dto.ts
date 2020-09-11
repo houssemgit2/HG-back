@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
-  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -14,7 +13,7 @@ import { GammeDto } from './gamme.dto';
 import { ProductDto } from './product.dto';
 import { IsExist } from '../../common/decorators/isUnique.validation';
 import { PromoConcernType } from '../../entities/PromoConcernedType';
-import { IsEmpty, IsArray } from 'class-validator';
+import { IsArray } from 'class-validator';
 import { ProductConcernType } from '../../entities/ProductConcernType';
 
 export class PromoGeneralPromoDto {
@@ -63,7 +62,7 @@ export class PromoGeneralPromoDto {
     },
     false,
   )
-  public promo_concern_id: number;
+  public promo_concern_type_id: number;
 
   @ApiProperty({
     required: true,
@@ -83,7 +82,7 @@ export class PromoGeneralPromoDto {
     false,
   )
   @IsNumber()
-  @ValidateIf(o => o.promo_concern_id === 1)
+  @ValidateIf(o => o.promo_concern_type_id === 1)
   product_concern_type_id: number;
 
   @ApiProperty({
@@ -95,14 +94,6 @@ export class PromoGeneralPromoDto {
   @ValidateNested({ always: true, each: true })
   @IsNotEmpty()
   public gamme: GammeDto;
-
-  @ApiProperty({
-    required: false,
-    example: 'all',
-  })
-  @IsEnum(['all', 'some', 'exclude'])
-  @ValidateIf(o => o.promo_concern_id === 1)
-  public option_product: 'all' | 'some' | 'exclude';
 
   @ApiProperty({
     required: false,
@@ -136,11 +127,11 @@ export class PromoGeneralPromoDto {
   @ValidateNested({ always: true, each: true })
   @ValidateIf(
     o =>
-      ['some', 'exclude'].includes(o.option_product) &&
-      o.promo_concern_id === 1,
+      (o.product_concern_type_id == 2 || o.product_concern_type_id == 3) &&
+      o.promo_concern_type_id == 1,
   )
   @IsOptional({
-    groups: ['concerned_gamme', 'some_product', 'exclude_product'],
+    groups: ['concerned_gamme', 'some_product'],
   })
   public new_products: string[];
 

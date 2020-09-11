@@ -58,7 +58,7 @@ import { UserReq } from '../auth/get-user.decorator';
 import { convertToSnakeCase } from 'src/common/utils/helpers';
 import { SavePromoTypeDto } from './dto/save-promo-types.dto';
 import { PromoGeneralPromoDto } from './dto/promo-general.dto';
-import { PromoValidationPipe } from '../common/pipes/promo/date-compariason.pipe';
+import { PromoValidationPipe } from '../common/pipes/promo/promo-general.Validation.pipe';
 // import { PromoConcernedValidationPipe } from '../common/pipes/promo/promo-concerned.pipe';
 import { PromoAchatDto } from './dto/promo.achat.dto';
 import { PromoAchatValidationPipe } from '../common/pipes/promo/promo-achat.pipe';

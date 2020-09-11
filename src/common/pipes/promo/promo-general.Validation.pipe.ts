@@ -11,7 +11,7 @@ import { validate } from 'class-validator';
 
 @Injectable()
 export class PromoValidationPipe implements PipeTransform<any> {
-  async transform(value: any, { metatype, type }: ArgumentMetadata) {
+  async transform(value: any, { type }: ArgumentMetadata) {
     if (type === 'body') {
       const groups: string[] = [];
       if (value && value.start_date && value.end_date) {
@@ -33,19 +33,22 @@ export class PromoValidationPipe implements PipeTransform<any> {
           );
         }
       }
-      if (value.promo_concern_id === 1) {
+      if (value.promo_concern_type_id === 1) {
         groups.push('concerned_gamme');
-        if (value.option_product === 'all') groups.push('all_product');
-        if (value.option_product === 'some') groups.push('some_product');
-        if (value.option_product === 'exclude') groups.push('exclude_product');
+        if (value.product_concern_type_id === 1) groups.push('all_product');
+        if (
+          value.product_concern_type_id == 2 ||
+          value.product_concern_type_id == 3
+        )
+          groups.push('some_product');
         if (value.product)
           throw new BadRequestException(
-            'Do not send product id/name when promo concern Gamme',
+            'product object is used when promo concern product',
           );
-      } else if (value.promo_concern_id === 2) {
+      } else if (value.promo_concern_type_id == 2) {
         groups.push('concerned_product');
-        if (value.lot === false) groups.push('without_lot');
-        if (value.lot === true) groups.push('with_lot');
+        if (value.is_lot === false) groups.push('without_lot');
+        if (value.is_lot === true) groups.push('with_lot');
       }
       const entityClass = plainToClass(PromoGeneralPromoDto, value, { groups });
       const errors = await validate(entityClass, { groups });
@@ -57,7 +60,6 @@ export class PromoValidationPipe implements PipeTransform<any> {
         );
       }
     }
-    // value = { ...value, groups };
     return value;
   }
 }
