@@ -1,5 +1,12 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn, BaseEntity } from "typeorm";
-import { Brand } from "./Brand";
+import {
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  BaseEntity,
+} from 'typeorm';
+import { Brand } from './Brand';
+import { Promo } from './Promo';
 
 @Entity('laboratory', { schema: 'hg_promo_beta' })
 export class Laboratory extends BaseEntity {
@@ -14,4 +21,10 @@ export class Laboratory extends BaseEntity {
     brand => brand.laboratory,
   )
   brands: Brand[];
+
+  @OneToMany(
+    () => Promo,
+    promo => promo.laboratory,
+  )
+  promos: Promo[];
 }

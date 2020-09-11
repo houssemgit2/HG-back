@@ -65,8 +65,5 @@ export class ListMeaDto extends PaginationDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsNumberString()
-  // @IsValidStoreId({
-  //   message: 'store_id is not allowed for this user, or missed store_id',
-  // })
   store_id?: number;
 }

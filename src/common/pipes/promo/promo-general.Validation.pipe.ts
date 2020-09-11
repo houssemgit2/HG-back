@@ -20,9 +20,6 @@ export class PromoValidationPipe implements PipeTransform<any> {
           value.end_date === 'Invalid date'
         )
           throw new BadRequestException('Invalid date');
-        //   const diff =
-        //     new Date(value.end_date).getTime() -
-        //     new Date(value.start_date).getTime();
         const startDate = moment(value.start_date, 'DD-MM-YYYY').valueOf();
         const endDate = moment(value.end_date, 'DD-MM-YYYY').valueOf();
         if (startDate >= endDate) {
@@ -32,24 +29,22 @@ export class PromoValidationPipe implements PipeTransform<any> {
             'End Date must be bigger than start date',
           );
         }
+        if (value.promo_concern_type_id === 1) {
+          if (value.product)
+            throw new BadRequestException(
+              'Product property is not allowed in this typeof promo',
+            );
+          if (
+            value.product_concern_type_id === 1 &&
+            (value.product_ids || value.new_products)
+          ) {
+            throw new BadRequestException(
+              'products list  is not allowed in this typeof promo',
+            );
+          }
+        }
       }
-      if (value.promo_concern_type_id === 1) {
-        groups.push('concerned_gamme');
-        if (value.product_concern_type_id === 1) groups.push('all_product');
-        if (
-          value.product_concern_type_id == 2 ||
-          value.product_concern_type_id == 3
-        )
-          groups.push('some_product');
-        if (value.product)
-          throw new BadRequestException(
-            'product object is used when promo concern product',
-          );
-      } else if (value.promo_concern_type_id == 2) {
-        groups.push('concerned_product');
-        if (value.is_lot === false) groups.push('without_lot');
-        if (value.is_lot === true) groups.push('with_lot');
-      }
+
       const entityClass = plainToClass(PromoGeneralPromoDto, value, { groups });
       const errors = await validate(entityClass, { groups });
 

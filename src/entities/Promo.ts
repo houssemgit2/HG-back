@@ -21,6 +21,7 @@ import { PromoMea } from './PromoMea';
 import { PromoStatus } from './Status';
 import { PromoConcernType } from './PromoConcernedType';
 import { ProductConcernType } from './ProductConcernType';
+import { Laboratory } from './Laboratory';
 
 @Index('promo_gamme_id_fk', ['gammeId'], {})
 @Index('promo_status_id_fk', ['statusId'], {})
@@ -32,6 +33,9 @@ export class Promo extends BaseEntity {
 
   @Column('int', { name: 'gamme_id', nullable: true })
   gammeId: number | null;
+
+  @Column('int', { name: 'laboratory_id', nullable: true })
+  laboratoryId: number | null;
 
   @Column('date', { name: 'start_date', nullable: true })
   startDate: Date | null;
@@ -90,6 +94,14 @@ export class Promo extends BaseEntity {
   )
   @JoinColumn([{ name: 'gamme_id', referencedColumnName: 'id' }])
   gamme: Gamme;
+
+  @ManyToOne(
+    () => Laboratory,
+    laboratory => laboratory.promos,
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
+  )
+  @JoinColumn([{ name: 'laboratory_id', referencedColumnName: 'id' }])
+  laboratory: Laboratory;
 
   @ManyToOne(
     () => PromoStatus,

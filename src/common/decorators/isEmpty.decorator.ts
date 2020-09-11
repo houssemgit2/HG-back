@@ -34,19 +34,18 @@ import {
 // }
 
 export function IsEmptyIf(
-  condition?: (object: any, value: any) => boolean,
+  condition: (object: any, value: any) => boolean,
   validationOptions?: ValidationOptions,
 ) {
   return function(object: Record<string, any>, propertyName: string) {
     registerDecorator({
-      name: 'isBooleanNumber',
+      name: 'IsEmptyIf',
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
       validator: {
         validate(value: any) {
           if (typeof condition === 'function') {
-            const cond = condition(object, value);
             if (!condition(object, value)) {
               return true;
             }

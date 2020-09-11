@@ -93,3 +93,10 @@ export async function compressFiles(response, filesPath, zipName) {
   });
   archive.finalize();
 }
+export function filterObjectProperty(object: object, keys: string[]): object {
+  Object.keys(object).forEach(el => {
+    if (!keys.includes(el)) delete object[el];
+  });
+
+  return object;
+}

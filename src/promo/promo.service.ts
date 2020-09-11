@@ -32,6 +32,7 @@ import { Product } from '../entities/Product';
 import { StorePromoMea } from '../entities/StorePromoMea';
 import { PromoConso } from '../entities/PromoConso';
 import { ProductDto } from './dto/product.dto';
+import { filterObjectProperty } from '../common/utils/helpers';
 // DTO
 @Injectable()
 export class PromoService {
@@ -302,13 +303,7 @@ export class PromoService {
       return err;
     }
   }
-  async getGeneralParams(promoId: number) {
-    try {
-      return await this.promoRepository.findOne(promoId);
-    } catch (e) {
-      throw new InternalServerErrorException(e);
-    }
-  }
+
   async getPromosAchat(promoId: number) {
     try {
       return await this.promoAchatRepository.findOne(promoId);
@@ -323,76 +318,38 @@ export class PromoService {
       throw new InternalServerErrorException(e);
     }
   }
+
   async saveGeneralParams(
     promoId: number,
     body: PromoGeneralPromoDto,
   ): Promise<Promo> {
     try {
-      const promo = new Promo();
-      promo.id = promoId;
-      promo.gammeId =
-        body.gamme.id ||
-        (await await getConnection()
-          .createQueryBuilder()
-          .insert()
-          .into(Gamme)
-          .values({ name: body.gamme.name })
-          .execute()
-          .then(data => data.raw.insertId));
       const promoClusters: PromoCluster[] = body.clusters_id.map(item => {
         const promoCluster = new PromoCluster();
         promoCluster.promoId = promoId;
         promoCluster.clusterId = item;
         return promoCluster;
       });
-      // groups  : concerned_gamme: all,some,exclude
-      // groups  : concerned_product: without_lot,with_lot
 
-      if (body.new_products && body.new_products.length) {
-        for (const element of body.new_products) {
-          const id = await this.saveProduct({
-            gammeId: promo.gammeId,
-            name: element,
-          });
-          body.product_ids.push(id);
-        }
-      }
-      if (body.product) {
-        const product = {
-          measureValue: body.value_unit_capacity,
-          isLot: body.is_lot,
-          quantityLot: body.qnt_product_lot,
-        };
-        let productId = body.product.id || 0;
-        if (!productId)
-          productId = await this.saveProduct({
-            name: body.product.name,
-            ean: body.product.ean,
-            gammeId: promo.gammeId,
-            ...product,
-          });
-        else {
-          const productDetails: any = {
-            gammeId: promo.gammeId,
-            ...product,
-          };
-          if (body.product.name) productDetails.name = body.product.name;
-          if (body.product.ean) productDetails.ean = body.product.ean;
-          await getConnection()
-            .createQueryBuilder()
-            .update(Product)
-            .set(productDetails)
-            .where('id =:id', { id: productId })
-            .execute();
-        }
-        promo.productIds = [productId];
-      }
       await this.promoClusterRepository.save(promoClusters);
-      const promoModified = {
+      const promo = {
+        id: promoId,
         ...convertToCamelCase(body),
-        ...promo,
       };
-      return await this.promoRepository.save(promoModified);
+      const promoColumnsNames = Promo.getRepository().metadata.columns.map(
+        item => item.propertyName,
+      );
+      filterObjectProperty(promo, promoColumnsNames);
+      return await this.promoRepository.save(promo);
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
+  }
+  async getGeneralParams(promoId: number) {
+    try {
+      return await this.promoRepository.findOne(promoId, {
+        relations: ['promoType', 'promoClusters'],
+      });
     } catch (e) {
       throw new InternalServerErrorException(e);
     }
@@ -402,26 +359,17 @@ export class PromoService {
     try {
       // promoMea
       // await this.promoMeaRepository.delete(id);
-      // promoConso
+      await this.promoConsoRepository.delete(id);
+      await this.promoAchatRepository.delete(id);
+      await this.promoMeaEmplacementRepository.delete({ promoId: id });
+      await this.promoMeaRepository.delete(id);
       // promoAchat
-      // promoClusters
+      await this.promoClusterRepository.delete({ promoId: id });
       // promoType
       return await this.promoRepository.delete(id);
     } catch (err) {
       return err;
     }
-  }
-  saveProduct(product: any) {
-    return getConnection()
-      .createQueryBuilder()
-      .insert()
-      .into(Product)
-      .values(product)
-      .execute()
-      .then(data => data.raw.insertId)
-      .catch(e => {
-        throw new InternalServerErrorException(e);
-      });
   }
 
   // @Transaction() async delete(
