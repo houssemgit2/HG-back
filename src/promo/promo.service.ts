@@ -11,7 +11,7 @@ import {
   LessThan,
   MoreThan,
   Between,
-  getConnection,
+  SelectQueryBuilder,
 } from 'typeorm';
 // Entity
 import { Promo } from './../entities/Promo';
@@ -27,12 +27,11 @@ import {
   arrayEquals,
   isNotEmptyArray,
 } from '../common/utils/helpers';
-import { Gamme } from '../entities/Gamme';
-import { Product } from '../entities/Product';
 import { StorePromoMea } from '../entities/StorePromoMea';
 import { PromoConso } from '../entities/PromoConso';
-import { ProductDto } from './dto/product.dto';
 import { filterObjectProperty } from '../common/utils/helpers';
+import { GetPromoDto } from './dto/get-promo.dto';
+import { PromoMeaDocumentProvide } from '../entities/PromoMeaDocumentProvide';
 // DTO
 @Injectable()
 export class PromoService {
@@ -51,6 +50,9 @@ export class PromoService {
     private promoMeaRepository: Repository<PromoMea>,
     @InjectRepository(PromoMeaEmplacement)
     private promoMeaEmplacementRepository: Repository<PromoMeaEmplacement>,
+
+    @InjectRepository(PromoMeaDocumentProvide)
+    private promoMeaDocumentProvide: Repository<PromoMeaDocumentProvide>,
 
     @InjectRepository(StorePromoMea)
     private storePromoMeaRepository: Repository<StorePromoMea>,
@@ -93,6 +95,13 @@ export class PromoService {
         );
         await this.promoMeaEmplacementRepository.save(emplacementList);
       }
+      if (promo.document_provide_types)
+        await this.promoMeaDocumentProvide.save(
+          promo.document_provide_types.map(item => ({
+            promoId,
+            documentProvideTypeId: item,
+          })),
+        );
       delete promo.promo_mea_emplacements;
       return await this.promoMeaRepository.save({
         promoId,
@@ -141,12 +150,13 @@ export class PromoService {
     try {
       return await this.promoRepository.findOne(promoId, {
         relations: [
-          'promoType',
-          // 'remunerations',
-          // 'promoClusters',
-          // 'promoAchat',
-          // 'promoConso',
-          // 'promoMea',
+          'promoType', //
+          'promoClusters', //
+          'promoAchat', //
+          'promoConso', //
+          'promoMea', //
+          'promoMea.promoMeaEmplacements', //
+          'promoMea.documentProvideTypes',
         ],
       });
     } catch (e) {
@@ -249,60 +259,60 @@ export class PromoService {
       throw new InternalServerErrorException(e);
     }
   }
-  async getAll(filter): Promise<Promo[]> {
-    const sqlQuery = this.promoRepository
-      .createQueryBuilder('p')
-      .leftJoinAndSelect(
-        'p.promoClusters',
-        'promoCluster',
-        'promoCluster.promo_id = p.id',
-      )
-      .leftJoinAndSelect(
-        'promoCluster.cluster',
-        'c',
-        'c.id = promoCluster.cluster_id',
-      )
-      .leftJoin('promo_type', 'promoType', 'promoType.promo_id = p.id')
-      .leftJoin('operation_type', 't', 't.id = promoType.operation_type_id')
-      .leftJoinAndSelect('p.gamme', 'gamme');
-    if (filter.startDate && filter.endDate) {
-      const queryDateOptions = [
-        {
-          startDate: LessThan(filter.startDate),
-        },
-        {
-          endDate: MoreThan(filter.startDate),
-        },
-        {
-          startDate: Between(filter.startDate, filter.endDate),
+  // async getAll(filter): Promise<Promo[]> {
+  //   const sqlQuery = this.promoRepository
+  //     .createQueryBuilder('p')
+  //     .leftJoinAndSelect(
+  //       'p.promoClusters',
+  //       'promoCluster',
+  //       'promoCluster.promo_id = p.id',
+  //     )
+  //     .leftJoinAndSelect(
+  //       'promoCluster.cluster',
+  //       'c',
+  //       'c.id = promoCluster.cluster_id',
+  //     )
+  //     .leftJoin('promo_type', 'promoType', 'promoType.promo_id = p.id')
+  //     .leftJoin('operation_type', 't', 't.id = promoType.operation_type_id')
+  //     .leftJoinAndSelect('p.gamme', 'gamme');
+  //   if (filter.startDate && filter.endDate) {
+  //     const queryDateOptions = [
+  //       {
+  //         startDate: LessThan(filter.startDate),
+  //       },
+  //       {
+  //         endDate: MoreThan(filter.startDate),
+  //       },
+  //       {
+  //         startDate: Between(filter.startDate, filter.endDate),
 
-          endDate: Between(filter.startDate, filter.endDate),
-        },
-      ];
+  //         endDate: Between(filter.startDate, filter.endDate),
+  //       },
+  //     ];
 
-      sqlQuery.where(queryDateOptions);
-    }
-    if (filter.clusters) {
-      sqlQuery.andWhere('c.name IN (:...clusters)', {
-        clusters: JSON.parse(filter.clusters),
-      });
-    }
-    if (filter.type) {
-      filter.type.split(',').forEach(val => {
-        sqlQuery.orWhere('t.name like :name', {
-          name: '%' + val + '%',
-        });
-      });
-    }
-    if (filter.perPage && filter.page) {
-      sqlQuery.skip(filter.perPage * (filter.page - 1)).take(filter.perPage);
-    }
-    try {
-      return await sqlQuery.getMany();
-    } catch (err) {
-      return err;
-    }
-  }
+  //     sqlQuery.where(queryDateOptions);
+  //   }
+  //   if (filter.clusters) {
+  //     sqlQuery.andWhere('c.name IN (:...clusters)', {
+  //       clusters: JSON.parse(filter.clusters),
+  //     });
+  //   }
+  //   if (filter.type) {
+  //     filter.type.split(',').forEach(val => {
+  //       sqlQuery.orWhere('t.name like :name', {
+  //         name: '%' + val + '%',
+  //       });
+  //     });
+  //   }
+  //   if (filter.perPage && filter.page) {
+  //     sqlQuery.skip(filter.perPage * (filter.page - 1)).take(filter.perPage);
+  //   }
+  //   try {
+  //     return await sqlQuery.getMany();
+  //   } catch (err) {
+  //     return err;
+  //   }
+  // }
 
   async getPromosAchat(promoId: number) {
     try {
@@ -313,7 +323,9 @@ export class PromoService {
   }
   async getPromosMea(promoId: number) {
     try {
-      return await this.promoMeaRepository.findOne(promoId);
+      return await this.promoMeaRepository.findOne(promoId, {
+        relations: ['promoMeaEmplacements', 'documentProvideTypes'],
+      });
     } catch (e) {
       throw new InternalServerErrorException(e);
     }
@@ -357,18 +369,20 @@ export class PromoService {
 
   async delete(id: number) {
     try {
-      // promoMea
-      // await this.promoMeaRepository.delete(id);
+      // todo to do we need transaction here
+      await this.promoClusterRepository.delete({ promoId: id });
+      await this.promoMeaEmplacementRepository.delete({ promoId: id });
+      await this.promoMeaDocumentProvide.delete({ promoId: id });
+
       await this.promoConsoRepository.delete(id);
       await this.promoAchatRepository.delete(id);
-      await this.promoMeaEmplacementRepository.delete({ promoId: id });
       await this.promoMeaRepository.delete(id);
-      // promoAchat
-      await this.promoClusterRepository.delete({ promoId: id });
-      // promoType
+
+      await this.promoOperationTypeRepository.delete({ promoId: id });
+
       return await this.promoRepository.delete(id);
     } catch (err) {
-      return err;
+      throw new InternalServerErrorException(err);
     }
   }
 
@@ -389,4 +403,63 @@ export class PromoService {
 
   //   return await promoRepository.delete(id);
   // }
+
+  async listPromos(filter: GetPromoDto) {
+    try {
+      const { perPage, page } = filter;
+
+      const promos = await this.promoRepository.find({
+        where: (qb: SelectQueryBuilder<Promo>) => {
+          if (filter.startDate && filter.endDate)
+            qb.where(
+              `(promo.start_date BETWEEN :startDate AND :endDate
+      OR (promo.end_date BETWEEN :startDate AND :endDate)
+      OR (promo.start_date <= :startDate and promo.end_date>= :endDate) )`,
+              {
+                startDate: filter.startDate,
+                endDate: filter.endDate,
+              },
+            );
+          if (filter.laboratoryId)
+            qb.andWhere('laboratory_id=:laboratoryId', {
+              laboratoryId: filter.laboratoryId,
+            });
+          if (filter.gammeId)
+            qb.andWhere('gamme_id=:gammeId', {
+              gammeId: filter.gammeId,
+            });
+          if (filter.clusterId)
+            qb.andWhere('promoClusters.cluster_id=:clusterId', {
+              clusterId: filter.clusterId,
+            });
+          if (filter.promoConcernTypeId)
+            qb.andWhere('promo_concern_type_id=:promoConcernTypeId', {
+              promoConcernTypeId: filter.promoConcernTypeId,
+            });
+          if (filter.promoTypeId)
+            qb.andWhere('Promo__promoType.operation_type_id=:promoTypeId', {
+              promoTypeId: filter.promoTypeId,
+            });
+        },
+
+        relations: [
+          'promoType',
+          'promoClusters',
+          'promoAchat',
+          'promoConso',
+          'promoMea',
+          'emplacements',
+          'promoMea.promoMeaEmplacements',
+          'promoMea.documentProvideTypes',
+        ],
+        loadEagerRelations: true,
+        skip: perPage * (page - 1),
+        take: perPage,
+      });
+      return promos;
+    } catch (e) {
+      console.log(e);
+      throw new InternalServerErrorException(e);
+    }
+  }
 }
