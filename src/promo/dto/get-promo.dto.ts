@@ -20,16 +20,24 @@ export class GetPromoDto {
   endDate: Date;
 
   @ApiProperty({ required: false })
+  @Type(() => String)
+  clusterId: string;
+
+  @ApiProperty({ required: false })
   @Type(() => Number)
-  offerAvantageClient: number;
+  laboratoryId: number;
+
+  @ApiProperty({ required: false })
+  @Type(() => Number)
+  gammeId: number;
+
+  @ApiProperty({ required: false })
+  @Type(() => Number)
+  promoConcernTypeId: number;
 
   @ApiProperty({ required: false })
   @Type(() => String)
-  clusters: string;
-
-  @ApiProperty({ required: false })
-  @Type(() => String)
-  type: string;
+  promoTypeId: string;
 
   @ApiProperty({ required: false })
   @Type(() => Number)
