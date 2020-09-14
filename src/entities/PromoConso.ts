@@ -55,6 +55,7 @@ export class PromoConso {
     {
       onDelete: 'RESTRICT',
       onUpdate: 'RESTRICT',
+      eager: true,
     },
   )
   @JoinColumn([{ name: 'micro_type_id', referencedColumnName: 'id' }])
@@ -66,6 +67,7 @@ export class PromoConso {
     {
       onDelete: 'RESTRICT',
       onUpdate: 'RESTRICT',
+      eager: true,
     },
   )
   @JoinColumn([{ name: 'circuit_type_id', referencedColumnName: 'id' }])
@@ -74,7 +76,7 @@ export class PromoConso {
   @ManyToOne(
     () => RemunerationBaseType,
     remunerationBaseType => remunerationBaseType.promoConsos,
-    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
   )
   @JoinColumn([{ name: 'remuneration_base_id', referencedColumnName: 'id' }])
   remunerationBase: RemunerationBaseType;

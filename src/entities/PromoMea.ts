@@ -89,7 +89,7 @@ export class PromoMea {
   @ManyToOne(
     () => RepaymentCircuitType,
     repaymentCircuitType => repaymentCircuitType.promoMeas,
-    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
   )
   @JoinColumn([
     { name: 'repayment_circuit_type_id', referencedColumnName: 'id' },

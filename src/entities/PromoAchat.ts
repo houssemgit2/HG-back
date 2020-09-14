@@ -51,7 +51,7 @@ export class PromoAchat {
   @ManyToOne(
     () => AchatAdvantageDiscountType,
     achatAdvantageDiscountType => achatAdvantageDiscountType.promoAchats,
-    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
   )
   @JoinColumn([
     { name: 'achat_advantage_discount_type_id', referencedColumnName: 'id' },

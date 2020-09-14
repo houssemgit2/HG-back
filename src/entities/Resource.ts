@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { StorePermission } from './StorePermission';
 
-@Entity('ressource', { schema: 'hg_promo_beta' })
+@Entity('resource', { schema: 'hg_promo_beta' })
 export class Resource extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;

@@ -12,8 +12,8 @@ export class EmplacementType extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
-  @Column('int', { name: 'name' })
-  name: number;
+  @Column('varchar', { name: 'name' })
+  name: string;
 
   // @OneToMany(
   //   () => Remuneration,

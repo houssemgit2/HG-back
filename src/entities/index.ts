@@ -45,12 +45,12 @@ import { RemunerationCaAnnualPlateType } from './RemunerationCaAnnualPlateType';
 import { RemunerationCaAnnualTargetType } from './RemunerationCaAnnualTargetType';
 import { RemunerationFixedType } from './RemunerationFixedType';
 import { RepaymentCircuitType } from './RepaymentCircuitType';
-import { Ressource } from './Ressource';
 import { PromoMeaEmplacement } from './PromoMeaEmplacement';
 import { PromoStatus } from './Status';
 import { PromoConcernType } from './PromoConcernedType';
 import { MeasureType } from './MeasureType';
 import { ProductConcernType } from './ProductConcernType';
+import { PromoMeaDocumentProvide } from './PromoMeaDocumentProvide';
 
 const entities = [
   Brand,
@@ -101,10 +101,10 @@ const entities = [
   RemunerationCaAnnualTargetType,
   RemunerationFixedType,
   RepaymentCircuitType,
-  Ressource,
   PromoStatus,
   PromoConcernType,
   ProductConcernType,
   MeasureType,
+  PromoMeaDocumentProvide,
 ];
 export default entities;
