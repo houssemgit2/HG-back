@@ -13,6 +13,7 @@ import { PromoStatus } from '../entities/Status';
 import { MeasureType } from '../entities/MeasureType';
 import { ProductConcernType } from '../entities/ProductConcernType';
 import { Resource } from '../entities/Resource';
+import { RejectionReason } from '../entities/RejectionReason';
 
 export enum promoState {
   CONFIRMED = 'CONFIRMED',
@@ -96,8 +97,13 @@ export const STATIC_TABLES = [
     entityName: 'MeasureType', //promo_status
   },
   {
-    name: 'resource',
+    name: 'resources',
     targetEntity: Resource,
     entityName: 'Resource', //promo_status
-  },
+  }, //RejectionReason
+  {
+    name: 'rejection-reasons',
+    targetEntity: RejectionReason,
+    entityName: 'RejectionReason', //promo_status
+  }, //RejectionReason
 ];

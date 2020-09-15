@@ -166,7 +166,8 @@ export class PromoService {
   async updatePromo(promoId: number, status: number) {
     return await this.promoRepository.update(promoId, { statusId: status });
   }
-  async duplicatePromo(promoId: number) {
+
+  async getPromoById(promoId: number, loadEagerRelations: boolean) {
     try {
       const promo = await this.promoRepository.findOne(promoId, {
         relations: [
@@ -176,10 +177,18 @@ export class PromoService {
           'promoConso',
           'promoMea',
           'emplacements',
-          'storePromoMeas',
+          // 'storePromoMeas',
         ],
-        loadEagerRelations: false,
+        loadEagerRelations,
       });
+      return promo;
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
+  }
+  async duplicatePromo(promoId: number) {
+    try {
+      const promo = await this.getPromoById(promoId, false);
       delete promo.id;
       delete promo.createdAt;
       delete promo.updatedAt;
@@ -201,8 +210,8 @@ export class PromoService {
 
       const promoClusters: PromoCluster[] = promo.promoClusters;
       delete promo.promoClusters;
-      const storePromoMeas: StorePromoMea[] = promo.storePromoMeas;
-      delete promo.storePromoMeas;
+      // const storePromoMeas: StorePromoMea[] = promo.storePromoMeas;
+      // delete promo.storePromoMeas;
 
       const duplicatedPromo = await this.promoRepository.save(promo);
       if (promoAchat)
@@ -246,13 +255,13 @@ export class PromoService {
             },
           ),
         );
-      if (isNotEmptyArray(promoClusters))
-        await this.storePromoMeaRepository.save(
-          storePromoMeas.map(item => ({
-            promoId: duplicatedPromo.id,
-            storeId: item.storeId,
-          })),
-        );
+      // if (isNotEmptyArray(promoClusters))
+      //   await this.storePromoMeaRepository.save(
+      //     storePromoMeas.map(item => ({
+      //       promoId: duplicatedPromo.id,
+      //       storeId: item.storeId,
+      //     })),
+      //   );
 
       return duplicatedPromo;
     } catch (e) {
