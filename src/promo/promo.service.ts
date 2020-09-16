@@ -2,6 +2,7 @@ import {
   Injectable,
   InternalServerErrorException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PromoOperationType } from '../entities/PromoType';
@@ -35,6 +36,7 @@ import { PromoMeaDocumentProvide } from '../entities/PromoMeaDocumentProvide';
 // DTO
 @Injectable()
 export class PromoService {
+  logger = new Logger('Promo Service');
   constructor(
     @InjectRepository(Promo)
     private promoRepository: Repository<Promo>,
@@ -146,29 +148,14 @@ export class PromoService {
         throw new InternalServerErrorException(e);
       });
   }
-  async getPromoType(promoId: number) {
-    try {
-      return await this.promoRepository.findOne(promoId, {
-        relations: [
-          'promoType', //
-          'promoClusters', //
-          'promoAchat', //
-          'promoConso', //
-          'promoMea', //
-          'promoMea.promoMeaEmplacements', //
-          'promoMea.documentProvideTypes',
-        ],
-      });
-    } catch (e) {
-      throw new InternalServerErrorException(e);
-    }
-  }
+
   async updatePromo(promoId: number, status: number) {
     return await this.promoRepository.update(promoId, { statusId: status });
   }
 
   async getPromoById(promoId: number, loadEagerRelations: boolean) {
     try {
+      this.logger.verbose(promoId);
       const promo = await this.promoRepository.findOne(promoId, {
         relations: [
           'promoType',
@@ -177,7 +164,7 @@ export class PromoService {
           'promoConso',
           'promoMea',
           'emplacements',
-          // 'storePromoMeas',
+          'storePromoMeas',
         ],
         loadEagerRelations,
       });
@@ -268,77 +255,6 @@ export class PromoService {
       throw new InternalServerErrorException(e);
     }
   }
-  // async getAll(filter): Promise<Promo[]> {
-  //   const sqlQuery = this.promoRepository
-  //     .createQueryBuilder('p')
-  //     .leftJoinAndSelect(
-  //       'p.promoClusters',
-  //       'promoCluster',
-  //       'promoCluster.promo_id = p.id',
-  //     )
-  //     .leftJoinAndSelect(
-  //       'promoCluster.cluster',
-  //       'c',
-  //       'c.id = promoCluster.cluster_id',
-  //     )
-  //     .leftJoin('promo_type', 'promoType', 'promoType.promo_id = p.id')
-  //     .leftJoin('operation_type', 't', 't.id = promoType.operation_type_id')
-  //     .leftJoinAndSelect('p.gamme', 'gamme');
-  //   if (filter.startDate && filter.endDate) {
-  //     const queryDateOptions = [
-  //       {
-  //         startDate: LessThan(filter.startDate),
-  //       },
-  //       {
-  //         endDate: MoreThan(filter.startDate),
-  //       },
-  //       {
-  //         startDate: Between(filter.startDate, filter.endDate),
-
-  //         endDate: Between(filter.startDate, filter.endDate),
-  //       },
-  //     ];
-
-  //     sqlQuery.where(queryDateOptions);
-  //   }
-  //   if (filter.clusters) {
-  //     sqlQuery.andWhere('c.name IN (:...clusters)', {
-  //       clusters: JSON.parse(filter.clusters),
-  //     });
-  //   }
-  //   if (filter.type) {
-  //     filter.type.split(',').forEach(val => {
-  //       sqlQuery.orWhere('t.name like :name', {
-  //         name: '%' + val + '%',
-  //       });
-  //     });
-  //   }
-  //   if (filter.perPage && filter.page) {
-  //     sqlQuery.skip(filter.perPage * (filter.page - 1)).take(filter.perPage);
-  //   }
-  //   try {
-  //     return await sqlQuery.getMany();
-  //   } catch (err) {
-  //     return err;
-  //   }
-  // }
-
-  async getPromosAchat(promoId: number) {
-    try {
-      return await this.promoAchatRepository.findOne(promoId);
-    } catch (e) {
-      throw new InternalServerErrorException(e);
-    }
-  }
-  async getPromosMea(promoId: number) {
-    try {
-      return await this.promoMeaRepository.findOne(promoId, {
-        relations: ['promoMeaEmplacements', 'documentProvideTypes'],
-      });
-    } catch (e) {
-      throw new InternalServerErrorException(e);
-    }
-  }
 
   async saveGeneralParams(
     promoId: number,
@@ -395,35 +311,18 @@ export class PromoService {
     }
   }
 
-  // @Transaction() async delete(
-  //   id: number,
-  //   @TransactionRepository(Promo) promoRepository: Repository<Promo>,
-  //   // @TransactionRepository(PromoMea) promoMeaRepository: Repository<PromoMea>,
-  //   // @TransactionRepository(PromoMea) promoConsoRepository: Repository<PromoMea>,
-  //   // @TransactionRepository(PromoMea) promoAchatRepository: Repository<PromoMea>,
-  //   // @TransactionRepository(PromoMea) promoTypeRepository: Repository<PromoMea>,
-  //   // @TransactionRepository(PromoMea)
-  //   // promoClusterRepository: Repository<PromoMea>,
-  //   // @TransactionRepository(PromoMea)
-  //   // promoMeaDocumentRepository: Repository<PromoMea>,
-  // ) {
-  //   // await promoMeaDocumentRepository.delete({ promoId: id });
-  //   // await promoMeaRepository.delete(id);
-
-  //   return await promoRepository.delete(id);
-  // }
-
   async listPromos(filter: GetPromoDto) {
     try {
       const { perPage, page } = filter;
 
+      // const totalItem = await this.promoRepository.count();
       const promos = await this.promoRepository.find({
         where: (qb: SelectQueryBuilder<Promo>) => {
           if (filter.startDate && filter.endDate)
             qb.where(
-              `(promo.start_date BETWEEN :startDate AND :endDate
-      OR (promo.end_date BETWEEN :startDate AND :endDate)
-      OR (promo.start_date <= :startDate and promo.end_date>= :endDate) )`,
+              `(start_date BETWEEN :startDate AND :endDate
+               OR (end_date BETWEEN :startDate AND :endDate)
+               OR (start_date <= :startDate and end_date>= :endDate) )`,
               {
                 startDate: filter.startDate,
                 endDate: filter.endDate,
@@ -438,7 +337,7 @@ export class PromoService {
               gammeId: filter.gammeId,
             });
           if (filter.clusterId)
-            qb.andWhere('promoClusters.cluster_id=:clusterId', {
+            qb.andWhere('Promo__promoClusters.cluster_id=:clusterId', {
               clusterId: filter.clusterId,
             });
           if (filter.promoConcernTypeId)
@@ -467,7 +366,7 @@ export class PromoService {
       });
       return promos;
     } catch (e) {
-      console.log(e);
+      console.error(e);
       throw new InternalServerErrorException(e);
     }
   }

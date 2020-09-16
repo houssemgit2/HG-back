@@ -108,6 +108,9 @@ export class PromoMea {
     ],
     schema: 'hg_promo_beta',
   })
+  // @JoinColumn([
+  //   { name: 'document_provide_type_id', referencedColumnName: 'id' },
+  // ])
   documentProvideTypes: DocumentProvideType[];
 
   @OneToMany(

@@ -8,6 +8,7 @@ import {
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { convertToSnakeCase } from './utils/helpers';
+import { Logger } from '@nestjs/common';
 
 export interface Response<T> {
   statusCode: number;
@@ -16,6 +17,7 @@ export interface Response<T> {
 
 @Injectable()
 export class TransformInterceptor implements NestInterceptor {
+  logger = new Logger('TransformInterceptor');
   private httpServer: HttpServer;
   intercept(
     context: ExecutionContext,
@@ -28,15 +30,17 @@ export class TransformInterceptor implements NestInterceptor {
     console.log('TransformInterceptor');
     console.log(pathRequest);
     if (method === 'POST') status = 200;
+    this.logger.verbose(`statusCode:${status} succssefly returning response`);
     if (!pathRequest.includes('login')) {
       // make the response standard {status,data}
-      console.log(`statusCode:${status} transforming response format`);
       return next.handle().pipe(
         map(data => ({
           statusCode: status,
           data: convertToSnakeCase(data),
         })),
       );
-    } else return next.handle().pipe(map(data => data));
+    } else {
+      return next.handle().pipe(map(data => data));
+    }
   }
 }

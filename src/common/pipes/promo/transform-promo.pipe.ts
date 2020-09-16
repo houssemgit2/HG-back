@@ -67,9 +67,11 @@ export class PromoTransformPipe implements PipeTransform<any> {
             });
         }
 
-        value.productIds = [productId];
+        value['product_ids'] = [productId];
         delete value.product;
       }
+      if (value.product_ids && Array.isArray(value.product_ids))
+        value['product_ids'] = value.product_ids.map(item => ({ id: item }));
     }
     return value;
   }

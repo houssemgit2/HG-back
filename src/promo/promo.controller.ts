@@ -161,35 +161,10 @@ export class PromoController {
   @ApiTags('Promo-form')
   @Get(':promoId')
   @UseGuards(AuthGuard(), AdminGuard)
-  async getPromoMea(@Param(':promoId') promoId: number) {
+  async getPromoById(@Param('promoId') promoId: number) {
     const promo = await this.promoService.getPromoById(promoId, true);
     return promo;
   }
-
-  // @ApiTags('Promo-form')
-  // @Get(':promoId/achat')
-  // @UseGuards(AuthGuard(), AdminGuard)
-  // // @UsePipes(new PromoAchatValidationPipe())
-  // async getPromoAchat(@Param(':promoId') promoId: number) {
-  //   const promoAchat = await this.promoService.getPromosAchat(promoId);
-  //   return promoAchat;
-  // }
-
-  // @ApiTags('Promo-form')
-  // @Get(':promoId/general')
-  // @UseGuards(AuthGuard(), AdminGuard)
-  // // @UsePipes(new PromoValidationPipe())
-  // async getPromoGeneralInfo(@Param(':promoId') promoId: number) {
-  //   const promo = await this.promoService.getGeneralParams(promoId);
-  //   return promo;
-  // }
-
-  // @ApiTags('Promo')
-  // @Get(':promoId')
-  // @UseGuards(AuthGuard(), AdminGuard)
-  // async getPromoType(@Param() param: PromoIdDto) {
-  //   return await this.promoService.getPromoType(param.promoId); //
-  // }
 
   @ApiTags('Promo')
   @Post('generate/promos')
