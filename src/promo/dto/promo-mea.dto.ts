@@ -16,17 +16,16 @@ import {
 } from './remuneration.dto';
 import { IsString, IsNumber, IsNumberString } from 'class-validator';
 import { RemunerationUnitProductDetailsDto } from './remuneration.dto';
+
 export class PromoMeaEmplacementDto {
   @ApiProperty()
   @IsNotEmpty()
   @Type(() => Number)
-  @IsNumberString()
-  emplacement_type_id: number;
+  emplacement_type_id: number; // todo validation isnUmber must be fixed
 
   @ApiProperty()
   @IsNotEmpty()
   @Type(() => String)
-  @IsString()
   details: string;
 }
 export class PromoMeaDto {
