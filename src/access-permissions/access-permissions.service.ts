@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { StorePermission } from '../entities/StorePermission';
 import { StorePermissionRepository } from './access-permissions.repository';
-import { PaginationDto } from 'src/store/dto/pagination.dto';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { CreateAccessPermissionDto } from './dto/create.dto';
 import { UpdateAccessPermissionDto } from './dto/update.dto';
 

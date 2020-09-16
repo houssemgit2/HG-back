@@ -4,8 +4,8 @@ import { IsNumber, IsNotEmpty } from 'class-validator';
 
 export class EligibilityMinimumDetailsDto {
   @ApiProperty()
-  @IsNumber()
   @Type(() => Number)
+  @IsNumber()
   @IsNotEmpty()
   quantity_min: number;
   @ApiProperty()

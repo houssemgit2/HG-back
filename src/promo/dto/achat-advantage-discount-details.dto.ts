@@ -35,34 +35,34 @@ export class PerCentAchatDiscountDto {
   @ApiProperty()
   @ValidateIf(o => o.discount === true)
   @IsNotEmpty()
-  @IsNumber()
   @Type(() => Number)
+  @IsNumber()
   achat_advantage_sub_discount_type_id: number;
 
   @ApiProperty()
   @IsNotEmpty()
   @ValidateIf(o => o.unity === true)
-  @IsBoolean()
   @Type(() => Boolean)
+  @IsBoolean()
   variegated: boolean;
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsString()
   @Type(() => String)
+  @IsString()
   comment: string;
 }
 export class FreeUnitAchatDiscountDto {
   @ApiProperty()
   @IsNotEmpty()
-  @IsNumber()
   @Type(() => Number)
+  @IsNumber()
   ordered_unity: number;
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsNumber()
   @Type(() => Number)
+  @IsNumber()
   free_unity: number;
 
   @ApiProperty()

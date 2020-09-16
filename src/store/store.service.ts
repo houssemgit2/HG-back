@@ -9,7 +9,7 @@ import { StoreRepository } from './store.repository';
 import { AddStoreDto } from './dto/add-store.dto';
 import { User } from '../entities/User';
 import { Store } from '../entities/Store';
-import { PaginationDto } from './dto/pagination.dto';
+import { PaginationDto } from '../common/dto/pagination.dto';
 import { StorePermissionDto } from '../store/dto/store-permission.dto';
 import { UserRepository } from '../auth/user.repository';
 import { StorePermission } from '../entities/StorePermission';

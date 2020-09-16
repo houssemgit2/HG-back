@@ -5,8 +5,8 @@ import { IsOptional, IsString, IsNumber } from 'class-validator';
 export class DiscountDto {
   @ApiProperty({ required: false })
   @IsOptional()
-  @IsNumber()
   @Type(() => Number)
+  @IsNumber()
   id: number;
 
   @ApiProperty({ required: false })

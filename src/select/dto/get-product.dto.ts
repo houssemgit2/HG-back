@@ -19,8 +19,8 @@ export class GetProductDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @IsNumber()
   @Type(() => Number)
+  @IsNumber()
   ean: number;
 
   @ApiProperty({ required: false })

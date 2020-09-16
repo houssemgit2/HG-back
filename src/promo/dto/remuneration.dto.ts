@@ -14,25 +14,25 @@ import { PromoMeaEmplacementDto } from './promo-mea-emplacement.dto';
 
 export class RemunerationUnitProductDetailsDto {
   @ApiProperty()
-  @IsNumber()
   @Type(() => Number)
+  @IsNumber()
   @IsNotEmpty()
   eligibility_ca_range_type_id: number;
   @ApiProperty()
-  @IsNumber()
   @Type(() => Number)
+  @IsNumber()
   @IsNotEmpty()
   value: number;
 }
 export class RemunerationCaAnnualDetailsDto {
   @ApiProperty()
-  @IsNumber()
   @Type(() => Number)
+  @IsNumber()
   @IsNotEmpty()
   remuneration_ca_annual_target_type_id: number;
   @ApiProperty()
-  @IsNumber()
   @Type(() => Number)
+  @IsNumber()
   @IsNotEmpty()
   remuneration_ca_annual_plate_type_id: number;
 }

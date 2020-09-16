@@ -9,7 +9,7 @@ import {
 import { Store } from '../entities/Store';
 import { InjectRepository } from '@nestjs/typeorm';
 import { InternalServerErrorException, Logger } from '@nestjs/common';
-import { PaginationDto } from './dto/pagination.dto';
+import { PaginationDto } from '../common/dto/pagination.dto';
 import { User } from '../entities/User';
 import { StorePermission } from '../entities/StorePermission';
 

@@ -8,7 +8,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { DatesMonthYearDto } from './datesList.dto';
 import { IsNumberString } from 'class-validator';
-import { PaginationDto } from '../../store/dto/pagination.dto';
+import { PaginationDto } from '../../common/dto/pagination.dto';
 
 const PromoMeaStateEnum = [
   'CONFIRMED',

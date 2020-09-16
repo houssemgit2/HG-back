@@ -11,7 +11,7 @@ import {
   UsePipes,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { PaginationDto } from './dto/pagination.dto';
+import { PaginationDto } from '../common/dto/pagination.dto';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { StoreService } from './store.service';
 import { InjectEventEmitter } from 'nest-emitter';
