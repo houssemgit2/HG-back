@@ -14,13 +14,13 @@ import {
   RemunerationCaAnnualDetailsDto,
   RemunerationFixedDetailsDto,
 } from './remuneration.dto';
-import { IsString, IsNumber } from 'class-validator';
+import { IsString, IsNumber, IsNumberString } from 'class-validator';
 import { RemunerationUnitProductDetailsDto } from './remuneration.dto';
 export class PromoMeaEmplacementDto {
   @ApiProperty()
   @IsNotEmpty()
   @Type(() => Number)
-  @IsNumber()
+  @IsNumberString()
   emplacement_type_id: number;
 
   @ApiProperty()
