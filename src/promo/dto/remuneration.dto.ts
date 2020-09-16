@@ -10,20 +10,8 @@ import {
   ValidateIf,
 } from 'class-validator';
 import { EligibilityDetailsDto } from './eligibility-ca-details.dto';
+import { PromoMeaEmplacementDto } from './promo-mea-emplacement.dto';
 
-export class QuantityRemunerationFixedDto {
-  @ApiProperty()
-  @IsNumber()
-  @Type(() => Number)
-  @IsNotEmpty()
-  emplacement_type_id: number;
-
-  @ApiProperty()
-  @IsString()
-  @Type(() => String)
-  @IsNotEmpty()
-  comment: string;
-}
 export class RemunerationUnitProductDetailsDto {
   @ApiProperty()
   @IsNumber()
@@ -57,14 +45,14 @@ export class RemunerationFixedDetailsDto {
 
   @ApiProperty({
     isArray: true,
-    type: QuantityRemunerationFixedDto,
+    type: PromoMeaEmplacementDto,
   })
   @IsArray()
   @ValidateIf(o => o.has_emplacement)
   @IsNotEmpty()
   @ValidateNested({ each: true, always: true })
-  @Type(() => QuantityRemunerationFixedDto)
-  data_emplacement: QuantityRemunerationFixedDto[];
+  @Type(() => PromoMeaEmplacementDto)
+  data_emplacement: PromoMeaEmplacementDto[];
 
   @ApiProperty()
   @IsNotEmpty()

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/camelcase */
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
@@ -7,6 +6,8 @@ import {
   ValidateIf,
   IsArray,
   ValidateNested,
+  IsString,
+  IsNumber,
 } from 'class-validator';
 import { EligibilityDetailsDto } from './eligibility-ca-details.dto';
 import { EligibilityMinimumDetailsDto } from './promo-mea-eligibility.dto';
@@ -14,20 +15,9 @@ import {
   RemunerationCaAnnualDetailsDto,
   RemunerationFixedDetailsDto,
 } from './remuneration.dto';
-import { IsString, IsNumber, IsNumberString } from 'class-validator';
 import { RemunerationUnitProductDetailsDto } from './remuneration.dto';
+import { PromoMeaEmplacementDto } from './promo-mea-emplacement.dto';
 
-export class PromoMeaEmplacementDto {
-  @ApiProperty()
-  @IsNotEmpty()
-  @Type(() => Number)
-  emplacement_type_id: number; // todo validation isnUmber must be fixed
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @Type(() => String)
-  details: string;
-}
 export class PromoMeaDto {
   @ApiProperty()
   @IsNotEmpty()
@@ -94,13 +84,10 @@ export class PromoMeaDto {
       },
     ],
   })
-  @IsArray()
-  @ValidateNested({ each: true, always: true })
   @Type(() => PromoMeaEmplacementDto)
   promo_mea_emplacements: PromoMeaEmplacementDto[];
 
   @ApiProperty()
-  @IsNotEmpty()
   @Type(() => Boolean)
   @IsBoolean()
   emplacement_plv_labo: boolean;
@@ -132,7 +119,7 @@ export class PromoMeaDto {
     type: RemunerationFixedDetailsDto,
     example: {
       has_emplacement: true,
-      data_emplacement: [{ emplacement_id: 1, comment: 'test' }],
+      data_emplacement: [{ emplacement_type_id: 1, comment: 'test' }],
       has_quantity: true,
       data_quantity: [
         {

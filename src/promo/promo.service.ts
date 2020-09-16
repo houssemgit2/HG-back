@@ -21,7 +21,7 @@ import { PromoCluster } from '../entities/PromoCluster';
 import { PromoAchat } from '../entities/PromoAchat';
 import { PromoAchatDto } from './dto/promo.achat.dto';
 import { PromoMea } from '../entities/PromoMea';
-import { PromoMeaDto, PromoMeaEmplacementDto } from './dto/promo-mea.dto';
+import { PromoMeaDto } from './dto/promo-mea.dto';
 import { PromoMeaEmplacement } from '../entities/PromoMeaEmplacement';
 import {
   convertToCamelCase,
@@ -33,6 +33,7 @@ import { PromoConso } from '../entities/PromoConso';
 import { filterObjectProperty } from '../common/utils/helpers';
 import { GetPromoDto } from './dto/get-promo.dto';
 import { PromoMeaDocumentProvide } from '../entities/PromoMeaDocumentProvide';
+import { PromoMeaEmplacementDto } from './dto/promo-mea-emplacement.dto';
 // DTO
 @Injectable()
 export class PromoService {
@@ -97,14 +98,18 @@ export class PromoService {
         );
         await this.promoMeaEmplacementRepository.save(emplacementList);
       }
-      if (promo.document_provide_types)
-        await this.promoMeaDocumentProvide.save(
+      if (promo.document_provide_types) {
+        // const test = await this.promoMeaDocumentProvide.delete({ promoId });
+        const savedDoc = await this.promoMeaDocumentProvide.save(
           promo.document_provide_types.map(item => ({
             promoId,
             documentProvideTypeId: item,
           })),
         );
+        console.log(savedDoc);
+      }
       delete promo.promo_mea_emplacements;
+      delete promo.document_provide_types;
       return await this.promoMeaRepository.save({
         promoId,
         ...convertToCamelCase(promo),

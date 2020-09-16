@@ -25,7 +25,9 @@ export class PromoMeaDocumentProvide extends BaseEntity {
     documentProvideType => documentProvideType.promoMeaDocumentProvide,
     { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
   )
-  @JoinColumn([{ name: 'operation_type_id', referencedColumnName: 'id' }])
+  @JoinColumn([
+    { name: 'document_provide_type_id', referencedColumnName: 'id' },
+  ])
   documentProvideType: DocumentProvideType;
 
   @ManyToOne(
