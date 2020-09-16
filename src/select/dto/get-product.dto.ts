@@ -15,7 +15,6 @@ export class GetProductDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  @Type(() => String)
   name: string;
 
   @ApiProperty({ required: false })
@@ -25,13 +24,13 @@ export class GetProductDto {
   ean: number;
 
   @ApiProperty({ required: false })
-  // @Type(() => Number)
   @IsOptional()
-  @IsInt()
-  @IsExist(
-    { message: 'Gamme not exist' },
-    { entityName: 'Gamme', entity: Gamme, key: 'id' },
-    false,
-  )
+  @Type(() => Number)
+  @IsNumber()
+  // @IsExist(
+  //   { message: 'Gamme not exist' },
+  //   { entityName: 'Gamme', entity: Gamme, key: 'id' },
+  //   false,
+  // )
   gamme_id: number;
 }
