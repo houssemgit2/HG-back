@@ -34,6 +34,8 @@ import { filterObjectProperty } from '../common/utils/helpers';
 import { GetPromoDto } from './dto/get-promo.dto';
 import { PromoMeaDocumentProvide } from '../entities/PromoMeaDocumentProvide';
 import { PromoMeaEmplacementDto } from './dto/promo-mea-emplacement.dto';
+import { getConnection } from 'typeorm';
+import { Product } from '../entities/Product';
 // DTO
 @Injectable()
 export class PromoService {
@@ -241,7 +243,6 @@ export class PromoService {
         await this.promoClusterRepository.save(
           promoClusters.map(
             (item): PromoCluster => {
-              delete item.id;
               item.promoId = duplicatedPromo.id;
               return item;
             },
@@ -373,6 +374,105 @@ export class PromoService {
     } catch (e) {
       console.error(e);
       throw new InternalServerErrorException(e);
+    }
+  }
+  async getAll(filter): Promise<any> {
+    const sqlQuery = this.promoRepository
+      .createQueryBuilder('p')
+      .leftJoinAndSelect(
+        'p.promoClusters',
+        'promoCluster',
+        'promoCluster.promo_id = p.id',
+      )
+      .leftJoinAndSelect(
+        'promoCluster.cluster',
+        'c',
+        'c.id = promoCluster.cluster_id',
+      )
+      .leftJoinAndSelect('p.gamme', 'gamme')
+      .leftJoinAndSelect('p.promoType', 'promoType')
+      .leftJoinAndSelect('promoType.operationType', 'operationType')
+      .leftJoinAndMapMany(
+        'p.promoProducts',
+        'product',
+        'product',
+        // "(JSON_SEARCH(p.product_ids,'one',CONVERT(product.id,CHAR)))",
+        "(JSON_CONTAINS(p.product_ids,CONVERT(product.id,CHAR),'$'))",
+        //  'product.id MEMBER OF (p.product_ids)',
+      )
+      .leftJoinAndSelect('p.promoAchat', 'promoAchat')
+      .leftJoinAndSelect('p.promoMea', 'promoMea')
+      .leftJoinAndSelect(
+        'promoMea.promoMeaEmplacements',
+        'promoMeaEmplacements',
+      )
+      .leftJoinAndSelect(
+        'promoMea.documentProvideTypes',
+        'documentProvideTypes',
+      )
+      .leftJoinAndMapOne(
+        'promoMea.remuneration_base_type',
+        'remuneration_base_type',
+        'eligibility_ca_range_type',
+        "(JSON_EXTRACT(promoMea.remuneration_unit_product_details,'$.eligibility_ca_range_type_id')) = eligibility_ca_range_type.id",
+      )
+      .leftJoinAndMapMany(
+        'promoMea',
+        'product',
+        'product',
+        // "(JSON_SEARCH(p.product_ids,'one',CONVERT(product.id,CHAR)))",
+        "(JSON_CONTAINS(p.product_ids,CONVERT(product.id,CHAR),'$'))",
+        //  'product.id MEMBER OF (p.product_ids)',
+      )
+      .leftJoinAndSelect(
+        'promoMeaEmplacements.emplacementType',
+        'emplacementType',
+      // ).leftJoinAndMapMany()
+
+    // .leftJoinAndSelect('p.promoMea', 'promoMea');
+    // .leftJoinAndMapOne(
+    //   'promoMea.remuneration_ca_annual_plate_type',
+    //   'remuneration_ca_annual_plate_type',
+    //   'annual_plate_type',
+    //   "(JSON_SEARCH(promoMea.remuneration_ca_annual_details,'one',CONVERT(remuneration_ca_annual_plate_type.id,CHAR)))",
+    // );
+
+    // if (filter.startDate && filter.endDate) {
+    //   const queryDateOptions = [
+    //     {
+    //       startDate: LessThan(filter.startDate),
+    //     },
+    //     {
+    //       endDate: MoreThan(filter.startDate),
+    //     },
+    //     {
+    //       startDate: Between(filter.startDate, filter.endDate),
+
+    //       endDate: Between(filter.startDate, filter.endDate),
+    //     },
+    //   ];
+
+    //   sqlQuery.where(queryDateOptions);
+    // }
+    // if (filter.clusters) {
+    //   sqlQuery.andWhere('c.name IN (:...clusters)', {
+    //     clusters: JSON.parse(filter.clusters),
+    //   });
+    // }
+    // if (filter.type) {
+    //   filter.type.split(',').forEach(val => {
+    //     sqlQuery.orWhere('t.name like :name', {
+    //       name: '%' + val + '%',
+    //     });
+    //   });
+    // }
+    // if (filter.perPage && filter.page) {
+    //   sqlQuery.skip(filter.perPage * (filter.page - 1)).take(filter.perPage);
+    // }
+    try {
+      return await sqlQuery.getMany();
+    } catch (err) {
+      throw new InternalServerErrorException(err);
     }
   }
 }

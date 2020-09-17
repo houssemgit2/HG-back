@@ -28,12 +28,14 @@ export class PromoTransformPipe implements PipeTransform<any> {
         delete value.gamme;
       }
       if (value.new_products && value.new_products.length) {
+        if (!value.product_ids) value['product_ids'] = [];
         for (const element of value.new_products) {
           const id = await this.saveProduct({
             gammeId: value.gammeId,
             name: element,
           });
-          value.product_ids.push(id);
+          if (value.product_ids) value.product_ids.push(id);
+          else console.log('no product_ids to push new product on it');
         }
       }
       if (value.product) {
@@ -42,10 +44,9 @@ export class PromoTransformPipe implements PipeTransform<any> {
           measureValue: value.measure_value,
           isLot: value.is_lot,
         };
-        if (product.quantityLot) product.quantityLot = value.quantity_lot;
-        if (product.measureTypeId)
-          product.measureTypeId = value.measure_type_id;
-        if (product.ean) product.ean = value.product.ean;
+        if (value.quantityLot) product.quantityLot = value.quantity_lot;
+        if (value.measureTypeId) product.measureTypeId = value.measure_type_id;
+        if (value.product.ean) product.ean = value.product.ean;
 
         let productId: number;
         if (!value.product.id)
@@ -53,7 +54,7 @@ export class PromoTransformPipe implements PipeTransform<any> {
             name: value.product.name,
             ...product,
           });
-        else {
+        else if (product.measureValue || product.measureTypeId) {
           productId = value.product.id;
           await getConnection()
             .createQueryBuilder()
@@ -65,13 +66,11 @@ export class PromoTransformPipe implements PipeTransform<any> {
               console.log('error during update');
               throw new InternalServerErrorException(e);
             });
-        }
+        } else productId = value.product.id;
 
         value['product_ids'] = [productId];
         delete value.product;
       }
-      if (value.product_ids && Array.isArray(value.product_ids))
-        value['product_ids'] = value.product_ids.map(item => ({ id: item }));
     }
     return value;
   }

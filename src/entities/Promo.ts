@@ -22,10 +22,14 @@ import { PromoStatus } from './Status';
 import { PromoConcernType } from './PromoConcernedType';
 import { ProductConcernType } from './ProductConcernType';
 import { Laboratory } from './Laboratory';
+import { Product } from './Product';
+import { ManyToMany } from 'typeorm';
 
 @Index('promo_gamme_id_fk', ['gammeId'], {})
 @Index('promo_status_id_fk', ['statusId'], {})
-@Index('promo_concern_id_fk', ['statusId'], {})
+@Index('promo_concern_id_fk', ['promoConcernTypeId'], {})
+@Index('promo_product_concern_type_id_fk', ['productConcernTypeId'], {})
+@Index('promo_product_ids_fk', ['productIds'], {})
 @Entity('promo', { schema: 'hg_promo_beta' })
 export class Promo extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
@@ -134,6 +138,20 @@ export class Promo extends BaseEntity {
   )
   @JoinColumn([{ name: 'promo_id', referencedColumnName: 'id' }])
   promoType: PromoOperationType[];
+
+  @ManyToOne(
+    () => Product,
+    promoProducts => promoProducts.promo,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'RESTRICT',
+      // persistence: false,
+      // primary: false,
+      // lazy: true,
+    },
+  )
+  @JoinColumn({ name: 'product_ids', referencedColumnName: 'id' })
+  promoProducts: Product[];
 
   // @OneToMany(
   //   () => Remuneration,

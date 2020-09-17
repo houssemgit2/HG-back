@@ -174,7 +174,11 @@ export class PromoGeneralPromoDto {
   // @IsNotEmpty({ groups: ['concerned_product'] })
   // @IsOptional({ groups: ['concerned_gamme'] })
   @IsNotEmpty()
-  @ValidateIf(o => o.promo_concern_type_id === 2)
+  @ValidateIf(
+    o =>
+      o.promo_concern_type_id === 2 &&
+      (o.measure_type_id || o.is_lot || o.is_lot === false),
+  )
   public measure_value: number;
 
   // UnitCapacity
@@ -189,7 +193,11 @@ export class PromoGeneralPromoDto {
   // @IsNotEmpty({ groups: ['concerned_product'] })
   // @IsOptional({ groups: ['concerned_gamme'] })
   @IsNotEmpty()
-  @ValidateIf(o => o.promo_concern_type_id === 2)
+  @ValidateIf(
+    o =>
+      o.promo_concern_type_id === 2 &&
+      (o.measure_value || o.is_lot || o.is_lot === false),
+  )
   public measure_type_id: number;
 
   @ApiProperty({
@@ -203,7 +211,10 @@ export class PromoGeneralPromoDto {
   // @IsNotEmpty({ groups: ['concerned_product'] })
   // @IsOptional({ groups: ['concerned_gamme'] })
   @IsNotEmpty()
-  @ValidateIf(o => o.promo_concern_type_id === 2)
+  @ValidateIf(
+    o =>
+      o.promo_concern_type_id === 2 && (o.measure_value || o.measure_type_id),
+  )
   public is_lot: boolean;
 
   @ApiProperty({

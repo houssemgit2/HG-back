@@ -87,7 +87,8 @@ export class PromoController {
   @Get()
   @UseGuards(AuthGuard()) // , AdminGuard)
   async findAll(@Query() getPromoDto: GetPromoDto) {
-    return await this.promoService.listPromos(getPromoDto);
+    // return await this.promoService.listPromos(getPromoDto);
+    return await this.promoService.getAll(getPromoDto);
   }
 
   @ApiTags('Promo-form')

@@ -14,13 +14,13 @@ import { Cluster } from './Cluster';
 @Index('promo_cluster_cluster_id_fk', ['clusterId'], {})
 @Entity('promo_cluster', { schema: 'hg_promo_beta' })
 export class PromoCluster extends BaseEntity {
-  @Column('int', { primary: true, name: 'id' })
-  id: number;
+  // @Column('int', { primary: true, name: 'id' })
+  // id: number;
 
-  @Column('int', { name: 'promo_id' })
+  @Column('int', { primary: true, name: 'promo_id' })
   promoId: number;
 
-  @Column('int', { name: 'cluster_id' })
+  @Column('int', { primary: true, name: 'cluster_id' })
   clusterId: number;
 
   @ManyToOne(
