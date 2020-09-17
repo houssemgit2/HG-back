@@ -427,7 +427,8 @@ export class PromoService {
       .leftJoinAndSelect(
         'promoMeaEmplacements.emplacementType',
         'emplacementType',
-      // ).leftJoinAndMapMany()
+      );
+    // ).leftJoinAndMapMany()
 
     // .leftJoinAndSelect('p.promoMea', 'promoMea');
     // .leftJoinAndMapOne(
