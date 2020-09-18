@@ -3,20 +3,14 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 export class PaginationDto {
   @ApiProperty({ required: false })
-  // @Type(() => Number)
-  @IsNumber()
+  @Type(() => Number)
   @IsNotEmpty()
   @ValidateIf(o => o.page)
-  // @IsNotEmpty({ groups: ['withPagination'] })
-  // @IsOptional({ always: false })
   perPage?: number;
 
   @ApiProperty({ required: false })
-  // @Type(() => Number)
-  @IsNumber()
-  // @IsNotEmpty({ groups: ['withPagination'] })
-  // @IsOptional({ always: false })
+  @Type(() => Number)
   @IsNotEmpty()
-  @ValidateIf(o => o.page)
+  @ValidateIf(o => o.perPage)
   page?: number;
 }

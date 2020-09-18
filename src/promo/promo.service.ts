@@ -317,92 +317,23 @@ export class PromoService {
     }
   }
 
-  async listPromos(filter: GetPromoDto) {
-    try {
-      const { perPage, page } = filter;
-
-      // const totalItem = await this.promoRepository.count();
-      const promos = await this.promoRepository.find({
-        where: (qb: SelectQueryBuilder<Promo>) => {
-          if (filter.startDate && filter.endDate)
-            qb.where(
-              `(start_date BETWEEN :startDate AND :endDate
-               OR (end_date BETWEEN :startDate AND :endDate)
-               OR (start_date <= :startDate and end_date>= :endDate) )`,
-              {
-                startDate: filter.startDate,
-                endDate: filter.endDate,
-              },
-            );
-          if (filter.laboratoryId)
-            qb.andWhere('laboratory_id=:laboratoryId', {
-              laboratoryId: filter.laboratoryId,
-            });
-          if (filter.gammeId)
-            qb.andWhere('gamme_id=:gammeId', {
-              gammeId: filter.gammeId,
-            });
-          if (filter.clusterId)
-            qb.andWhere('Promo__promoClusters.cluster_id=:clusterId', {
-              clusterId: filter.clusterId,
-            });
-          if (filter.promoConcernTypeId)
-            qb.andWhere('promo_concern_type_id=:promoConcernTypeId', {
-              promoConcernTypeId: filter.promoConcernTypeId,
-            });
-          if (filter.promoTypeId)
-            qb.andWhere('Promo__promoType.operation_type_id=:promoTypeId', {
-              promoTypeId: filter.promoTypeId,
-            });
-        },
-
-        relations: [
-          'promoType',
-          'promoClusters',
-          'promoAchat',
-          'promoConso',
-          'promoMea',
-          'emplacements',
-          'promoMea.promoMeaEmplacements',
-          'promoMea.documentProvideTypes',
-        ],
-        loadEagerRelations: true,
-        skip: perPage * (page - 1),
-        take: perPage,
-      });
-      return promos;
-    } catch (e) {
-      console.error(e);
-      throw new InternalServerErrorException(e);
-    }
-  }
-
   async getPromos(filter, promoId?: number): Promise<any> {
     const sqlQuery = this.promoRepository
       .createQueryBuilder('p')
-      .leftJoinAndSelect(
-        'p.promoClusters',
-        'promoCluster',
-        'promoCluster.promo_id = p.id',
-      )
-      .leftJoinAndSelect(
-        'promoCluster.cluster',
-        'c',
-        'c.id = promoCluster.cluster_id',
-      )
+      .leftJoinAndSelect('p.promoClusters', 'promoCluster')
+      .leftJoinAndSelect('promoCluster.cluster', 'c')
       .leftJoinAndSelect('p.gamme', 'gamme')
       .leftJoinAndSelect('p.promoType', 'promoType')
       .leftJoinAndSelect('promoType.operationType', 'operationType')
+      .leftJoinAndSelect('p.promoAchat', 'promoAchat')
+      .leftJoinAndSelect('p.promoMea', 'promoMea')
       .leftJoinAndMapMany(
         'p.promoProducts',
         'product',
         'product',
-        // "(JSON_SEARCH(p.product_ids,'one',CONVERT(product.id,CHAR)))",
         "(JSON_CONTAINS(p.product_ids,CONVERT(product.id,CHAR),'$'))",
-        //  'product.id MEMBER OF (p.product_ids)',
       )
-      .leftJoinAndSelect('p.promoAchat', 'promoAchat')
-      .leftJoinAndSelect('p.promoMea', 'promoMea')
+
       .leftJoinAndSelect(
         'promoMea.promoMeaEmplacements',
         'promoMeaEmplacements',
@@ -467,38 +398,43 @@ export class PromoService {
       );
     try {
       if (promoId) return await sqlQuery.getOne();
-      if (filter.startDate && filter.endDate) {
-        const queryDateOptions = [
+      if (filter.startDate && filter.endDate)
+        sqlQuery.where(
+          `(start_date BETWEEN :startDate AND :endDate
+               OR (end_date BETWEEN :startDate AND :endDate)
+               OR (start_date <= :startDate and end_date>= :endDate) )`,
           {
-            startDate: LessThan(filter.startDate),
+            startDate: filter.startDate,
+            endDate: filter.endDate,
           },
-          {
-            endDate: MoreThan(filter.startDate),
-          },
-          {
-            startDate: Between(filter.startDate, filter.endDate),
-
-            endDate: Between(filter.startDate, filter.endDate),
-          },
-        ];
-
-        sqlQuery.where(queryDateOptions);
-      }
-      if (filter.clusters) {
-        sqlQuery.andWhere('c.name IN (:...clusters)', {
-          clusters: JSON.parse(filter.clusters),
+        );
+      if (filter.laboratoryId)
+        sqlQuery.andWhere('p.laboratory_id=:laboratoryId', {
+          laboratoryId: filter.laboratoryId,
         });
+      if (filter.gammeId)
+        sqlQuery.andWhere('p.gamme_id=:gammeId', {
+          gammeId: filter.gammeId,
+        });
+      if (filter.clusterId && Array.isArray(filter.clusterId))
+        sqlQuery.andWhere('promoCluster.cluster_id IN (:clusterId)', {
+          clusterId: filter.clusterId,
+        });
+      else if (filter.clusterId)
+        sqlQuery.andWhere('promoCluster.cluster_id=:clusterId', {
+          clusterId: filter.clusterId,
+        });
+      if (filter.promoConcernTypeId)
+        sqlQuery.andWhere('promo_concern_type_id=:promoConcernTypeId', {
+          promoConcernTypeId: filter.promoConcernTypeId,
+        });
+      if (filter.promoTypeId)
+        sqlQuery.andWhere('promoType.operation_type_id=:promoTypeId', {
+          promoTypeId: filter.promoTypeId,
+        });
+      if (filter.perPage && filter.page) {
+        sqlQuery.skip(filter.perPage * (filter.page - 1)).take(filter.perPage);
       }
-      // if (filter.type) {
-      //   filter.type.split(',').forEach(val => {
-      //     sqlQuery.orWhere('t.name like :name', {
-      //       name: '%' + val + '%',
-      //     });
-      //   });
-      // }
-      // if (filter.perPage && filter.page) {
-      //   sqlQuery.skip(filter.perPage * (filter.page - 1)).take(filter.perPage);
-      // }
       return await sqlQuery.getMany();
     } catch (err) {
       throw new InternalServerErrorException(err);

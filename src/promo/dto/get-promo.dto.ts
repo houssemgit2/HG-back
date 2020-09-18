@@ -6,11 +6,15 @@ import {
   IsDate,
   IsString,
   IsBoolean,
+  ValidateIf,
+  Max,
+  IsArray,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
+import { PaginationDto } from '../../common/dto/pagination.dto';
 
-export class GetPromoDto {
+export class GetPromoDto extends PaginationDto {
   @ApiProperty({ required: false })
   @Type(() => Date)
   startDate: Date;
@@ -19,9 +23,9 @@ export class GetPromoDto {
   @Type(() => Date)
   endDate: Date;
 
-  @ApiProperty({ required: false })
-  @Type(() => String)
-  clusterId: string;
+  @ApiProperty({ required: false, isArray: true, type: Number })
+  @Type(() => Number)
+  clusterId: number;
 
   @ApiProperty({ required: false })
   @Type(() => Number)
@@ -38,12 +42,4 @@ export class GetPromoDto {
   @ApiProperty({ required: false })
   @Type(() => String)
   promoTypeId: string;
-
-  @ApiProperty({ required: false })
-  @Type(() => Number)
-  perPage: number;
-
-  @ApiProperty({ required: false })
-  @Type(() => Number)
-  page: number;
 }
