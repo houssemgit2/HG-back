@@ -45,15 +45,15 @@ export class PromoValidationPipe implements PipeTransform<any> {
         }
       }
 
-      const entityClass = plainToClass(PromoGeneralPromoDto, value, { groups });
-      const errors = await validate(entityClass, { groups });
+      // const entityClass = plainToClass(PromoGeneralPromoDto, value, { groups });
+      // const errors = await validate(entityClass, { groups });
 
-      if (errors.length > 0) {
-        console.log(errors);
-        throw new BadRequestException(
-          errors.map(item => JSON.stringify(item.constraints)),
-        );
-      }
+      // if (errors.length > 0) {
+      //   console.log(errors);
+      //   throw new BadRequestException(
+      //     errors.map(item => JSON.stringify(item.constraints)),
+      //   );
+      // }
     }
     return value;
   }

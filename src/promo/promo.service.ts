@@ -376,7 +376,8 @@ export class PromoService {
       throw new InternalServerErrorException(e);
     }
   }
-  async getAll(filter): Promise<any> {
+
+  async getPromos(filter, promoId?: number): Promise<any> {
     const sqlQuery = this.promoRepository
       .createQueryBuilder('p')
       .leftJoinAndSelect(
@@ -411,66 +412,93 @@ export class PromoService {
         'documentProvideTypes',
       )
       .leftJoinAndMapOne(
-        'promoMea.remuneration_base_type',
+        'promoMea.remunerationUnitProductEligibilityCaRange',
         'remuneration_base_type',
         'eligibility_ca_range_type',
         "(JSON_EXTRACT(promoMea.remuneration_unit_product_details,'$.eligibility_ca_range_type_id')) = eligibility_ca_range_type.id",
       )
+      .leftJoinAndMapOne(
+        'promoMea.remunerationCaAnnualTarget',
+        'remuneration_ca_annual_target_type',
+        'remuneration_ca_annual_target_type',
+        "(JSON_EXTRACT(promoMea.remuneration_ca_annual_details,'$.remuneration_ca_annual_target_type_id')) = remuneration_ca_annual_target_type.id",
+      )
+      .leftJoinAndMapOne(
+        'promoMea.remunerationCaAnnualPlate',
+        'remuneration_ca_annual_plate_type',
+        'remuneration_ca_annual_plate_type',
+        "(JSON_EXTRACT(promoMea.remuneration_ca_annual_details,'$.remuneration_ca_annual_plate_type_id')) = remuneration_ca_annual_plate_type.id",
+      )
+      .leftJoinAndMapOne(
+        'promoAchat.eligibilityFrancoDetails',
+        'eligibility_franco_type',
+        'eligibility_franco_type',
+        "(JSON_EXTRACT(promoAchat.eligibility_franco,'$.eligibility_franco_type_id')) = eligibility_franco_type.id",
+      )
+      .leftJoinAndMapOne(
+        'promoAchat.achatAdvantageDiscountData',
+        'achat_advantage_discount_type',
+        'achat_advantage_discount_type',
+        "(JSON_EXTRACT(promoAchat.achat_advantage_discount_details,'$.achat_advantage_discount_type_id')) = achat_advantage_discount_type.id",
+      )
       .leftJoinAndMapMany(
-        'promoMea',
-        'product',
-        'product',
-        // "(JSON_SEARCH(p.product_ids,'one',CONVERT(product.id,CHAR)))",
-        "(JSON_CONTAINS(p.product_ids,CONVERT(product.id,CHAR),'$'))",
-        //  'product.id MEMBER OF (p.product_ids)',
+        'promoAchat.achatAdvantageSubDiscountData',
+        'achat_sub_advantage_discount_type',
+        'achat_sub_advantage_discount_type',
+        ` JSON_CONTAINS(JSON_EXTRACT(promoAchat.achat_advantage_discount_details,"$[*].achat_advantage_sub_discount_type_id"),CONVERT(achat_sub_advantage_discount_type.id,CHAR),"$") OR
+          JSON_CONTAINS(JSON_EXTRACT(promoAchat.achat_advantage_discount_details,"$.achat_advantage_sub_discount_type_id"),CONVERT(achat_sub_advantage_discount_type.id,CHAR),"$")
+        `,
+      ) // TODO  fix saving the achat_discount
+      .leftJoinAndMapMany(
+        'promoMea.eligibilityCaRangeEqualCondition',
+        'equal_condition_type',
+        'eligibility_equal_condition_type',
+        ' JSON_CONTAINS(JSON_EXTRACT(promoMea.eligibility_ca_range_details,"$[*].equal_condition_type_id"),CONVERT(eligibility_equal_condition_type.id,CHAR),"$")',
+      )
+      .leftJoinAndMapMany(
+        'promoMea.remunerationFixedEqualCondition',
+        'equal_condition_type',
+        'remuneration_fixed_equal_condition_type',
+        ' JSON_CONTAINS(JSON_EXTRACT(promoMea.remuneration_fixed_details,"$.data_quantity[*].equal_condition_type_id"),CONVERT(remuneration_fixed_equal_condition_type.id,CHAR),"$")',
       )
       .leftJoinAndSelect(
         'promoMeaEmplacements.emplacementType',
         'emplacementType',
       );
-    // ).leftJoinAndMapMany()
-
-    // .leftJoinAndSelect('p.promoMea', 'promoMea');
-    // .leftJoinAndMapOne(
-    //   'promoMea.remuneration_ca_annual_plate_type',
-    //   'remuneration_ca_annual_plate_type',
-    //   'annual_plate_type',
-    //   "(JSON_SEARCH(promoMea.remuneration_ca_annual_details,'one',CONVERT(remuneration_ca_annual_plate_type.id,CHAR)))",
-    // );
-
-    // if (filter.startDate && filter.endDate) {
-    //   const queryDateOptions = [
-    //     {
-    //       startDate: LessThan(filter.startDate),
-    //     },
-    //     {
-    //       endDate: MoreThan(filter.startDate),
-    //     },
-    //     {
-    //       startDate: Between(filter.startDate, filter.endDate),
-
-    //       endDate: Between(filter.startDate, filter.endDate),
-    //     },
-    //   ];
-
-    //   sqlQuery.where(queryDateOptions);
-    // }
-    // if (filter.clusters) {
-    //   sqlQuery.andWhere('c.name IN (:...clusters)', {
-    //     clusters: JSON.parse(filter.clusters),
-    //   });
-    // }
-    // if (filter.type) {
-    //   filter.type.split(',').forEach(val => {
-    //     sqlQuery.orWhere('t.name like :name', {
-    //       name: '%' + val + '%',
-    //     });
-    //   });
-    // }
-    // if (filter.perPage && filter.page) {
-    //   sqlQuery.skip(filter.perPage * (filter.page - 1)).take(filter.perPage);
-    // }
     try {
+      if (promoId) return await sqlQuery.getOne();
+      if (filter.startDate && filter.endDate) {
+        const queryDateOptions = [
+          {
+            startDate: LessThan(filter.startDate),
+          },
+          {
+            endDate: MoreThan(filter.startDate),
+          },
+          {
+            startDate: Between(filter.startDate, filter.endDate),
+
+            endDate: Between(filter.startDate, filter.endDate),
+          },
+        ];
+
+        sqlQuery.where(queryDateOptions);
+      }
+      if (filter.clusters) {
+        sqlQuery.andWhere('c.name IN (:...clusters)', {
+          clusters: JSON.parse(filter.clusters),
+        });
+      }
+      // if (filter.type) {
+      //   filter.type.split(',').forEach(val => {
+      //     sqlQuery.orWhere('t.name like :name', {
+      //       name: '%' + val + '%',
+      //     });
+      //   });
+      // }
+      // if (filter.perPage && filter.page) {
+      //   sqlQuery.skip(filter.perPage * (filter.page - 1)).take(filter.perPage);
+      // }
       return await sqlQuery.getMany();
     } catch (err) {
       throw new InternalServerErrorException(err);

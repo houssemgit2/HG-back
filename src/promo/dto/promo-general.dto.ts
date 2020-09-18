@@ -152,6 +152,8 @@ export class PromoGeneralPromoDto {
     example: [1, 3],
   })
   @IsNotEmpty()
+  @IsArray()
+  @ValidateNested({ each: true, always: true })
   public clusters_id: number[];
 
   @ApiProperty({
