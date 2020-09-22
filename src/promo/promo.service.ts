@@ -79,7 +79,9 @@ export class PromoService {
     try {
       await this.validPromoType('MEA', promoId);
       if (isNotEmptyArray(promo.promo_mea_emplacements)) {
+        // validate if the promo mea emplacement are the same   in Remuneration product unity fixed amount has emplacement
         if (
+          promo.remuneration_fixed_details &&
           promo.remuneration_fixed_details.has_emplacement &&
           !arrayEquals(
             promo.remuneration_fixed_details.data_emplacement.map(
@@ -182,6 +184,7 @@ export class PromoService {
   }
   async duplicatePromo(promoId: number) {
     try {
+      //todo we need transaction here
       const promo = await this.getPromoById(promoId, false);
       delete promo.id;
       delete promo.createdAt;
