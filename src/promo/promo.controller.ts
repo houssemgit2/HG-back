@@ -84,88 +84,6 @@ export class PromoController {
   logger = new Logger('promo controller');
 
   @ApiTags('Promo')
-  @Get()
-  @UseGuards(AuthGuard()) // , AdminGuard)
-  async findAll(@Query() getPromoDto: GetPromoDto) {
-    return await this.promoService.getPromos(getPromoDto);
-  }
-
-  @ApiTags('Promo-form')
-  @Post('/types')
-  @UseGuards(AuthGuard(), AdminGuard)
-  async setPromoType(@Query() query: SavePromoTypeDto) {
-    return await this.promoService.createPromoType(query.type_ids);
-  }
-
-  @ApiTags('Promo-form')
-  @Put(':promoId')
-  @UseGuards(AuthGuard(), AdminGuard)
-  async updatePromoStatus(
-    @Param() param: PromoIdDto,
-    @Body('status') status: number,
-  ) {
-    return await this.promoService.updatePromo(param.promoId, status); //
-  }
-
-  @ApiTags('Promo-form')
-  @Post(':promoId')
-  @UseGuards(AuthGuard(), AdminGuard)
-  async DuplicatePromo(@Param() param: PromoIdDto) {
-    return await this.promoService.duplicatePromo(param.promoId);
-  }
-
-  @ApiTags('Promo-form')
-  @Delete(':promoId')
-  @UseGuards(AuthGuard(), AdminGuard)
-  async deletePromo(@Param() param: PromoIdDto) {
-    return await this.promoService.delete(param.promoId);
-  }
-
-  @ApiTags('Promo-form')
-  @Post(':promoId/general')
-  @UseGuards(AuthGuard(), AdminGuard)
-  @UsePipes(new PromoValidationPipe(), new PromoTransformPipe())
-  async savePromoGeneralInfo(
-    @Param() param: PromoIdDto,
-    @Body()
-    body: PromoGeneralPromoDto,
-  ) {
-    const promo = await this.promoService.saveGeneralParams(
-      param.promoId,
-      body,
-    );
-    return promo;
-  }
-
-  @ApiTags('Promo-form')
-  @Post(':promoId/achat')
-  @UseGuards(AuthGuard(), AdminGuard)
-  // @UsePipes(new PromoAchatValidationPipe())
-  async savePromoAchat(
-    @Param() param: PromoIdDto,
-    @Body(new PromoAchatValidationPipe()) body: PromoAchatDto,
-  ) {
-    const promoAchat = await this.promoService.saveOpAchat(param.promoId, body);
-    return promoAchat;
-  }
-
-  @ApiTags('Promo-form')
-  @Post(':promoId/mea')
-  @UseGuards(AuthGuard(), AdminGuard)
-  async savePromoMea(@Param() param: PromoIdDto, @Body() body: PromoMeaDto) {
-    const meaPromo = await this.promoService.saveMeaPromo(param.promoId, body);
-    return meaPromo;
-  }
-
-  @ApiTags('Promo-form')
-  @Get(':promoId')
-  @UseGuards(AuthGuard(), AdminGuard)
-  async getPromoById(@Param('promoId') promoId: number) {
-    const promo = await this.promoService.getPromos({}, promoId);
-    return promo;
-  }
-
-  @ApiTags('Promo')
   @Post('generate/promos')
   @Header('Content-Type', 'image/pdf')
   @Header('Content-Disposition', 'attachment; filename=promos.pdf')
@@ -174,34 +92,6 @@ export class PromoController {
       body.promos,
     );
     return fs.createReadStream(file).pipe(response);
-  }
-
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Reasons List' })
-  @ApiResponse({ status: 200, description: 'list all rejection reason' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiTags('Store-Promo-Mea')
-  @Get('promo-mea-reason')
-  @UseGuards(AuthGuard(), ClientGuard)
-  async findRejectionReasons() {
-    return await this.rejectionReasonService.getAll().then(data =>
-      data.map(item => {
-        item.label = item.name;
-        return item;
-      }),
-    );
-  }
-
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Add reason' })
-  @ApiResponse({ status: 200, description: 'add new rejection reason' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiTags('Store-Promo-Mea')
-  @Post('promo-mea-reason')
-  @UseGuards(AuthGuard())
-  async addRejectionReasons(@Body() body: any) {
-    const { name } = body;
-    return await this.rejectionReasonService.add(name);
   }
 
   @ApiBearerAuth()
@@ -272,43 +162,13 @@ export class PromoController {
     }
   }
 
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'list labs' })
-  @ApiResponse({ status: 200, description: 'list laboratories' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiTags('Store-Promo-Mea')
-  @Get('promo-mea/labs')
-  @UseGuards(AuthGuard(), ClientGuard)
-  async listLabs() {
-    const results = await this.storePromoMeaService
-      .listLabs()
-      .then(data => data.map(item => item.name));
-    return { results, labLength: results.length };
+  @ApiTags('Promo-form')
+  @Post('/types')
+  @UseGuards(AuthGuard(), AdminGuard)
+  async setPromoType(@Query() query: SavePromoTypeDto) {
+    return await this.promoService.createPromoType(query.type_ids);
   }
-
-  @ApiOperation({ summary: 'list promo mea' })
-  @ApiResponse({
-    status: 200,
-    description:
-      'List promo Mea with month year or dates list,array of month & year',
-  })
-  @ApiTags('Store-Promo-Mea')
-  @Get('promo-mea')
-  @UseGuards(AuthGuard(), ClientGuard, StoreAdminGuard)
-  async listAllMea(
-    @Query(new DatesListValidationPipe()) filter: ListMeaDto,
-    @UserReq() user: User,
-  ): Promise<StorePromoMea[]> {
-    if (user.userRoleId !== 1) filter.store_id = user.storeId;
-    return await this.storePromoMeaService.findPromos(
-      filter,
-      user,
-      false,
-      null,
-      true,
-    );
-  }
-
+  // store promo mea
   @ApiOperation({ summary: 'Download mea list' })
   @ApiResponse({
     status: 200,
@@ -497,5 +357,103 @@ export class PromoController {
       false,
       promoId,
     );
+  }
+
+  @ApiOperation({ summary: 'list promo mea' })
+  @ApiResponse({
+    status: 200,
+    description:
+      'List promo Mea with month year or dates list,array of month & year',
+  })
+  @ApiTags('Store-Promo-Mea')
+  @Get('promo-mea')
+  @UseGuards(AuthGuard(), ClientGuard, StoreAdminGuard)
+  async listAllMea(
+    @Query(new DatesListValidationPipe()) filter: ListMeaDto,
+    @UserReq() user: User,
+  ): Promise<StorePromoMea[]> {
+    if (user.userRoleId !== 1) filter.store_id = user.storeId;
+    return await this.storePromoMeaService.findPromos(
+      filter,
+      user,
+      false,
+      null,
+      true,
+    );
+  }
+  // end of store promo mea
+  @ApiTags('Promo-form')
+  @Post(':promoId/general')
+  @UseGuards(AuthGuard(), AdminGuard)
+  @UsePipes(new PromoValidationPipe(), new PromoTransformPipe())
+  async savePromoGeneralInfo(
+    @Param() param: PromoIdDto,
+    @Body()
+    body: PromoGeneralPromoDto,
+  ) {
+    const promo = await this.promoService.saveGeneralParams(
+      param.promoId,
+      body,
+    );
+    return promo;
+  }
+
+  @ApiTags('Promo-form')
+  @Post(':promoId/achat')
+  @UseGuards(AuthGuard(), AdminGuard)
+  // @UsePipes(new PromoAchatValidationPipe())
+  async savePromoAchat(
+    @Param() param: PromoIdDto,
+    @Body(new PromoAchatValidationPipe()) body: PromoAchatDto,
+  ) {
+    const promoAchat = await this.promoService.saveOpAchat(param.promoId, body);
+    return promoAchat;
+  }
+
+  @ApiTags('Promo-form')
+  @Post(':promoId/mea')
+  @UseGuards(AuthGuard(), AdminGuard)
+  async savePromoMea(@Param() param: PromoIdDto, @Body() body: PromoMeaDto) {
+    const meaPromo = await this.promoService.saveMeaPromo(param.promoId, body);
+    return meaPromo;
+  }
+  @ApiTags('Promo-form')
+  @Post(':promoId')
+  @UseGuards(AuthGuard(), AdminGuard)
+  async DuplicatePromo(@Param() param: PromoIdDto) {
+    return await this.promoService.duplicatePromo(param.promoId);
+  }
+  // *****
+  @ApiTags('Promo-form')
+  @Get(':promoId')
+  @UseGuards(AuthGuard(), AdminGuard)
+  async getPromoById(@Param('promoId') promoId: number) {
+    const promo = await this.promoService.getPromos({}, promoId);
+    return promo;
+  }
+
+  @ApiTags('Promo-form')
+  @Put(':promoId')
+  @UseGuards(AuthGuard(), AdminGuard)
+  async updatePromoStatus(
+    @Param() param: PromoIdDto,
+    @Body('status') status: number,
+  ) {
+    return await this.promoService.updatePromo(param.promoId, status); //
+  }
+
+  @ApiTags('Promo-form')
+  @Delete(':promoId')
+  @UseGuards(AuthGuard(), AdminGuard)
+  async deletePromo(@Param() param: PromoIdDto) {
+    return await this.promoService.delete(param.promoId);
+  }
+
+  @ApiTags('Promo')
+  @Get('/')
+  @UseGuards(AuthGuard()) // , AdminGuard)
+  async findAll(@Query() getPromoDto: GetPromoDto) {
+    this.logger.verbose('get promos');
+    return await this.promoService.getPromos(getPromoDto);
   }
 }

@@ -66,7 +66,7 @@ export class StorePromoMeaService {
       `error during fetching promos with expired end dates,promos is not array`,
     );
   }
-  isPromoExpired(endDate) {
+  isPromoExpired(endDate): boolean {
     const idealEndDate = moment(endDate)
       .endOf('month')
       .format('YYYY-MM-DD');
@@ -84,6 +84,7 @@ export class StorePromoMeaService {
       throw new InternalServerErrorException(e);
     }
   }
+  // todo optimize this
   async afterPromoPostponed(promoId: number) {
     try {
       await this.updateState(
