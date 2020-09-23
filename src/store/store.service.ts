@@ -17,7 +17,7 @@ import { EditStoreDto } from './dto/edit-store.dto';
 import { EditUserCredentialDto } from '../user/dto/edit-user.dto';
 import { AddOwnerDto } from './dto/add-owner.dto';
 import { InjectEventEmitter } from 'nest-emitter';
-import { MyEventEmitter } from './store.events';
+import { StoreEventEmitter } from '../app.events';
 import { getConnection, getRepository } from 'typeorm';
 import { StorePromoMea } from '../entities/StorePromoMea';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
@@ -29,16 +29,16 @@ export class StoreService implements OnModuleInit {
     private storeRepository: StoreRepository,
     private userRepository: UserRepository,
     private storePromoMeaRepository: StorePromoMeaRepository,
-    @InjectEventEmitter() private readonly emitter: MyEventEmitter,
+    @InjectEventEmitter() private readonly emitter: StoreEventEmitter,
   ) {}
   onModuleInit() {
     this.emitter.on('storeCreated', async (clusterId, storeId) => {
-      const testCluster = await this.findMeaByStore(storeId);
+      const testCluster = await this.saveMeaByStore(storeId);
       console.log(testCluster);
     });
   }
   logger = new Logger('Store service');
-  async findMeaByStore(storeId: number) {
+  async saveMeaByStore(storeId: number) {
     let promosIds: StorePromoMea[];
     await this.storePromoMeaRepository
       .findPromoMeaByIdPromoStore(null, null, storeId)

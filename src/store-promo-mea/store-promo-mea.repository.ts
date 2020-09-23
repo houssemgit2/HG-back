@@ -35,24 +35,23 @@ export class StorePromoMeaRepository extends Repository<StorePromoMea> {
     clusterId?: number,
     storeId?: number,
   ) {
+    this.logger.debug(`fetching store promo mea... `);
     if (!promoId && !clusterId && !storeId)
       throw new Error('you must provide a promo_id or store_id or clusterId');
     const searchQuery = getConnection()
       .createQueryBuilder()
       .select(['store.cip as storeId', 'promoClusters.promoId as promoId'])
       .from(Store, 'store')
-      // .innerJoinAndSelect('store.clusters', 'clusters')
       .leftJoin('store.clusters', 'clusters')
       .leftJoin('clusters.promoClusters', 'promoClusters')
       .leftJoin('promoClusters.promo', 'promo')
       .leftJoin('promo.promoType', 'promoType')
       .leftJoin('promoType.operationType', 'operationType')
-      .where("operationType.name like '%MEA%'");
+      .where("operationType.name like '%MEA%'")
+      .andWhere('promo.status_id=1');
     try {
       if (storeId) {
-        this.logger.verbose(
-          'fetching store concerned for the promoId' + promoId,
-        );
+        this.logger.verbose('fetching store concerned for the store' + storeId);
         const byStore = searchQuery.andWhere('store.cip = :cip', {
           cip: storeId,
         });
@@ -79,12 +78,13 @@ export class StorePromoMeaRepository extends Repository<StorePromoMea> {
     }
   }
 
-  @Transaction()
+  // @Transaction()
   async removeNotConcerned(
     promosIds: number | number[],
     storeIds: number[] | number,
   ) {
     try {
+      // remove store promo mea for a specific promo or for specific store
       if (Array.isArray(promosIds) && Array.isArray(storeIds))
         throw new InternalServerErrorException(
           `promosIds or storeIds must be not array,`,
@@ -92,20 +92,26 @@ export class StorePromoMeaRepository extends Repository<StorePromoMea> {
       let dltQuery = this.createQueryBuilder().delete();
       if (Array.isArray(promosIds)) {
         this.logger.warn('when store cluster is updated');
-        dltQuery = dltQuery
-          .where('promo_id NOT IN (:...ids)', {
+        dltQuery = dltQuery.where('store_id = :storeId', { storeId: storeIds });
+        if (promosIds.length)
+          dltQuery = dltQuery.where('store_id NOT IN (:...ids)', {
+            ids: storeIds,
+          });
+        if (promosIds.length)
+          dltQuery = dltQuery.where('promo_id NOT IN (:...ids)', {
             ids: promosIds,
-          })
-          .andWhere('store_id = :storeId', { storeId: storeIds });
+          });
       } else if (Array.isArray(storeIds)) {
         this.logger.warn(' // when promo cluster is updated');
-        dltQuery = dltQuery
-          .where('store_id NOT IN (:...ids)', {
+        dltQuery = dltQuery.where('promo_id = :promoId', {
+          promoId: promosIds,
+        });
+        if (storeIds.length)
+          dltQuery = dltQuery.where('store_id NOT IN (:...ids)', {
             ids: storeIds,
-          })
-          .andWhere('promo_id = :promoId', { promoId: promosIds });
+          });
       } else return null;
-      return await dltQuery.execute();
+      return await dltQuery.execute(); // TODO make sure we are allowed to delete not concerned store promo mea
     } catch (e) {
       throw new InternalServerErrorException(e);
     }
@@ -190,7 +196,7 @@ export class StorePromoMeaRepository extends Repository<StorePromoMea> {
           .execute();
       else
         this.logger.warn(`promo to remove length is ${promoToRemove.length}`);
-      // todo remove this and make the promoId and storeId a primary key after removing the id in StorePromoMea
+      // TODO  remove this and make the promoId and storeId a primary key after removing the id in StorePromoMea
       // and use save with onDuplicate : ignore
       return await this.save(promoStoreToInsert);
     } catch (e) {

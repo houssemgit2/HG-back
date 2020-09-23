@@ -23,7 +23,8 @@ import { CoquePromoModule } from './coque-promo/coque-promo.module';
 import { ClustersModule } from './clusters/clusters.module';
 import { SupportModule } from './support/support.module';
 import { SelectModule } from './select/select.module';
-
+import { NestEmitterModule } from 'nest-emitter';
+import { EventEmitter } from 'events';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -65,6 +66,7 @@ import { SelectModule } from './select/select.module';
     ClustersModule,
     SupportModule,
     SelectModule,
+    NestEmitterModule.forRoot(new EventEmitter()),
   ],
   controllers: [AppController],
   providers: [AppService],

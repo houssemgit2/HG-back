@@ -12,6 +12,5 @@ export class PromoMeaEmplacementDto {
   @ApiProperty()
   @IsNotEmpty()
   @Type(() => String)
-  @IsString()
   public details: string;
 }

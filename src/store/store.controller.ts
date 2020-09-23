@@ -15,7 +15,7 @@ import { PaginationDto } from '../common/dto/pagination.dto';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { StoreService } from './store.service';
 import { InjectEventEmitter } from 'nest-emitter';
-import { MyEventEmitter } from './store.events';
+import { StoreEventEmitter } from '../app.events';
 import {
   ApiTags,
   ApiBearerAuth,
@@ -33,7 +33,7 @@ import { RequiredGroupsValidationPipe } from '../common/pipes/requiredGroups.val
 export class StoreController {
   constructor(
     private storeService: StoreService,
-    @InjectEventEmitter() private readonly emitter: MyEventEmitter,
+    @InjectEventEmitter() private readonly emitter: StoreEventEmitter,
   ) {}
 
   @ApiOperation({ summary: 'Add store' })

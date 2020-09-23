@@ -6,8 +6,7 @@ import { StoreRepository } from './store.repository';
 
 import { AuthModule } from '../auth/auth.module';
 import { UserRepository } from '../auth/user.repository';
-import { NestEmitterModule } from 'nest-emitter';
-import { EventEmitter } from 'events';
+
 import { StorePermissionRepository } from '../access-permissions/access-permissions.repository';
 import { StorePromoMeaRepository } from '../store-promo-mea/store-promo-mea.repository';
 
@@ -20,7 +19,6 @@ import { StorePromoMeaRepository } from '../store-promo-mea/store-promo-mea.repo
       StorePromoMeaRepository,
     ]),
     AuthModule,
-    NestEmitterModule.forRoot(new EventEmitter()),
   ],
   controllers: [StoreController],
   providers: [StoreService],
