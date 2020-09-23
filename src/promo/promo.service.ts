@@ -36,13 +36,13 @@ import { PromoMeaDocumentProvide } from '../entities/PromoMeaDocumentProvide';
 import { PromoMeaEmplacementDto } from './dto/promo-mea-emplacement.dto';
 import { getConnection } from 'typeorm';
 import { Product } from '../entities/Product';
+import { PromoRepository } from './promo.repository';
 // DTO
 @Injectable()
 export class PromoService {
   logger = new Logger('Promo Service');
   constructor(
-    @InjectRepository(Promo)
-    private promoRepository: Repository<Promo>,
+    private promoRepository: PromoRepository,
     @InjectRepository(PromoOperationType)
     private promoOperationTypeRepository: Repository<PromoOperationType>,
     @InjectRepository(PromoCluster)
@@ -159,7 +159,11 @@ export class PromoService {
   }
 
   async updatePromo(promoId: number, status: number) {
-    return await this.promoRepository.update(promoId, { statusId: status });
+    try {
+      return await this.promoRepository.update(promoId, { statusId: status });
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
   }
 
   async getPromoById(promoId: number, loadEagerRelations: boolean) {
@@ -184,7 +188,7 @@ export class PromoService {
   }
   async duplicatePromo(promoId: number) {
     try {
-      //todo we need transaction here
+      // TODO  we need transaction here
       const promo = await this.getPromoById(promoId, false);
       delete promo.id;
       delete promo.createdAt;
@@ -303,7 +307,7 @@ export class PromoService {
 
   async delete(id: number) {
     try {
-      // todo to do we need transaction here
+      // TODO  to do we need transaction here
       await this.promoClusterRepository.delete({ promoId: id });
       await this.promoMeaEmplacementRepository.delete({ promoId: id });
       await this.promoMeaDocumentProvide.delete({ promoId: id });
@@ -321,126 +325,6 @@ export class PromoService {
   }
 
   async getPromos(filter, promoId?: number): Promise<any> {
-    const sqlQuery = this.promoRepository
-      .createQueryBuilder('p')
-      .leftJoinAndSelect('p.promoClusters', 'promoCluster')
-      .leftJoinAndSelect('promoCluster.cluster', 'c')
-      .leftJoinAndSelect('p.gamme', 'gamme')
-      .leftJoinAndSelect('p.promoType', 'promoType')
-      .leftJoinAndSelect('promoType.operationType', 'operationType')
-      .leftJoinAndSelect('p.promoAchat', 'promoAchat')
-      .leftJoinAndSelect('p.promoMea', 'promoMea')
-      .leftJoinAndMapMany(
-        'p.promoProducts',
-        'product',
-        'product',
-        "(JSON_CONTAINS(p.product_ids,CONVERT(product.id,CHAR),'$'))",
-      )
-
-      .leftJoinAndSelect(
-        'promoMea.promoMeaEmplacements',
-        'promoMeaEmplacements',
-      )
-      .leftJoinAndSelect(
-        'promoMea.documentProvideTypes',
-        'documentProvideTypes',
-      )
-      .leftJoinAndMapOne(
-        'promoMea.remunerationUnitProductEligibilityCaRange',
-        'remuneration_base_type',
-        'eligibility_ca_range_type',
-        "(JSON_EXTRACT(promoMea.remuneration_unit_product_details,'$.eligibility_ca_range_type_id')) = eligibility_ca_range_type.id",
-      )
-      .leftJoinAndMapOne(
-        'promoMea.remunerationCaAnnualTarget',
-        'remuneration_ca_annual_target_type',
-        'remuneration_ca_annual_target_type',
-        "(JSON_EXTRACT(promoMea.remuneration_ca_annual_details,'$.remuneration_ca_annual_target_type_id')) = remuneration_ca_annual_target_type.id",
-      )
-      .leftJoinAndMapOne(
-        'promoMea.remunerationCaAnnualPlate',
-        'remuneration_ca_annual_plate_type',
-        'remuneration_ca_annual_plate_type',
-        "(JSON_EXTRACT(promoMea.remuneration_ca_annual_details,'$.remuneration_ca_annual_plate_type_id')) = remuneration_ca_annual_plate_type.id",
-      )
-      .leftJoinAndMapOne(
-        'promoAchat.eligibilityFrancoDetails',
-        'eligibility_franco_type',
-        'eligibility_franco_type',
-        "(JSON_EXTRACT(promoAchat.eligibility_franco,'$.eligibility_franco_type_id')) = eligibility_franco_type.id",
-      )
-      .leftJoinAndMapOne(
-        'promoAchat.achatAdvantageDiscountData',
-        'achat_advantage_discount_type',
-        'achat_advantage_discount_type',
-        "(JSON_EXTRACT(promoAchat.achat_advantage_discount_details,'$.achat_advantage_discount_type_id')) = achat_advantage_discount_type.id",
-      )
-      .leftJoinAndMapMany(
-        'promoAchat.achatAdvantageSubDiscountData',
-        'achat_sub_advantage_discount_type',
-        'achat_sub_advantage_discount_type',
-        ` JSON_CONTAINS(JSON_EXTRACT(promoAchat.achat_advantage_discount_details,"$[*].achat_advantage_sub_discount_type_id"),CONVERT(achat_sub_advantage_discount_type.id,CHAR),"$") OR
-          JSON_CONTAINS(JSON_EXTRACT(promoAchat.achat_advantage_discount_details,"$.achat_advantage_sub_discount_type_id"),CONVERT(achat_sub_advantage_discount_type.id,CHAR),"$")
-        `,
-      ) // TODO  fix saving the achat_discount
-      .leftJoinAndMapMany(
-        'promoMea.eligibilityCaRangeEqualCondition',
-        'equal_condition_type',
-        'eligibility_equal_condition_type',
-        ' JSON_CONTAINS(JSON_EXTRACT(promoMea.eligibility_ca_range_details,"$[*].equal_condition_type_id"),CONVERT(eligibility_equal_condition_type.id,CHAR),"$")',
-      )
-      .leftJoinAndMapMany(
-        'promoMea.remunerationFixedEqualCondition',
-        'equal_condition_type',
-        'remuneration_fixed_equal_condition_type',
-        ' JSON_CONTAINS(JSON_EXTRACT(promoMea.remuneration_fixed_details,"$.data_quantity[*].equal_condition_type_id"),CONVERT(remuneration_fixed_equal_condition_type.id,CHAR),"$")',
-      )
-      .leftJoinAndSelect(
-        'promoMeaEmplacements.emplacementType',
-        'emplacementType',
-      );
-    try {
-      if (promoId) return await sqlQuery.getOne();
-      if (filter.startDate && filter.endDate)
-        sqlQuery.where(
-          `(start_date BETWEEN :startDate AND :endDate
-               OR (end_date BETWEEN :startDate AND :endDate)
-               OR (start_date <= :startDate and end_date>= :endDate) )`,
-          {
-            startDate: filter.startDate,
-            endDate: filter.endDate,
-          },
-        );
-      if (filter.laboratoryId)
-        sqlQuery.andWhere('p.laboratory_id=:laboratoryId', {
-          laboratoryId: filter.laboratoryId,
-        });
-      if (filter.gammeId)
-        sqlQuery.andWhere('p.gamme_id=:gammeId', {
-          gammeId: filter.gammeId,
-        });
-      if (filter.clusterId && Array.isArray(filter.clusterId))
-        sqlQuery.andWhere('promoCluster.cluster_id IN (:clusterId)', {
-          clusterId: filter.clusterId,
-        });
-      else if (filter.clusterId)
-        sqlQuery.andWhere('promoCluster.cluster_id=:clusterId', {
-          clusterId: filter.clusterId,
-        });
-      if (filter.promoConcernTypeId)
-        sqlQuery.andWhere('promo_concern_type_id=:promoConcernTypeId', {
-          promoConcernTypeId: filter.promoConcernTypeId,
-        });
-      if (filter.promoTypeId)
-        sqlQuery.andWhere('promoType.operation_type_id=:promoTypeId', {
-          promoTypeId: filter.promoTypeId,
-        });
-      if (filter.perPage && filter.page) {
-        sqlQuery.skip(filter.perPage * (filter.page - 1)).take(filter.perPage);
-      }
-      return await sqlQuery.getMany();
-    } catch (err) {
-      throw new InternalServerErrorException(err);
-    }
+    return await this.promoRepository.findAll(filter, promoId);
   }
 }

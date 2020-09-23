@@ -7,7 +7,7 @@ export class PromoMeaEmplacementDto {
   @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
-  public emplacement_type_id: number; // todo validation isnUmber must be fixed
+  public emplacement_type_id: number; // TODO  validation isnUmber must be fixed
 
   @ApiProperty()
   @IsNotEmpty()

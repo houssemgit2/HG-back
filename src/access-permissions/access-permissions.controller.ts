@@ -81,7 +81,7 @@ export class AccessPermissionsController {
     // .then(data=> data.map(item=>this.accessPermissionsService.accessPermissionV1Keys(item)))
   }
 
-  // todo is why we didn't use the storeId from the Req.user
+  // TODO  is why we didn't use the storeId from the Req.user
   @ApiOperation({ summary: 'update a store access permissions' })
   @ApiResponse({ status: 200, description: 'updated store access permissions' })
   @ApiResponse({ status: 403, description: 'Forbidden.' })

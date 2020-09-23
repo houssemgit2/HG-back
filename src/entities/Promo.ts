@@ -47,7 +47,7 @@ export class Promo extends BaseEntity {
   @Column('date', { name: 'end_date', nullable: true })
   endDate: Date | null;
 
-  @Column('int', { name: 'status_id', nullable: true, default: 0 })
+  @Column('int', { name: 'status_id', nullable: true, default: 3 })
   statusId: number;
 
   @Column('int', { name: 'promo_concern_type_id', nullable: true })

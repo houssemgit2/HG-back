@@ -21,13 +21,44 @@ import { RejectionReason } from '../entities/RejectionReason';
 import { RejectionReasonRepository } from 'src/rejection-reason/rejection-reason.repository';
 import { Cron } from '@nestjs/schedule';
 import { promoState } from 'src/config/enum-types';
+import { InjectEventEmitter } from 'nest-emitter';
+import { PromoEventEmitter } from 'src/app.events';
 
 @Injectable()
 export class StorePromoMeaService {
   constructor(
     private storePromoMeaRepository: StorePromoMeaRepository,
     private rejectionReasonRepository: RejectionReasonRepository,
+    @InjectEventEmitter() private readonly emitter: PromoEventEmitter,
   ) {}
+  onModuleInit() {
+    this.emitter.on('promoCreated', async promoId => {
+      console.log(`validated new promo with id ${promoId}`);
+      try {
+        const promoStore = await this.storePromoMeaRepository.findPromoMeaByIdPromoStore(
+          promoId,
+          null,
+          null,
+        );
+        await this.storePromoMeaRepository.removeNotConcerned(
+          promoId,
+          promoStore.map(item => item.storeId),
+        );
+        if (promoStore && promoStore.length)
+          await this.storePromoMeaRepository
+            .save(promoStore)
+            .then(() =>
+              this.logger.log(
+                `store promo mea inserted successfully after validated promo ${promoId}`,
+              ),
+            );
+      } catch (e) {
+        this.logger.error('Error in event emit after promo validation ');
+        throw new InternalServerErrorException(e);
+      }
+    });
+  }
+
   private logger = new Logger(StorePromoMeaService.name);
 
   @Cron('0 0 * * *')
@@ -84,7 +115,7 @@ export class StorePromoMeaService {
       throw new InternalServerErrorException(e);
     }
   }
-  // todo optimize this
+  // TODO  optimize this
   async afterPromoPostponed(promoId: number) {
     try {
       await this.updateState(
@@ -125,7 +156,7 @@ export class StorePromoMeaService {
       store_id,
     } = filter;
     const selectedColumn = [
-      'promo_id as promoId',
+      'sp.promo_id as promoId',
       'promo.id as ID',
       'state',
       'active',
@@ -176,7 +207,7 @@ export class StorePromoMeaService {
           'owner.email',
           'owner.phone',
           'owner.address',
-        ]); // todo check the front resp
+        ]); // TODO  check the front resp
     if (start_date && end_date)
       sqlQuery.where(
         `(promo.start_date BETWEEN :start_date AND :end_date
@@ -206,7 +237,7 @@ export class StorePromoMeaService {
       }
     }
     if (clusters) {
-      sqlQuery.andWhere('store.clusterId = :clusters', { clusters }); //todo make it by promoCluster table
+      sqlQuery.andWhere('store.clusterId = :clusters', { clusters }); // TODO  make it by promoCluster table
     }
     if (active === true || active === false) {
       sqlQuery.andWhere('sp.active = :active', { active });
@@ -370,17 +401,18 @@ export class StorePromoMeaService {
     promoId: number,
     storeId: number,
   ): Promise<StorePromoMea> {
-    try {
-      const promo = await this.storePromoMeaRepository.findOne({
+    const promo = await this.storePromoMeaRepository
+      .findOne({
         where: { promoId, storeId },
+      })
+      .catch(e => {
+        throw new InternalServerErrorException(e);
       });
-      if (!promo) throw new Error();
-      return promo;
-    } catch (e) {
+    if (!promo)
       throw new NotFoundException(
         `promo promoId:${promoId} storeId:${storeId} not found`,
       );
-    }
+    return promo;
   }
   async validatePromoState(
     promoId: number,
@@ -469,10 +501,10 @@ export class StorePromoMeaService {
     const libelle = '';
     const gamme: string =
       promoMea.promo && promoMea.promo.gamme ? promoMea.promo.gamme.name : '';
-    const promoType: any = //todo fix this type related to promo type
+    const promoType: any = // TODO  fix this type related to promo type
       promoMea.promo && promoMea.promo.promoType
         ? promoMea.promo.promoType
-        : // todo fix this filter by the promo type
+        : // TODO  fix this filter by the promo type
           '';
     const storeId: number = promoMea.storeId;
     const officineName: string =
@@ -571,21 +603,9 @@ export class StorePromoMeaService {
 
     return filePath;
   }
-  // fixUrl(promo: any): any {
-  //   if (promo.url_picture)
-  //     promo.url_picture = process.env.AWS_S3_BASE_URL + promo.url_picture;
-  //   if (promo.url_sells_listing)
-  //     promo.url_sells_listing =
-  //       process.env.AWS_S3_BASE_URL + promo.url_sells_listing;
-  //   return promo;
-  // }
-  async listLabs(): Promise<Laboratory[]> {
-    const laboRepository = getRepository(Laboratory);
-    const labs = await laboRepository.find();
-    // if (!labs.length) throw new NotFoundException('labs list not found');
-    return labs;
-  }
+
   async insertPromoMea(promoId?: number, clusterId?: number, storeId?: number) {
+    // TODO remove this if never used, it fetch and insert the promo mea store
     try {
       const promos = await this.storePromoMeaRepository.findPromoMeaByIdPromoStore(
         promoId,

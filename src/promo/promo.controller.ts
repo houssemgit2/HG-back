@@ -65,6 +65,8 @@ import { PromoAchatValidationPipe } from '../common/pipes/promo/promo-achat.pipe
 import { PromoMeaDto } from './dto/promo-mea.dto';
 import { PromoIdDto } from './dto/promo-id.dto';
 import { PromoTransformPipe } from '../common/pipes/promo/transform-promo.pipe';
+import { InjectEventEmitter } from 'nest-emitter';
+import { PromoEventEmitter } from 'src/app.events';
 
 const multerOptionsForMeaExcel: MulterOptions = multerOptions(
   /xlsm|xlsx|xlsb|xls|xla|xlml|ods|csv|.xlsx|csv/,
@@ -80,6 +82,7 @@ export class PromoController {
     private storePromoSelectedService: StorePromoSelectedService,
     private storePromoMeaService: StorePromoMeaService,
     private meaUploadService: MeaUploadService,
+    @InjectEventEmitter() private readonly emitter: PromoEventEmitter,
   ) {}
   logger = new Logger('promo controller');
 
@@ -439,7 +442,13 @@ export class PromoController {
     @Param() param: PromoIdDto,
     @Body('status') status: number,
   ) {
-    return await this.promoService.updatePromo(param.promoId, status); //
+    return await this.promoService
+      .updatePromo(param.promoId, status)
+      .then(data => {
+        if (data.raw.changedRows)
+          this.emitter.emit('promoCreated', param.promoId);
+        return data;
+      });
   }
 
   @ApiTags('Promo-form')
