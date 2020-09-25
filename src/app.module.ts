@@ -28,7 +28,7 @@ import { EventEmitter } from 'events';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      logging: false,
+      logging: true,
       name: 'default',
       type: 'mysql',
       host:

@@ -6,7 +6,7 @@
     "password": "AZcLpafyKMG6HPxs",
     "database": "hg_promo_beta",
     "synchronize": false,
-    "logging": false,
+    "logging": true,
     "entities": [
         "./src/entities/*.ts"
     ],
