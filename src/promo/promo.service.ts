@@ -5,8 +5,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PromoOperationType } from '../entities/PromoType';
-// import { PromoType } from 'src/entities/PromoType';
+
 import {
   Repository,
   LessThan,
@@ -14,29 +13,32 @@ import {
   Between,
   SelectQueryBuilder,
 } from 'typeorm';
-// Entity
+import { getConnection } from 'typeorm';
+
+import { Product } from '../entities/Product';
 import { Promo } from './../entities/Promo';
-import { PromoGeneralPromoDto } from './dto/promo-general.dto';
-import { PromoCluster } from '../entities/PromoCluster';
 import { PromoAchat } from '../entities/PromoAchat';
-import { PromoAchatDto } from './dto/promo.achat.dto';
+import { PromoCluster } from '../entities/PromoCluster';
+import { PromoConso } from '../entities/PromoConso';
 import { PromoMea } from '../entities/PromoMea';
-import { PromoMeaDto } from './dto/promo-mea.dto';
+import { PromoMeaDocumentProvide } from '../entities/PromoMeaDocumentProvide';
 import { PromoMeaEmplacement } from '../entities/PromoMeaEmplacement';
+import { PromoOperationType } from '../entities/PromoType';
+import { StorePromoMea } from '../entities/StorePromoMea';
 import {
   convertToCamelCase,
   arrayEquals,
   isNotEmptyArray,
 } from '../common/utils/helpers';
-import { StorePromoMea } from '../entities/StorePromoMea';
-import { PromoConso } from '../entities/PromoConso';
 import { filterObjectProperty } from '../common/utils/helpers';
-import { GetPromoDto } from './dto/get-promo.dto';
-import { PromoMeaDocumentProvide } from '../entities/PromoMeaDocumentProvide';
-import { PromoMeaEmplacementDto } from './dto/promo-mea-emplacement.dto';
-import { getConnection } from 'typeorm';
-import { Product } from '../entities/Product';
+
 import { PromoRepository } from './promo.repository';
+
+import { GetPromoDto } from './dto/get-promo.dto';
+import { PromoGeneralPromoDto } from './dto/promo-general.dto';
+import { PromoMeaEmplacementDto } from './dto/promo-mea-emplacement.dto';
+import { PromoMeaDto } from './dto/promo-mea.dto';
+import { PromoAchatDto } from './dto/promo.achat.dto';
 // DTO
 @Injectable()
 export class PromoService {
@@ -325,6 +327,6 @@ export class PromoService {
   }
 
   async getPromos(filter, promoId?: number): Promise<any> {
-    return await this.promoRepository.findAll(filter, promoId);
+    try{return await this.promoRepository.findAll(filter, promoId);}catch(err){throw new InternalServerErrorException(err)}
   }
 }
