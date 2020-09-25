@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/camelcase */
-import { GetSelectedDto } from './dto/get-selected.dto';
-import { SaveSelectedDto } from './dto/save-selected.dto';
+import { PdfPromoGeneratorService } from '@app/pdf-promo-generator';
+
 import {
   Controller,
   Get,
@@ -21,11 +21,6 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
-  AdminGuard,
-  StoreAdminGuard,
-  ClientGuard,
-} from '../auth/guards/admin.guard';
-import {
   ApiTags,
   ApiBearerAuth,
   ApiOperation,
@@ -33,47 +28,60 @@ import {
   ApiConsumes,
   ApiQuery,
 } from '@nestjs/swagger';
-import * as fs from 'fs';
-import { PromoService } from './promo.service';
-import { GetPromoDto } from './dto/get-promo.dto';
-import { PdfPromoGeneratorService } from '@app/pdf-promo-generator';
-import { RejectionReasonService } from 'src/rejection-reason/rejection-reason.service';
-import { StorePromoSelectedService } from './../store-promo-selected/store-promo-selected.service';
-
-import { StorePromoMeaService } from '../store-promo-mea/store-promo-mea.service';
-import { ListMeaDto } from '../store-promo-mea/dto/list-mea.dto';
-import { StorePromoMea } from '../entities/StorePromoMea';
-import { ActiveToggleDto } from '../store-promo-mea/dto/active-toggle.dto';
-import { MeaUploadService } from 'src/mea-upload/mea-upload.service';
-import * as url from 'url';
-import { SetStateDto } from 'src/store-promo-mea/dto/setState.dto';
-import { DatesListValidationPipe } from 'src/common/pipes/dates.validation.pipe';
-import { RejectionReasonValidation } from 'src/common/pipes/rejection-reason.pipe';
-import { ListMeaToExportDto } from 'src/store-promo-mea/dto/list-mea-for-export.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { meaS3MulterOptions, multerOptions } from 'src/config/multer';
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
-import { User } from '../entities/User';
-import { UserReq } from '../auth/get-user.decorator';
-import { convertToSnakeCase } from 'src/common/utils/helpers';
-import { SavePromoTypeDto } from './dto/save-promo-types.dto';
-import { PromoGeneralPromoDto } from './dto/promo-general.dto';
-import { PromoValidationPipe } from '../common/pipes/promo/promo-general.Validation.pipe';
-// import { PromoConcernedValidationPipe } from '../common/pipes/promo/promo-concerned.pipe';
-import { PromoAchatDto } from './dto/promo.achat.dto';
-import { PromoAchatValidationPipe } from '../common/pipes/promo/promo-achat.pipe';
-import { PromoMeaDto } from './dto/promo-mea.dto';
-import { PromoIdDto } from './dto/promo-id.dto';
-import { PromoTransformPipe } from '../common/pipes/promo/transform-promo.pipe';
-import { InjectEventEmitter } from 'nest-emitter';
-import { PromoEventEmitter } from 'src/app.events';
 import {
   InternalServerErrorException,
   BadRequestException,
 } from '@nestjs/common';
-import { ApiFile } from '../common/decorators/api-file.decorator';
+
+import * as fs from 'fs';
+
+import { RejectionReasonService } from 'src/rejection-reason/rejection-reason.service';
+import { MeaUploadService } from 'src/mea-upload/mea-upload.service';
+
+import * as url from 'url';
+
+import { SetStateDto } from 'src/store-promo-mea/dto/setState.dto';
+import { DatesListValidationPipe } from 'src/common/pipes/dates.validation.pipe';
+import { RejectionReasonValidation } from 'src/common/pipes/rejection-reason.pipe';
+import { ListMeaToExportDto } from 'src/store-promo-mea/dto/list-mea-for-export.dto';
+import { meaS3MulterOptions, multerOptions } from 'src/config/multer';
+import { convertToSnakeCase } from 'src/common/utils/helpers';
+
+import { InjectEventEmitter } from 'nest-emitter';
+
+import { PromoEventEmitter } from 'src/app.events';
 import { SelectValidationPipe } from 'src/common/pipes/select.pipe';
+
+import { UserReq } from '../auth/get-user.decorator';
 import { StorePromoMeaInterceptor } from '../common/store-promo-mea.interceptor';
+import { StorePromoMea } from '../entities/StorePromoMea';
+import { User } from '../entities/User';
+import { StorePromoMeaService } from '../store-promo-mea/store-promo-mea.service';
+import { StorePromoSelectedService } from './../store-promo-selected/store-promo-selected.service';
+import {
+  AdminGuard,
+  StoreAdminGuard,
+  ClientGuard,
+} from '../auth/guards/admin.guard';
+import { ApiFile } from '../common/decorators/api-file.decorator';
+import { ActiveToggleDto } from '../store-promo-mea/dto/active-toggle.dto';
+import { ListMeaDto } from '../store-promo-mea/dto/list-mea.dto';
+import { PromoAchatValidationPipe } from '../common/pipes/promo/promo-achat.pipe';
+import { PromoValidationPipe } from '../common/pipes/promo/promo-general.Validation.pipe';
+import { PromoTransformPipe } from '../common/pipes/promo/transform-promo.pipe';
+
+import { PromoService } from './promo.service';
+
+import { GetPromoDto } from './dto/get-promo.dto';
+import { GetSelectedDto } from './dto/get-selected.dto';
+import { PromoGeneralPromoDto } from './dto/promo-general.dto';
+import { PromoIdDto } from './dto/promo-id.dto';
+import { PromoMeaDto } from './dto/promo-mea.dto';
+import { PromoAchatDto } from './dto/promo.achat.dto';
+import { SavePromoTypeDto } from './dto/save-promo-types.dto';
+import { SaveSelectedDto } from './dto/save-selected.dto';
 
 const multerOptionsForMeaExcel: MulterOptions = multerOptions(
   /xlsm|xlsx|xlsb|xls|xla|xlml|ods|csv|.xlsx|csv/,
@@ -466,9 +474,6 @@ export class PromoController {
   @Get('/')
   @UseGuards(AuthGuard()) // , AdminGuard)
   async findAll(@Query() getPromoDto: GetPromoDto) {
-    this.logger.verbose(
-      `get promos filtered by ${JSON.stringify(getPromoDto)}`,
-    );
     return await this.promoService.getPromos(getPromoDto);
   }
 }
