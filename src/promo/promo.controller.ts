@@ -442,8 +442,8 @@ export class PromoController {
   @ApiTags('Promo-form')
   @Get(':promoId')
   @UseGuards(AuthGuard(), AdminGuard)
-  async getPromoById(@Param('promoId') promoId: number) {
-    const promo = await this.promoService.getPromos({}, promoId);
+  async getPromoById(@Param('promoId') promoId: number,@UserReq() user:User) {
+    const promo = await this.promoService.getPromos({}, user,promoId);
     return promo;
   }
 
@@ -473,7 +473,7 @@ export class PromoController {
   @ApiTags('Promo')
   @Get('/')
   @UseGuards(AuthGuard()) // , AdminGuard)
-  async findAll(@Query() getPromoDto: GetPromoDto) {
-    return await this.promoService.getPromos(getPromoDto);
+  async findAll(@Query() getPromoDto: GetPromoDto,@UserReq() user:User) {
+    return await this.promoService.getPromos(getPromoDto,user);
   }
 }

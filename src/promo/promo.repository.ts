@@ -1,7 +1,9 @@
-import { Repository, EntityRepository } from 'typeorm';
-import { Promo } from '../entities/Promo';
 import { InjectRepository } from '@nestjs/typeorm';
 import { InternalServerErrorException } from '@nestjs/common';
+
+import { Repository, EntityRepository } from 'typeorm';
+
+import { Promo } from '../entities/Promo';
 
 @EntityRepository(Promo)
 export class PromoRepository extends Repository<Promo> {
@@ -17,6 +19,7 @@ export class PromoRepository extends Repository<Promo> {
       .leftJoinAndSelect('promoCluster.cluster', 'c')
       .leftJoinAndSelect('p.gamme', 'gamme')
       .leftJoinAndSelect('p.promoType', 'promoType')
+      .leftJoinAndSelect('p.status', 'status','status')
       .leftJoinAndSelect('promoType.operationType', 'operationType')
       .leftJoinAndSelect('p.promoAchat', 'promoAchat')
       .leftJoinAndSelect('p.promoMea', 'promoMea')
@@ -124,6 +127,10 @@ export class PromoRepository extends Repository<Promo> {
       if (filter.promoTypeId)
         sqlQuery.andWhere('promoType.operation_type_id=:promoTypeId', {
           promoTypeId: filter.promoTypeId,
+        });
+      if (filter.status)
+        sqlQuery.andWhere('p.status_id=:status or status.name like :statusName' ,{
+          status:filter.status,statusName: `%${filter.status}%`
         });
       if (filter.perPage && filter.page) {
         sqlQuery.skip(filter.perPage * (filter.page - 1)).take(filter.perPage);

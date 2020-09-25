@@ -15,6 +15,8 @@ import {
 } from 'typeorm';
 import { getConnection } from 'typeorm';
 
+import { User } from "src/entities/User";
+
 import { Product } from '../entities/Product';
 import { Promo } from './../entities/Promo';
 import { PromoAchat } from '../entities/PromoAchat';
@@ -326,7 +328,13 @@ export class PromoService {
     }
   }
 
-  async getPromos(filter, promoId?: number): Promise<any> {
-    try{return await this.promoRepository.findAll(filter, promoId);}catch(err){throw new InternalServerErrorException(err)}
+  async getPromos(filter, user:User,promoId?: number): Promise<any> {
+    try{
+    if(user.userRoleId !==1 ) filter.status = 1 
+      return await this.promoRepository.findAll(filter, promoId);
+    }catch(err){
+    this.logger.error('Error on fetching All Promos')
+        throw new InternalServerErrorException(err);
+    }
   }
 }
