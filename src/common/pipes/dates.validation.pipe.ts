@@ -14,9 +14,10 @@ export class DatesListValidationPipe implements PipeTransform {
   transform(value: any, metadata: ArgumentMetadata) {
     if (value.constructor.name !== 'ListMeaDto') return value;
     if (value && !(value.month && value.year) && !value.dates_list) {
-      throw new BadRequestException(
-        'month and year or dates list are required',
-      );
+      // throw new BadRequestException(
+      //   'month and year or dates list are required',
+      // );
+      return value; // TODO remove this return decomment error
     }
     if (value && value.dates_list) {
       this.logger.warn(

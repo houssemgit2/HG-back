@@ -11,7 +11,7 @@ export class SelectValidationPipe implements PipeTransform {
       value.entityName = selectedTable.entityName;
       value.targetEntity = selectedTable.targetEntity;
     }
-
+    console.log('*******************from pipe validation');
     return value;
   }
 }

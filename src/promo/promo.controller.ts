@@ -51,7 +51,7 @@ import { DatesListValidationPipe } from 'src/common/pipes/dates.validation.pipe'
 import { RejectionReasonValidation } from 'src/common/pipes/rejection-reason.pipe';
 import { ListMeaToExportDto } from 'src/store-promo-mea/dto/list-mea-for-export.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { multerOptions } from 'src/config/multer';
+import { meaS3MulterOptions, multerOptions } from 'src/config/multer';
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 import { User } from '../entities/User';
 import { UserReq } from '../auth/get-user.decorator';
@@ -67,6 +67,13 @@ import { PromoIdDto } from './dto/promo-id.dto';
 import { PromoTransformPipe } from '../common/pipes/promo/transform-promo.pipe';
 import { InjectEventEmitter } from 'nest-emitter';
 import { PromoEventEmitter } from 'src/app.events';
+import {
+  InternalServerErrorException,
+  BadRequestException,
+} from '@nestjs/common';
+import { ApiFile } from '../common/decorators/api-file.decorator';
+import { SelectValidationPipe } from 'src/common/pipes/select.pipe';
+import { StorePromoMeaInterceptor } from '../common/store-promo-mea.interceptor';
 
 const multerOptionsForMeaExcel: MulterOptions = multerOptions(
   /xlsm|xlsx|xlsb|xls|xla|xlml|ods|csv|.xlsx|csv/,
@@ -273,36 +280,33 @@ export class PromoController {
   @ApiConsumes('multipart/form-data')
   @ApiTags('Store-Promo-Mea')
   @Post('promo-mea/:id')
+  @UseInterceptors(
+    new StorePromoMeaInterceptor(),
+    FileInterceptor('justif', meaS3MulterOptions),
+  )
+  @ApiFile('justif')
   @UseGuards(AuthGuard(), StoreAdminGuard)
   async uploadPromoMeaProofImage(
     @Req() req: any,
-    @Res() res: any,
+    @UploadedFile() file,
     @Param('id') id: number,
     @UserReq() user: User,
     @Query('store_id') storeId = user.storeId,
   ): Promise<any> {
-    await this.storePromoMeaService.validatePromoState(id, storeId);
-    this.meaUploadService.upload(req, res, async error => {
-      if (error) {
-        console.log(error);
-        return res.status(404).json(`Failed to upload image file: ${error}`);
-      }
-      // location = ;
-      const parsed = url.parse(req.files[0].location, true);
-      const location = parsed.path;
-      await this.meaUploadService.afterUpload(id, storeId, location, null);
-      const promo = await this.storePromoMeaService
-        .doesPromoExist(id, storeId)
-        .then(data => {
-          data.urlPicture = req.files[0].location;
-          return data;
-        });
-      res.status(200).json({
-        statusCode: 200,
-        data: convertToSnakeCase(promo),
-      });
-      // return promo;
-    });
+    this.logger.setContext(file);
+    if (!file) throw new BadRequestException('please upload a filre');
+    // await this.storePromoMeaService.validatePromoState(id, storeId);
+    // await this.storePromoMeaService.doesPromoExist(id, storeId).then(data => {
+    //   data.urlPicture = file.location;
+    //   return data;
+    // });
+    const update = await this.meaUploadService.afterUpload(
+      id,
+      storeId,
+      file.key,
+      null,
+    );
+    return { urlPicture: file.location };
   }
 
   @ApiOperation({ summary: 'toggle promo mea active' })
@@ -462,7 +466,9 @@ export class PromoController {
   @Get('/')
   @UseGuards(AuthGuard()) // , AdminGuard)
   async findAll(@Query() getPromoDto: GetPromoDto) {
-    this.logger.verbose('get promos');
+    this.logger.verbose(
+      `get promos filtered by ${JSON.stringify(getPromoDto)}`,
+    );
     return await this.promoService.getPromos(getPromoDto);
   }
 }

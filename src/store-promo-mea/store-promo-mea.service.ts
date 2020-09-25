@@ -35,23 +35,12 @@ export class StorePromoMeaService {
     this.emitter.on('promoCreated', async promoId => {
       console.log(`validated new promo with id ${promoId}`);
       try {
-        const promoStore = await this.storePromoMeaRepository.findPromoMeaByIdPromoStore(
-          promoId,
-          null,
-          null,
-        );
-        await this.storePromoMeaRepository.removeNotConcerned(
-          promoId,
-          promoStore.map(item => item.storeId),
-        );
-        if (promoStore && promoStore.length)
-          await this.storePromoMeaRepository
-            .save(promoStore)
-            .then(() =>
-              this.logger.log(
-                `store promo mea inserted successfully after validated promo ${promoId}`,
-              ),
-            );
+        const promoStore = await this.insertPromoMea(promoId, null, null);
+        // await this.storePromoMeaRepository.removeNotConcerned(
+        //   promoId,
+        //   promoStore.map(item => item.storeId),
+        // );
+        console.log(promoStore);
       } catch (e) {
         this.logger.error('Error in event emit after promo validation ');
         throw new InternalServerErrorException(e);
@@ -158,6 +147,10 @@ export class StorePromoMeaService {
     const selectedColumn = [
       'sp.promo_id as promoId',
       'promo.id as ID',
+      'gamme.name as gamme',
+      'clusters.name as cluster',
+      'laboratory.name as laboratoire',
+      'laboratory.name as lab',
       'state',
       'active',
       'uploaded_at',
@@ -170,15 +163,14 @@ export class StorePromoMeaService {
       `CONCAT('${process.env.AWS_S3_BASE_URL}',sp.url_picture) as url_picture`,
       `CONCAT('${process.env.AWS_S3_BASE_URL}',sp.url_sells_listing)  as url_sells_listing`,
       'operationType.name as type_off',
-      'gamme.name as gamme',
-      'clusters.name as cluster',
     ];
     const sqlQueryForSelect = this.storePromoMeaRepository
       .createQueryBuilder('sp')
       .select(selectedColumn)
-      .leftJoinAndSelect('sp.promo', 'promo', 'promo.id = sp.promo_id')
-      .leftJoinAndSelect('sp.store', 'store', 'store.cip = sp.store_id')
+      .leftJoinAndSelect('sp.promo', 'promo') //, 'promo.id = sp.promo_id')
+      .leftJoinAndSelect('sp.store', 'store') //, 'store.cip = sp.store_id')
       .leftJoinAndSelect('promo.gamme', 'gamme')
+      .leftJoinAndSelect('promo.laboratory', 'laboratory')
       .leftJoinAndSelect('promo.promoType', 'promoType')
       .leftJoinAndSelect('promoType.operationType', 'operationType')
       .leftJoinAndSelect('store.clusters', 'clusters')
@@ -199,13 +191,15 @@ export class StorePromoMeaService {
         .leftJoinAndSelect(
           'store.users',
           'owner',
-          'owner.store_id=store.cip && is_owner=true',
+          //          'owner.store_id=store.cip && is_owner=true',
         )
         .addSelect([
           'store.name as descr',
           'CONCAT(owner.first_name," ",owner.last_name) as officine_name',
+          'owner.first_name as contact_name',
+          'owner.last_name as lst_name',
           'owner.email',
-          'owner.phone',
+          'owner.phone as phone_num',
           'owner.address',
         ]); // TODO  check the front resp
     if (start_date && end_date)
@@ -249,11 +243,13 @@ export class StorePromoMeaService {
       sqlQuery.skip(filter.perPage * (page - 1)).take(perPage);
     }
     try {
+      // return await this.storePromoMeaRepository.find();
       if (promoId)
         return await sqlQuery
           .andWhere('sp.promo_id= :promoId', { promoId })
           .getRawOne();
       if (toImportExcel) return await sqlQuery.getMany();
+      // const promos: StorePromoMea[] = await sqlQuery.getRawMany();
       const promos: StorePromoMea[] = await sqlQuery.getRawMany();
       const totalItem = await sqlQuery.getCount();
       // if (!promos.length)
@@ -418,7 +414,12 @@ export class StorePromoMeaService {
     promoId: number,
     storeId: number,
   ): Promise<StorePromoMea> {
-    const promo: StorePromoMea = await this.doesPromoExist(promoId, storeId);
+    const promo: StorePromoMea = await this.doesPromoExist(
+      promoId,
+      storeId,
+    ).catch(e => {
+      throw new InternalServerErrorException(e);
+    });
     if (
       promo.state === 'OPERATION_REFUSED' ||
       promo.state === 'NOT_JUSTIFIED'
@@ -612,7 +613,13 @@ export class StorePromoMeaService {
         clusterId,
         storeId,
       );
-      return await this.storePromoMeaRepository.save(promos);
+      return await this.storePromoMeaRepository.save(promos).then(data => {
+        if (data)
+          this.logger.log(
+            `store promo mea inserted successfully after validated promo ${promoId}`,
+          );
+        return data;
+      });
     } catch (e) {
       console.log(e);
       throw new InternalServerErrorException(e);

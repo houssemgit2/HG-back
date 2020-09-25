@@ -36,7 +36,12 @@ export class TransformInterceptor implements NestInterceptor {
       return next.handle().pipe(
         map(data => ({
           statusCode: status,
-          data: convertToSnakeCase(data),
+          // code: status, // TODO keep just the statusCode and front team has to use statusCode
+          data:
+            data && data.data
+              ? convertToSnakeCase(data.data)
+              : convertToSnakeCase(data),
+          totalItems: data.totalItem,
         })),
       );
     } else {

@@ -38,7 +38,7 @@ export class StoreService implements OnModuleInit {
     });
   }
   logger = new Logger('Store service');
-  async saveMeaByStore(storeId: number) {
+  async saveMeaByStore(storeId: number): Promise<any> | null {
     let promosIds: StorePromoMea[];
     await this.storePromoMeaRepository
       .findPromoMeaByIdPromoStore(null, null, storeId)
@@ -46,12 +46,20 @@ export class StoreService implements OnModuleInit {
         promosIds = data;
       });
     console.log('promos list to add to the store', storeId);
-    return await getConnection()
-      .createQueryBuilder()
-      .insert()
-      .into(StorePromoMea)
-      .values(promosIds)
-      .execute();
+    if (promosIds && promosIds.length)
+      return await getConnection()
+        .createQueryBuilder()
+        .insert()
+        .into(StorePromoMea)
+        .values(promosIds)
+        .execute();
+    this.logger.warn(`no store promo mea concern store ${storeId}`);
+    this.logger.error(`no store promo mea concern store ${storeId}`);
+    this.logger.verbose(`no store promo mea concern store ${storeId}`);
+    this.logger.log(`no store promo mea concern store ${storeId}`);
+    this.logger.debug(`no store promo mea concern store ${storeId}`);
+    this.logger.setContext(`no store promo mea concern store ${storeId}`);
+    return null;
   }
   async createOne(
     addStore: AddStoreDto,
