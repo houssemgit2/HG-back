@@ -8,16 +8,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import {
   Repository,
-  LessThan,
-  MoreThan,
-  Between,
-  SelectQueryBuilder,
 } from 'typeorm';
-import { getConnection } from 'typeorm';
 
 import { User } from 'src/entities/User';
 
-import { Product } from '../entities/Product';
 import { Promo } from './../entities/Promo';
 import { PromoAchat } from '../entities/PromoAchat';
 import { PromoCluster } from '../entities/PromoCluster';
@@ -26,7 +20,6 @@ import { PromoMea } from '../entities/PromoMea';
 import { PromoMeaDocumentProvide } from '../entities/PromoMeaDocumentProvide';
 import { PromoMeaEmplacement } from '../entities/PromoMeaEmplacement';
 import { PromoOperationType } from '../entities/PromoType';
-import { StorePromoMea } from '../entities/StorePromoMea';
 import {
   convertToCamelCase,
   arrayEquals,
@@ -36,7 +29,6 @@ import { filterObjectProperty } from '../common/utils/helpers';
 
 import { PromoRepository } from './promo.repository';
 
-import { GetPromoDto } from './dto/get-promo.dto';
 import { PromoGeneralPromoDto } from './dto/promo-general.dto';
 import { PromoMeaEmplacementDto } from './dto/promo-mea-emplacement.dto';
 import { PromoMeaDto } from './dto/promo-mea.dto';
@@ -62,9 +54,6 @@ export class PromoService {
 
     @InjectRepository(PromoMeaDocumentProvide)
     private promoMeaDocumentProvide: Repository<PromoMeaDocumentProvide>,
-
-    @InjectRepository(StorePromoMea)
-    private storePromoMeaRepository: Repository<StorePromoMea>,
   ) { }
   async validPromoType(type: string, promoId: number) {
     const isValidType = await this.promoOperationTypeRepository
@@ -338,6 +327,7 @@ export class PromoService {
     try {
       if (user.userRoleId !== 1) filter.status = 1;
       return await this.promoRepository.findAll(filter, promoId);
+      // return await this.promoMeaRepository.find()
     } catch (err) {
       this.logger.error('Error on fetching All Promos');
       throw new InternalServerErrorException(err);

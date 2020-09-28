@@ -3,12 +3,13 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-  HttpServer,
 } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
+
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+
 import { convertToSnakeCase } from './utils/helpers';
-import { Logger } from '@nestjs/common';
 
 export interface Response<T> {
   statusCode: number;
@@ -18,14 +19,12 @@ export interface Response<T> {
 @Injectable()
 export class TransformInterceptor implements NestInterceptor {
   logger = new Logger('TransformInterceptor');
-  private httpServer: HttpServer;
   intercept(
     context: ExecutionContext,
     next: CallHandler,
   ): Observable<Response<any>> {
     const pathRequest = context.switchToHttp().getRequest().path;
     const method = context.switchToHttp().getRequest().method;
-    const request = context.switchToHttp().getRequest().request;
     let status = context.switchToHttp().getResponse().statusCode;
     console.log('TransformInterceptor');
     console.log(pathRequest);
@@ -41,7 +40,7 @@ export class TransformInterceptor implements NestInterceptor {
             data && data.data
               ? convertToSnakeCase(data.data)
               : convertToSnakeCase(data),
-          totalItems: data.totalItem,
+          totalItems: data ? data.totalItem : undefined,
         })),
       );
     } else {

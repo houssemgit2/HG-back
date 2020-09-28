@@ -94,7 +94,7 @@ export class PromoRepository extends Repository<Promo> {
         'emplacementType',
       );
     try {
-      if (promoId) return await sqlQuery.getOne();
+      if (promoId) return await sqlQuery.where('p.id =:promoId', { promoId }).getOne();
       if (filter.startDate && filter.endDate)
         sqlQuery.where(
           `(start_date BETWEEN :startDate AND :endDate

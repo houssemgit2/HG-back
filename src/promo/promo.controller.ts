@@ -455,9 +455,10 @@ export class PromoController {
   @ApiTags('Promo-form')
   @Get(':promoId')
   @UseGuards(AuthGuard(), AdminGuard)
-  async getPromoById(@Param('promoId') promoId: number, @UserReq() user: User) {
-    const promo = await this.promoService.getPromos({}, user, promoId);
-    return promo;
+  getPromoById(@Param('promoId') promoId: number, @UserReq() user: User) {
+    return this.promoService.getPromos({}, user, promoId).then(data => { if (data) return data; else return {} }
+    )
+
   }
 
   @ApiTags('Promo')
