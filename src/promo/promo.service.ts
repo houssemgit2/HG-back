@@ -15,7 +15,7 @@ import {
 } from 'typeorm';
 import { getConnection } from 'typeorm';
 
-import { User } from "src/entities/User";
+import { User } from 'src/entities/User';
 
 import { Product } from '../entities/Product';
 import { Promo } from './../entities/Promo';
@@ -65,7 +65,7 @@ export class PromoService {
 
     @InjectRepository(StorePromoMea)
     private storePromoMeaRepository: Repository<StorePromoMea>,
-  ) {}
+  ) { }
   async validPromoType(type: string, promoId: number) {
     const isValidType = await this.promoOperationTypeRepository
       .createQueryBuilder('promoType')
@@ -118,11 +118,17 @@ export class PromoService {
       }
       delete promo.promo_mea_emplacements;
       delete promo.document_provide_types;
-      return await this.promoMeaRepository.save({
+      // delete promo.remuneration_fixed_details;
+      console.log(promo);
+      const camelPromo = convertToCamelCase(promo);
+      console.log(camelPromo);
+      const created = await this.promoMeaRepository.save({
         promoId,
-        ...convertToCamelCase(promo),
+        ...camelPromo
       });
+      return created
     } catch (e) {
+      this.logger.error('error on saving mea promo details');
       throw new InternalServerErrorException(e);
     }
   }
@@ -328,13 +334,13 @@ export class PromoService {
     }
   }
 
-  async getPromos(filter, user:User,promoId?: number): Promise<any> {
-    try{
-    if(user.userRoleId !==1 ) filter.status = 1 
+  async getPromos(filter, user: User, promoId?: number): Promise<any> {
+    try {
+      if (user.userRoleId !== 1) filter.status = 1;
       return await this.promoRepository.findAll(filter, promoId);
-    }catch(err){
-    this.logger.error('Error on fetching All Promos')
-        throw new InternalServerErrorException(err);
+    } catch (err) {
+      this.logger.error('Error on fetching All Promos');
+      throw new InternalServerErrorException(err);
     }
   }
 }

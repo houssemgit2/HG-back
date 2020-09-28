@@ -19,7 +19,7 @@ export class PromoRepository extends Repository<Promo> {
       .leftJoinAndSelect('promoCluster.cluster', 'c')
       .leftJoinAndSelect('p.gamme', 'gamme')
       .leftJoinAndSelect('p.promoType', 'promoType')
-      .leftJoinAndSelect('p.status', 'status','status')
+      .leftJoinAndSelect('p.status', 'status')
       .leftJoinAndSelect('promoType.operationType', 'operationType')
       .leftJoinAndSelect('p.promoAchat', 'promoAchat')
       .leftJoinAndSelect('p.promoMea', 'promoMea')

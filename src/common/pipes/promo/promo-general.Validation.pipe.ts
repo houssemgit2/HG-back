@@ -4,16 +4,13 @@ import {
   ArgumentMetadata,
   BadRequestException,
 } from '@nestjs/common';
+
 import * as moment from 'moment';
-import { plainToClass } from 'class-transformer';
-import { PromoGeneralPromoDto } from '../../../promo/dto/promo-general.dto';
-import { validate } from 'class-validator';
 
 @Injectable()
 export class PromoValidationPipe implements PipeTransform<any> {
   async transform(value: any, { type }: ArgumentMetadata) {
     if (type === 'body') {
-      const groups: string[] = [];
       if (value && value.start_date && value.end_date) {
         if (
           value.start_date === 'Invalid date' ||
@@ -31,29 +28,19 @@ export class PromoValidationPipe implements PipeTransform<any> {
         }
         if (value.promo_concern_type_id === 1) {
           if (value.product)
-            throw new BadRequestException(
-              'Product property is not allowed in this typeof promo',
-            );
+            delete value.product
           if (
-            value.product_concern_type_id === 1 &&
-            (value.product_ids || value.new_products)
+            value.product_concern_type_id === 1
           ) {
-            throw new BadRequestException(
-              'products list  is not allowed in this typeof promo',
-            );
+            delete value.product_ids
+            delete value.new_products
           }
+        } else if (value.promo_concern_type_id === 2) {
+          delete value.product_ids
+          delete value.new_products
+          delete value.product_concern_type_id
         }
       }
-
-      // const entityClass = plainToClass(PromoGeneralPromoDto, value, { groups });
-      // const errors = await validate(entityClass, { groups });
-
-      // if (errors.length > 0) {
-      //   console.log(errors);
-      //   throw new BadRequestException(
-      //     errors.map(item => JSON.stringify(item.constraints)),
-      //   );
-      // }
     }
     return value;
   }

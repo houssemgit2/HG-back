@@ -93,7 +93,7 @@ export class PromoController {
     private storePromoMeaService: StorePromoMeaService,
     private meaUploadService: MeaUploadService,
     @InjectEventEmitter() private readonly emitter: PromoEventEmitter,
-  ) {}
+  ) { }
   logger = new Logger('promo controller');
 
   @ApiTags('Promo')
@@ -229,8 +229,7 @@ export class PromoController {
   @ApiTags('Store-Promo-Mea')
   @Post('promo-mea/:id/set-to')
   @UseGuards(AuthGuard(), StoreAdminGuard)
-  @UsePipes(new RejectionReasonValidation())
-  async changePromoState(@Body() body: SetStateDto, @Param('id') id: number) {
+  @UsePipes(new RejectionReasonValidation()) async changePromoState(@Body() body: SetStateDto, @Param('id') id: number) {
     return await this.storePromoMeaService.validateProof(
       id,
       body.store_id,
@@ -289,7 +288,7 @@ export class PromoController {
   )
   @ApiFile('justif')
   @UseGuards(AuthGuard(), StoreAdminGuard)
-  async uploadPromoMeaProofImage( 
+  async uploadPromoMeaProofImage(
     @UploadedFile() file,
     @Param('id') id: number,
     @UserReq() user: User,
