@@ -11,6 +11,7 @@ import { getConnection } from 'typeorm';
 import moment = require('moment');
 import * as url from 'url';
 import { meaS3MulterOptions } from 'src/config/multer';
+import { PROMO_STATE } from 'src/config/enum-types';
 
 @Injectable()
 export class MeaUploadService {
@@ -30,7 +31,7 @@ export class MeaUploadService {
           .update(StorePromoMea)
           .set({
             urlPicture: location,
-            state: 'PENDING',
+            state: PROMO_STATE.PENDING,
             uploadedAt: moment().format('YYYY-MM-DD hh:mm:ss'),
           })
           .where('promo_id = :promoId AND store_id =:storeId', {
@@ -52,14 +53,15 @@ export class MeaUploadService {
     urlSellsListing: string,
   ) {
     try {
+      const uploadedAt = moment().format();
       return await getConnection()
         .createQueryBuilder()
         .update(StorePromoMea)
         .set({
           urlPicture,
           urlSellsListing,
-          state: 'PENDING',
-          uploadedAt: Date.now(),
+          state: PROMO_STATE.PENDING,
+          uploadedAt,
         })
         .where('promo_id = :promoId AND store_id =:storeId', {
           promoId: id,

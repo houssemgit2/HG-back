@@ -1,21 +1,20 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsEnum } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsEnum,
+  ValidateIf,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-const PromoMeaStateEnum = ['CONFIRMED', 'REJECTED'];
+import { PROMO_STATE } from '../../config/enum-types';
 export class SetStateDto {
   @ApiProperty({
     required: true,
-    enum: PromoMeaStateEnum,
+    enum: PROMO_STATE,
   })
-  @IsEnum(PromoMeaStateEnum)
+  @IsEnum(PROMO_STATE)
   @IsNotEmpty()
-  public state:
-    | 'TO_JUSTIFY'
-    | 'PENDING'
-    | 'CONFIRMED'
-    | 'REJECTED'
-    | 'NOT_JUSTIFIED'
-    | 'OPERATION_REFUSED';
-
+  public state: PROMO_STATE;
   @ApiProperty({
     required: true,
     type: Number,
@@ -26,9 +25,17 @@ export class SetStateDto {
 
   @ApiProperty({
     required: true,
+    type: String,
+  })
+  @IsNotEmpty()
+  @ValidateIf(o => o.state === PROMO_STATE.REJECTED && !o.reason_id)
+  public reason: string;
+
+  @ApiProperty({
+    required: true,
     type: Number,
   })
-  @IsNumber()
-  @IsOptional()
-  public reason: number;
+  @IsNotEmpty()
+  @ValidateIf(o => o.state === PROMO_STATE.REJECTED && !o.reason)
+  public reason_id: number;
 }

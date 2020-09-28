@@ -15,7 +15,7 @@ import { ProductConcernType } from '../entities/ProductConcernType';
 import { Resource } from '../entities/Resource';
 import { RejectionReason } from '../entities/RejectionReason';
 
-export enum promoState {
+export enum PROMO_STATE {
   CONFIRMED = 'CONFIRMED',
   REJECTED = 'REJECTED',
   TO_JUSTIFY = 'TO_JUSTIFY',

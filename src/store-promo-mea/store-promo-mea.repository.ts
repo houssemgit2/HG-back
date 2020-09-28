@@ -9,6 +9,7 @@ import { StorePromoMea } from '../entities/StorePromoMea';
 import { Logger, InternalServerErrorException } from '@nestjs/common';
 import { getConnection } from 'typeorm';
 import { Store } from '../entities/Store';
+import { PROMO_STATE } from 'src/config/enum-types';
 
 @EntityRepository(StorePromoMea)
 export class StorePromoMeaRepository extends Repository<StorePromoMea> {
@@ -25,8 +26,8 @@ export class StorePromoMeaRepository extends Repository<StorePromoMea> {
     const updateResult = await this.update(queryCondition, toSetObject);
     await this.decrement(queryCondition, 'rejectionNumber', 1);
     await this.update(
-      { state: 'REJECTED', rejectionNumber: 0 },
-      { state: 'OPERATION_REFUSED' },
+      { state: PROMO_STATE.REJECTED, rejectionNumber: 0 },
+      { state: PROMO_STATE.OPERATION_REFUSED },
     );
     return updateResult;
   }

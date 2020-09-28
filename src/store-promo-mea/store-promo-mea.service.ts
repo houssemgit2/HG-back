@@ -20,7 +20,7 @@ import moment = require('moment');
 import { RejectionReason } from '../entities/RejectionReason';
 import { RejectionReasonRepository } from 'src/rejection-reason/rejection-reason.repository';
 import { Cron } from '@nestjs/schedule';
-import { promoState } from 'src/config/enum-types';
+import { PROMO_STATE } from 'src/config/enum-types';
 import { InjectEventEmitter } from 'nest-emitter';
 import { PromoEventEmitter } from 'src/app.events';
 
@@ -59,7 +59,7 @@ export class StorePromoMeaService {
       .subtract(daysAfterEndDate + 1, 'days')
       .format('YYYY-MM-DD');
     this.logger.debug(
-      `fetching promo  where their end_date little then ${filterPromos.end_date} ${promoState.NOT_JUSTIFIED}`,
+      `fetching promo  where their end_date little then ${filterPromos.end_date} ${PROMO_STATE.NOT_JUSTIFIED}`,
     );
     try {
       const promos = await this.findPromos(filterPromos);
@@ -98,8 +98,8 @@ export class StorePromoMeaService {
   }
   async updatePromoByState(promoId: number) {
     try {
-      await this.updateState(promoId, null, promoState.TO_JUSTIFY, null, true);
-      await this.updateState(promoId, null, promoState.REJECTED, null, true);
+      await this.updateState(promoId, null, PROMO_STATE.TO_JUSTIFY, null, true);
+      await this.updateState(promoId, null, PROMO_STATE.REJECTED, null, true);
     } catch (e) {
       throw new InternalServerErrorException(e);
     }
@@ -110,14 +110,14 @@ export class StorePromoMeaService {
       await this.updateState(
         promoId,
         null,
-        promoState.NOT_JUSTIFIED,
+        PROMO_STATE.NOT_JUSTIFIED,
         null,
         true,
       );
       await this.updateState(
         promoId,
         null,
-        promoState.OPERATION_REFUSED,
+        PROMO_STATE.OPERATION_REFUSED,
         null,
         true,
       );
@@ -160,8 +160,8 @@ export class StorePromoMeaService {
       '(SELECT name FROM rejection_reason WHERE rejection_reason.id=sp.siege_rejected_reason_id) as siege_rejected_reason',
       '(SELECT name FROM rejection_reason WHERE rejection_reason.id=sp.officine_rejected_reason_id) as officine_rejected_reason',
       'sp.store_id as id_cip',
-      `CONCAT('${process.env.AWS_S3_BASE_URL}',sp.url_picture) as url_picture`,
-      `CONCAT('${process.env.AWS_S3_BASE_URL}',sp.url_sells_listing)  as url_sells_listing`,
+      `CONCAT('${process.env.AWS_S3_BASE_URL}/',sp.url_picture) as url_picture`,
+      `CONCAT('${process.env.AWS_S3_BASE_URL}/',sp.url_sells_listing)  as url_sells_listing`,
       'operationType.name as type_off',
     ];
     const sqlQueryForSelect = this.storePromoMeaRepository
@@ -218,13 +218,13 @@ export class StorePromoMeaService {
       });
     // if (user && user.userRoleId === 1) sqlQuery.andWhere(`owner.is_owner=1`);
     if (state) {
-      if (state === 'UNJUSTIFIED')
+      if (state === PROMO_STATE.UNJUSTIFIED)
         sqlQuery.andWhere('sp.state IN(:...states)', {
-          states: ['REJECTED', 'TO_JUSTIFY'],
+          states: [PROMO_STATE.REJECTED, PROMO_STATE.TO_JUSTIFY],
         });
-      else if (state === 'REJECTED')
+      else if (state === PROMO_STATE.REJECTED)
         sqlQuery.andWhere('sp.state IN(:...states)', {
-          states: ['REJECTED', 'OPERATION_REFUSED'],
+          states: [PROMO_STATE.REJECTED, PROMO_STATE.OPERATION_REFUSED],
         });
       else {
         sqlQuery.andWhere('sp.state = :state', { state });
@@ -288,18 +288,22 @@ export class StorePromoMeaService {
     const queryCondition: any = new StorePromoMea();
     if (promoId) queryCondition.promoId = promoId;
     if (storeId) queryCondition.storeId = storeId;
-    if (state === 'REJECTED' && !reasonId) {
+    if (state === PROMO_STATE.REJECTED && !reasonId) {
       throw new BadRequestException('Rejected promo must has a reason');
     }
-    if (state === 'REJECTED') toSetObject.siegeRejectedReasonId = reasonId;
+    if (state === PROMO_STATE.REJECTED)
+      toSetObject.siegeRejectedReasonId = reasonId;
     if (updateByState) {
-      if (state === 'TO_JUSTIFY') queryCondition.state = 'NOT_JUSTIFIED';
-      if (state === 'REJECTED') {
-        queryCondition.state = 'OPERATION_REFUSED';
+      if (state === PROMO_STATE.TO_JUSTIFY)
+        queryCondition.state = PROMO_STATE.NOT_JUSTIFIED;
+      if (state === PROMO_STATE.REJECTED) {
+        queryCondition.state = PROMO_STATE.OPERATION_REFUSED;
         queryCondition.rejection_time = 2;
       }
-      if (state === 'NOT_JUSTIFIED') queryCondition.state = 'TO_JUSTIFY';
-      if (state === 'OPERATION_REFUSED') queryCondition.state = 'REJECTED';
+      if (state === PROMO_STATE.NOT_JUSTIFIED)
+        queryCondition.state = PROMO_STATE.TO_JUSTIFY;
+      if (state === PROMO_STATE.OPERATION_REFUSED)
+        queryCondition.state = PROMO_STATE.REJECTED;
     }
     try {
       this.logger.debug(
@@ -307,7 +311,7 @@ export class StorePromoMeaService {
           toSetObject,
         )} where ${JSON.stringify(queryCondition)}`,
       );
-      if (toSetObject.state === 'REJECTED')
+      if (toSetObject.state === PROMO_STATE.REJECTED)
         return this.storePromoMeaRepository.rejectPromo(
           queryCondition,
           toSetObject,
@@ -335,22 +339,16 @@ export class StorePromoMeaService {
     promoId: number,
     storeId: number,
     reasonId: number,
-    state:
-      | 'TO_JUSTIFY'
-      | 'PENDING'
-      | 'CONFIRMED'
-      | 'REJECTED'
-      | 'NOT_JUSTIFIED'
-      | 'OPERATION_REFUSED',
+    state: PROMO_STATE,
   ) {
     //  await this.updateState(promoId, storeId, state, reasonId);
     const promo: StorePromoMea = await this.doesPromoExist(promoId, storeId);
     promo.state = state;
     promo.siegeRejectedReasonId = reasonId;
-    if (promo.state === 'REJECTED' && promo.rejectionNumber >= 1)
+    if (promo.state === PROMO_STATE.REJECTED && promo.rejectionNumber >= 1)
       promo.rejectionNumber = promo.rejectionNumber - 1;
-    if (promo.state === 'REJECTED' && promo.rejectionNumber < 1)
-      promo.state = 'OPERATION_REFUSED';
+    if (promo.state === PROMO_STATE.REJECTED && promo.rejectionNumber < 1)
+      promo.state = PROMO_STATE.OPERATION_REFUSED;
     await this.storePromoMeaRepository.save(promo);
     return promo;
   }
@@ -421,8 +419,8 @@ export class StorePromoMeaService {
       throw new InternalServerErrorException(e);
     });
     if (
-      promo.state === 'OPERATION_REFUSED' ||
-      promo.state === 'NOT_JUSTIFIED'
+      promo.state === PROMO_STATE.OPERATION_REFUSED ||
+      promo.state === PROMO_STATE.NOT_JUSTIFIED
     ) {
       throw new BadRequestException(
         `Can't upload proof to ${!promo || promo.state} promo`,
@@ -463,10 +461,13 @@ export class StorePromoMeaService {
         await validateOrReject(promo);
       }
       for (const promo of promos) {
-        if (promo.state === 'REJECTED' && parseInt(promo.rejectionReason)) {
+        if (
+          promo.state === PROMO_STATE.REJECTED &&
+          parseInt(promo.rejectionReason)
+        ) {
           this.logger.verbose('fetching the reason id');
           promo.siegeRejectedReasonId = parseInt(promo.rejectionReason);
-        } else if (promo.state === 'REJECTED') {
+        } else if (promo.state === PROMO_STATE.REJECTED) {
           this.logger.verbose('fetching the reason id');
           await this.rejectionReasonRepository
             .getReasonId(promo.rejectionReason)
@@ -539,13 +540,15 @@ export class StorePromoMeaService {
     };
   }
   stateMeaToExcel(promoMea: StorePromoMea): string {
-    if (promoMea.state === 'REJECTED') return 'N';
-    if (promoMea.state === 'CONFIRMED') return 'O';
+    if (promoMea.state === PROMO_STATE.REJECTED) return 'N';
+    if (promoMea.state === PROMO_STATE.CONFIRMED) return 'O';
     return '';
   }
-  evalStateValue(value: 'N' | 'O'): 'CONFIRMED' | 'REJECTED' | undefined {
-    if (value === 'O') return 'CONFIRMED';
-    if (value === 'N') return 'REJECTED';
+  evalStateValue(
+    value: 'N' | 'O',
+  ): PROMO_STATE.CONFIRMED | PROMO_STATE.REJECTED | undefined {
+    if (value === 'O') return PROMO_STATE.CONFIRMED;
+    if (value === 'N') return PROMO_STATE.REJECTED;
     return undefined;
   }
   transformXLSMeaPromo(promo) {

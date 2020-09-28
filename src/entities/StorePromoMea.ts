@@ -12,6 +12,7 @@ import {
 import { RejectionReason } from './RejectionReason';
 import { Store } from './Store';
 import { Promo } from './Promo';
+import { PROMO_STATE } from '../config/enum-types';
 
 @Index('store_promo_mea_store_id_fk', ['storeId'], {})
 @Index('store_promo_mea_promo_id_fk', ['promoId'], {})
@@ -47,23 +48,10 @@ export class StorePromoMea extends BaseEntity {
 
   @Column('enum', {
     name: 'state',
-    enum: [
-      'TO_JUSTIFY',
-      'PENDING',
-      'CONFIRMED',
-      'REJECTED',
-      'NOT_JUSTIFIED',
-      'OPERATION_REFUSED',
-    ],
-    default: () => "'TO_JUSTIFY'",
+    enum: PROMO_STATE,
+    default: () => 'PROMO_STATE.TO_JUSTIFY',
   })
-  state:
-    | 'TO_JUSTIFY'
-    | 'PENDING'
-    | 'CONFIRMED'
-    | 'REJECTED'
-    | 'NOT_JUSTIFIED'
-    | 'OPERATION_REFUSED';
+  state: PROMO_STATE;
 
   @Column('int', { name: 'rejection_number', default: () => "'2'" })
   rejectionNumber: number;
@@ -100,10 +88,10 @@ export class StorePromoMea extends BaseEntity {
   // @AfterUpdate()
   // updateState() {
   //   console.log('we are after update ---------------------->', this);
-  //   if (this.state === 'REJECTED' && this.rejectionNumber > 0) {
+  //   if (this.state === PROMO_STATE.REJECTED && this.rejectionNumber > 0) {
   //     this.rejectionNumber = this.rejectionNumber - 1;
   //   }
-  //   if (this.state === 'REJECTED' && this.rejectionNumber === 0) {
+  //   if (this.state === PROMO_STATE.REJECTED && this.rejectionNumber === 0) {
   //     this.state = 'OPERATION_REFUSED';
   //   }
   //   // this.save();
