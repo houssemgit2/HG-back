@@ -239,7 +239,7 @@ export class PromoController {
     return await this.storePromoMeaService.validateProof(
       id,
       body.store_id,
-      body.reason,
+      body.reason_id,
       body.state,
     );
   }
@@ -308,12 +308,7 @@ export class PromoController {
     //   data.urlPicture = file.location;
     //   return data;
     // });
-    const update = await this.meaUploadService.afterUpload(
-      id,
-      storeId,
-      file.key,
-      null,
-    );
+    await this.meaUploadService.afterUpload(id, storeId, file.key, null);
     return { urlPicture: file.location };
   }
 
@@ -366,12 +361,13 @@ export class PromoController {
     this.logger.debug(
       `fetching promo_mea_id ${promoId} for the store cip ${storeId}`,
     );
-    return await this.storePromoMeaService.findPromos(
+    const promo = await this.storePromoMeaService.findPromos(
       filter,
       user,
       false,
       promoId,
     );
+    return promo;
   }
 
   @ApiOperation({ summary: 'list promo mea' })
@@ -442,8 +438,8 @@ export class PromoController {
   @ApiTags('Promo-form')
   @Get(':promoId')
   @UseGuards(AuthGuard(), AdminGuard)
-  async getPromoById(@Param('promoId') promoId: number,@UserReq() user:User) {
-    const promo = await this.promoService.getPromos({}, user,promoId);
+  async getPromoById(@Param('promoId') promoId: number, @UserReq() user: User) {
+    const promo = await this.promoService.getPromos({}, user, promoId);
     return promo;
   }
 
@@ -473,7 +469,7 @@ export class PromoController {
   @ApiTags('Promo')
   @Get('/')
   @UseGuards(AuthGuard()) // , AdminGuard)
-  async findAll(@Query() getPromoDto: GetPromoDto,@UserReq() user:User) {
-    return await this.promoService.getPromos(getPromoDto,user);
+  async findAll(@Query() getPromoDto: GetPromoDto, @UserReq() user: User) {
+    return await this.promoService.getPromos(getPromoDto, user);
   }
 }
