@@ -31,13 +31,11 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 import {
-  InternalServerErrorException,
   BadRequestException,
 } from '@nestjs/common';
 
 import * as fs from 'fs';
 
-import { RejectionReasonService } from 'src/rejection-reason/rejection-reason.service';
 import { MeaUploadService } from 'src/mea-upload/mea-upload.service';
 
 import * as url from 'url';
@@ -47,12 +45,10 @@ import { DatesListValidationPipe } from 'src/common/pipes/dates.validation.pipe'
 import { RejectionReasonValidation } from 'src/common/pipes/rejection-reason.pipe';
 import { ListMeaToExportDto } from 'src/store-promo-mea/dto/list-mea-for-export.dto';
 import { meaS3MulterOptions, multerOptions } from 'src/config/multer';
-import { convertToSnakeCase } from 'src/common/utils/helpers';
 
 import { InjectEventEmitter } from 'nest-emitter';
 
 import { PromoEventEmitter } from 'src/app.events';
-import { SelectValidationPipe } from 'src/common/pipes/select.pipe';
 
 import { UserReq } from '../auth/get-user.decorator';
 import { StorePromoMeaInterceptor } from '../common/store-promo-mea.interceptor';
@@ -93,7 +89,6 @@ export class PromoController {
   constructor(
     private readonly promoService: PromoService,
     private pdfPromoGeneratorService: PdfPromoGeneratorService,
-    private rejectionReasonService: RejectionReasonService,
     private storePromoSelectedService: StorePromoSelectedService,
     private storePromoMeaService: StorePromoMeaService,
     private meaUploadService: MeaUploadService,
@@ -294,8 +289,7 @@ export class PromoController {
   )
   @ApiFile('justif')
   @UseGuards(AuthGuard(), StoreAdminGuard)
-  async uploadPromoMeaProofImage(
-    @Req() req: any,
+  async uploadPromoMeaProofImage( 
     @UploadedFile() file,
     @Param('id') id: number,
     @UserReq() user: User,
