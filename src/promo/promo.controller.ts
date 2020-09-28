@@ -428,13 +428,7 @@ export class PromoController {
     return await this.promoService.duplicatePromo(param.promoId);
   }
   // *****
-  @ApiTags('Promo-form')
-  @Get(':promoId')
-  @UseGuards(AuthGuard(), AdminGuard)
-  async getPromoById(@Param('promoId') promoId: number, @UserReq() user: User) {
-    const promo = await this.promoService.getPromos({}, user, promoId);
-    return promo;
-  }
+
 
   @ApiTags('Promo-form')
   @Put(':promoId')
@@ -457,6 +451,13 @@ export class PromoController {
   @UseGuards(AuthGuard(), AdminGuard)
   async deletePromo(@Param() param: PromoIdDto) {
     return await this.promoService.delete(param.promoId);
+  }
+  @ApiTags('Promo-form')
+  @Get(':promoId')
+  @UseGuards(AuthGuard(), AdminGuard)
+  async getPromoById(@Param('promoId') promoId: number, @UserReq() user: User) {
+    const promo = await this.promoService.getPromos({}, user, promoId);
+    return promo;
   }
 
   @ApiTags('Promo')

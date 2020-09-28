@@ -59,8 +59,7 @@ export class Promo extends BaseEntity {
   @Column('json', { name: 'product_ids', nullable: true })
   productIds: object | null;
 
-  // @Column('json', { name: 'products_id_out', nullable: true })
-  // productsIdOut: object | null;
+
 
   @Column('text', { name: 'comment', nullable: true })
   comment: string;

@@ -22,7 +22,8 @@ export class PromoRepository extends Repository<Promo> {
       .leftJoinAndSelect('p.status', 'status')
       .leftJoinAndSelect('promoType.operationType', 'operationType')
       .leftJoinAndSelect('p.promoAchat', 'promoAchat')
-      .leftJoinAndSelect('p.promoMea', 'promoMea')
+      // .leftJoinAndSelect('p.promoMea', 'promoMea')
+      .leftJoin('p.promoMea', 'promoMea')
       .leftJoinAndMapMany(
         'p.promoProducts',
         'product',
@@ -73,8 +74,8 @@ export class PromoRepository extends Repository<Promo> {
         'achat_sub_advantage_discount_type',
         'achat_sub_advantage_discount_type',
         ` JSON_CONTAINS(JSON_EXTRACT(promoAchat.achat_advantage_discount_details,"$[*].achat_advantage_sub_discount_type_id"),CONVERT(achat_sub_advantage_discount_type.id,CHAR),"$") OR
-          JSON_CONTAINS(JSON_EXTRACT(promoAchat.achat_advantage_discount_details,"$.achat_advantage_sub_discount_type_id"),CONVERT(achat_sub_advantage_discount_type.id,CHAR),"$")
-        `,
+        JSON_CONTAINS(JSON_EXTRACT(promoAchat.achat_advantage_discount_details,"$.achat_advantage_sub_discount_type_id"),CONVERT(achat_sub_advantage_discount_type.id,CHAR),"$")
+      `,
       ) // TODO  fix saving the achat_discount
       .leftJoinAndMapMany(
         'promoMea.eligibilityCaRangeEqualCondition',
@@ -129,8 +130,8 @@ export class PromoRepository extends Repository<Promo> {
           promoTypeId: filter.promoTypeId,
         });
       if (filter.status)
-        sqlQuery.andWhere('p.status_id=:status or status.name like :statusName' ,{
-          status:filter.status,statusName: `%${filter.status}%`
+        sqlQuery.andWhere('p.status_id=:status or status.name like :statusName', {
+          status: filter.status, statusName: `%${filter.status}%`
         });
       if (filter.perPage && filter.page) {
         sqlQuery.skip(filter.perPage * (filter.page - 1)).take(filter.perPage);
