@@ -9,10 +9,11 @@ import {
   OneToMany,
   OneToOne,
 } from 'typeorm';
-import { Promo } from './Promo';
-import { RepaymentCircuitType } from './RepaymentCircuitType';
+
 import { DocumentProvideType } from './DocumentProvideType';
+import { Promo } from './Promo';
 import { PromoMeaEmplacement } from './PromoMeaEmplacement';
+import { RepaymentCircuitType } from './RepaymentCircuitType';
 
 @Index('fkIdx_415', ['promoId'], {})
 @Index('fkIdx_459', ['repaymentCircuitTypeId'], {})
@@ -39,7 +40,7 @@ export class PromoMea {
   @Column('tinyint', { name: 'has_eligibility_other' })
   hasEligibilityOther: boolean;
 
-  @Column('json', { name: 'eligibility_other_details' })
+  @Column('text', { name: 'eligibility_other_details' })
   eligibilityOtherDetails: string;
 
   @Column('tinyint', { name: 'emplacement_plv_labo' })

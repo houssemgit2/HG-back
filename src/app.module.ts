@@ -1,30 +1,35 @@
+import { PdfPromoGeneratorModule } from '@app/pdf-promo-generator';
+
 import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
+
+import { NestEmitterModule } from 'nest-emitter';
+
+import { EventEmitter } from 'events';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { StoreModule } from './store/store.module';
-import { UserModule } from './user/user.module';
-import { PromoModule } from './promo/promo.module';
-import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import entities from './entities';
-import { PdfPromoGeneratorModule } from '@app/pdf-promo-generator';
-import { LefletPeriodModule } from './leflet-period/leflet-period.module';
-import { LeafletModule } from './leaflet/leaflet.module';
-import { OrderUploadModule } from './order-upload/order-upload.module';
-import { ConfigModule } from '@nestjs/config';
+
 import { AccessPermissionsModule } from './access-permissions/access-permissions.module';
-import { RejectionReasonModule } from './rejection-reason/rejection-reason.module';
-import { StorePromoSelectedModule } from './store-promo-selected/store-promo-selected.module';
-import { StorePromoMeaModule } from './store-promo-mea/store-promo-mea.module';
-import { MeaUploadModule } from './mea-upload/mea-upload.module';
-import { ScheduleModule } from '@nestjs/schedule';
-import { CoquePromoModule } from './coque-promo/coque-promo.module';
+import { AuthModule } from './auth/auth.module';
 import { ClustersModule } from './clusters/clusters.module';
-import { SupportModule } from './support/support.module';
+import { CoquePromoModule } from './coque-promo/coque-promo.module';
+import { LeafletModule } from './leaflet/leaflet.module';
+import { LefletPeriodModule } from './leflet-period/leflet-period.module';
+import { MeaUploadModule } from './mea-upload/mea-upload.module';
+import { OrderUploadModule } from './order-upload/order-upload.module';
+import { PromoModule } from './promo/promo.module';
+import { RejectionReasonModule } from './rejection-reason/rejection-reason.module';
 import { SelectModule } from './select/select.module';
-import { NestEmitterModule } from 'nest-emitter';
-import { EventEmitter } from 'events';
+import { StorePromoMeaModule } from './store-promo-mea/store-promo-mea.module';
+import { StorePromoSelectedModule } from './store-promo-selected/store-promo-selected.module';
+import { StoreModule } from './store/store.module';
+import { SupportModule } from './support/support.module';
+import { UserModule } from './user/user.module';
+import { LoggerMiddleware } from './common/middleware/logger.middleware';
 @Module({
   imports: [
     TypeOrmModule.forRoot({

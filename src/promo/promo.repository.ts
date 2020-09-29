@@ -22,8 +22,7 @@ export class PromoRepository extends Repository<Promo> {
       .leftJoinAndSelect('p.status', 'status')
       .leftJoinAndSelect('promoType.operationType', 'operationType')
       .leftJoinAndSelect('p.promoAchat', 'promoAchat')
-      // .leftJoinAndSelect('p.promoMea', 'promoMea')
-      .leftJoin('p.promoMea', 'promoMea')
+      .leftJoinAndSelect('p.promoMea', 'promoMea')
       .leftJoinAndMapMany(
         'p.promoProducts',
         'product',
