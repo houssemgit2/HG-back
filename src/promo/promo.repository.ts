@@ -18,6 +18,7 @@ export class PromoRepository extends Repository<Promo> {
       .leftJoinAndSelect('p.promoClusters', 'promoCluster')
       .leftJoinAndSelect('promoCluster.cluster', 'c')
       .leftJoinAndSelect('p.gamme', 'gamme')
+      .leftJoinAndSelect('p.laboratory', 'laboratory')
       .leftJoinAndSelect('p.promoType', 'promoType')
       .leftJoinAndSelect('p.status', 'status')
       .leftJoinAndSelect('promoType.operationType', 'operationType')

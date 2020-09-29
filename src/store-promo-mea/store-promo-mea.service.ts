@@ -6,23 +6,34 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { StorePromoMeaRepository } from './store-promo-mea.repository';
-import { getConnection, getRepository } from 'typeorm';
-import { StorePromoMea } from '../entities/StorePromoMea';
-import { ListMeaDto } from './dto/list-mea.dto';
-import { User } from '../entities/User';
-import { Laboratory } from '../entities/Laboratory';
-import * as XLSX from 'xlsx';
-import { ListMeaToExportDto } from './dto/list-mea-for-export.dto';
-import { ImportedExcelPromosJSon } from './dto/imported-excel.dto';
-import { validateOrReject } from 'class-validator';
-import moment = require('moment');
-import { RejectionReason } from '../entities/RejectionReason';
-import { RejectionReasonRepository } from 'src/rejection-reason/rejection-reason.repository';
 import { Cron } from '@nestjs/schedule';
+
+import { getConnection } from 'typeorm';
+
+import * as XLSX from 'xlsx';
+
+import { validateOrReject } from 'class-validator';
+
+import moment = require('moment');
+
+import { RejectionReasonRepository } from 'src/rejection-reason/rejection-reason.repository';
 import { PROMO_STATE } from 'src/config/enum-types';
+
 import { InjectEventEmitter } from 'nest-emitter';
+
 import { PromoEventEmitter } from 'src/app.events';
+
+import * as url from 'url';
+
+import { RejectionReason } from '../entities/RejectionReason';
+import { StorePromoMea } from '../entities/StorePromoMea';
+import { User } from '../entities/User';
+
+import { StorePromoMeaRepository } from './store-promo-mea.repository';
+
+import { ImportedExcelPromosJSon } from './dto/imported-excel.dto';
+import { ListMeaToExportDto } from './dto/list-mea-for-export.dto';
+import { ListMeaDto } from './dto/list-mea.dto';
 
 @Injectable()
 export class StorePromoMeaService {
@@ -30,7 +41,7 @@ export class StorePromoMeaService {
     private storePromoMeaRepository: StorePromoMeaRepository,
     private rejectionReasonRepository: RejectionReasonRepository,
     @InjectEventEmitter() private readonly emitter: PromoEventEmitter,
-  ) {}
+  ) { }
   onModuleInit() {
     this.emitter.on('promoCreated', async promoId => {
       console.log(`validated new promo with id ${promoId}`);
@@ -180,6 +191,7 @@ export class StorePromoMeaService {
       .leftJoinAndSelect('sp.promo', 'promo', 'promo.id = sp.promo_id')
       .leftJoinAndSelect('sp.store', 'store', 'store.cip = sp.store_id')
       .leftJoinAndSelect('promo.gamme', 'gamme')
+      .leftJoinAndSelect('promo.laboratory', 'laboratory')
       .leftJoinAndSelect('promo.promoType', 'promoType')
       .leftJoinAndSelect('promoType.operationType', 'operationType')
       .leftJoinAndSelect('store.clusters', 'clusters')
@@ -248,7 +260,10 @@ export class StorePromoMeaService {
         return await sqlQuery
           .andWhere('sp.promo_id= :promoId', { promoId })
           .getRawOne();
-      if (toImportExcel) return await sqlQuery.getMany();
+      if (toImportExcel) {
+        const promo = await sqlQuery.getMany();
+        return promo
+      }
       // const promos: StorePromoMea[] = await sqlQuery.getRawMany();
       const promos: StorePromoMea[] = await sqlQuery.getRawMany();
       const totalItem = await sqlQuery.getCount();
@@ -375,8 +390,8 @@ export class StorePromoMeaService {
   ) {
     const reasonId: number = reason
       ? await this.rejectionReasonRepository
-          .getReasonId(reason)
-          .then(data => data.id)
+        .getReasonId(reason)
+        .then(data => data.id)
       : null;
     this.logger.debug(`reason is ${reason} and the reasonId is ${reasonId}`);
     await getConnection()
@@ -446,7 +461,7 @@ export class StorePromoMeaService {
       moment().format('YYYYMMDD'),
     )}.${filter.type}`;
     const filePath = `${__dirname}/../output/exportedExcel/${fileName}`;
-    await this.generateExcelFile(promos, filePath, fileName, filter.type);
+    await this.generateExcelFile(promos, filePath, filter.type);
     return filePath;
   }
   async updateMeaByExcel(filePath: string) {
@@ -488,9 +503,9 @@ export class StorePromoMeaService {
     } catch (e) {
       const err = Array.isArray(e)
         ? e.map(item => ({
-            row: `${item.target.promoID}--${item.target.storeId}`,
-            constraints: item.constraints,
-          }))
+          row: `${item.target.promoID}--${item.target.storeId}`,
+          constraints: item.constraints,
+        }))
         : `something went wrong during update ${e}`;
       throw new BadRequestException(
         `failed file validation ${JSON.stringify(err)}`,
@@ -499,7 +514,7 @@ export class StorePromoMeaService {
   }
   promoToExportExcel(promoMea: StorePromoMea) {
     const idSys: string = promoMea.promoId + '--' + promoMea.storeId;
-    const lab = '';
+    const lab = promoMea.promo.laboratory ? promoMea.promo.laboratory.name : ''
     const libelle = '';
     const gamme: string =
       promoMea.promo && promoMea.promo.gamme ? promoMea.promo.gamme.name : '';
@@ -507,20 +522,20 @@ export class StorePromoMeaService {
       promoMea.promo && promoMea.promo.promoType
         ? promoMea.promo.promoType
         : // TODO  fix this filter by the promo type
-          '';
+        '';
     const storeId: number = promoMea.storeId;
     const officineName: string =
       promoMea.store && promoMea.store.users[0]
         ? promoMea.store.users[0].firstName +
-          ' ' +
-          promoMea.store.users[0].lastName
+        ' ' +
+        promoMea.store.users[0].lastName
         : '';
     // promoMea.store.owner.firstName + ' ' + promoMea.store.owner.lastName;
     const cluster: string =
       promoMea.store && promoMea.store.clusters
         ? promoMea.store.clusters.name
         : '';
-    const urlPicture: string = promoMea.urlPicture;
+    const urlPicture: string = url.parse(promoMea.urlPicture).host ? promoMea.urlPicture : `${process.env.AWS_S3_BASE_URL}${promoMea.urlPicture}`
     const state = this.stateMeaToExcel(promoMea);
     const rejectionReason = promoMea.rejectedReason
       ? promoMea.rejectedReason.name
@@ -571,7 +586,6 @@ export class StorePromoMeaService {
   async generateExcelFile(
     promos,
     filePath: string,
-    fileName: string,
     type: XLSX.BookType,
   ) {
     const workBook = XLSX.utils.book_new();

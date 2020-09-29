@@ -1,19 +1,21 @@
-import { DocumentProvideType } from 'src/entities/DocumentProvideType';
-import { EligibilityFrancoType } from 'src/entities/EligibilityFrancoType';
-import { EmplacementType } from 'src/entities/EmplacementType';
-import { EqualConditionType } from 'src/entities/EqualConditionType';
-import { OperationType } from 'src/entities/OperationType';
-import { RemunerationBaseType } from 'src/entities/RemunerationBaseType';
-import { RemunerationCaAnnualPlateType } from 'src/entities/RemunerationCaAnnualPlateType';
-import { RemunerationCaAnnualTargetType } from 'src/entities/RemunerationCaAnnualTargetType';
-import { RemunerationFixedType } from 'src/entities/RemunerationFixedType';
-import { RepaymentCircuitType } from 'src/entities/RepaymentCircuitType';
-import { PromoConcernType } from '../entities/PromoConcernedType';
-import { PromoStatus } from '../entities/Status';
+
+import { DocumentProvideType } from '../entities/DocumentProvideType';
+import { EligibilityFrancoType } from '../entities/EligibilityFrancoType';
+import { EmplacementType } from '../entities/EmplacementType';
+import { EqualConditionType } from '../entities/EqualConditionType';
 import { MeasureType } from '../entities/MeasureType';
+import { OperationType } from '../entities/OperationType';
 import { ProductConcernType } from '../entities/ProductConcernType';
-import { Resource } from '../entities/Resource';
+import { PromoConcernType } from '../entities/PromoConcernedType';
 import { RejectionReason } from '../entities/RejectionReason';
+import { RemunerationBaseType } from '../entities/RemunerationBaseType';
+import { RemunerationCaAnnualPlateType } from '../entities/RemunerationCaAnnualPlateType';
+import { RemunerationCaAnnualTargetType } from '../entities/RemunerationCaAnnualTargetType';
+import { RemunerationFixedType } from '../entities/RemunerationFixedType';
+import { RepaymentCircuitType } from '../entities/RepaymentCircuitType';
+import { Resource } from '../entities/Resource';
+import { PromoStatus } from '../entities/Status';
+
 
 export enum PROMO_STATE {
   CONFIRMED = 'CONFIRMED',
