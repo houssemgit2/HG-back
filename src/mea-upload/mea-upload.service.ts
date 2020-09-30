@@ -4,48 +4,55 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
+
 import * as multer from 'multer';
+
 import * as AWS from 'aws-sdk';
-import { StorePromoMea } from '../entities/StorePromoMea';
+
 import { getConnection } from 'typeorm';
+
 import moment = require('moment');
+
 import * as url from 'url';
+
 import { meaS3MulterOptions } from 'src/config/multer';
 import { PROMO_STATE } from 'src/config/enum-types';
 
+import { StorePromoMea } from '../entities/StorePromoMea';
+
 @Injectable()
 export class MeaUploadService {
-  async fileUpload(@Req() req, @Res() res, promoId: number, storeId: number) {
-    try {
-      let location: string;
-      const result = await this.upload(req, res, async function(error) {
-        if (error) {
-          console.log(error);
-          return res.status(404).json(`Failed to upload image file: ${error}`);
-        }
-        location = req.files[0].location;
-        const parsed = url.parse(location, true);
-        location = parsed.path;
-        await getConnection()
-          .createQueryBuilder()
-          .update(StorePromoMea)
-          .set({
-            urlPicture: location,
-            state: PROMO_STATE.PENDING,
-            uploadedAt: moment().format('YYYY-MM-DD hh:mm:ss'),
-          })
-          .where('promo_id = :promoId AND store_id =:storeId', {
-            promoId,
-            storeId,
-          })
-          .execute();
-      });
-      return result;
-    } catch (error) {
-      console.log(error);
-      return res.status(500).json(`Failed to upload image file: ${error}`);
-    }
-  }
+  // async fileUpload(@Req() req, @Res() res, promoId: number, storeId: number) {
+  //   try {
+  //     let location: string;
+  //     const result = await this.upload(req, res, async function(error) {
+  //       if (error) {
+  //         console.log(error);
+  //         return res.status(404).json(`Failed to upload image file: ${error}`);
+  //       }
+  //       location = req.files[0].location;
+  //       const parsed = url.parse(location, true);
+  //       location = parsed.path;
+  //       await getConnection()
+  //         .createQueryBuilder()
+  //         .update(StorePromoMea)
+  //         .set({
+  //           urlPicture: location,
+  //           stateId: 2,
+  //           uploadedAt: moment().format('YYYY-MM-DD hh:mm:ss'),
+  //         })
+  //         .where('promo_id = :promoId AND store_id =:storeId', {
+  //           promoId,
+  //           storeId,
+  //         })
+  //         .execute();
+  //     });
+  //     return result;
+  //   } catch (error) {
+  //     console.log(error);
+  //     return res.status(500).json(`Failed to upload image file: ${error}`);
+  //   }
+  // }
   async afterUpload(
     id: number,
     storeId: number,
@@ -60,7 +67,7 @@ export class MeaUploadService {
         .set({
           urlPicture,
           urlSellsListing,
-          state: PROMO_STATE.PENDING,
+          stateId: 2,
           uploadedAt,
         })
         .where('promo_id = :promoId AND store_id =:storeId', {
