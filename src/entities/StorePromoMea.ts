@@ -9,10 +9,13 @@ import {
   AfterUpdate,
   AfterLoad,
 } from 'typeorm';
+
+import { PROMO_STATE } from '../config/enum-types';
+
+import { Promo } from './Promo';
 import { RejectionReason } from './RejectionReason';
 import { Store } from './Store';
-import { Promo } from './Promo';
-import { PROMO_STATE } from '../config/enum-types';
+import { StorePromoMeaStateType } from './StorePromoMeaStateType';
 
 @Index('store_promo_mea_store_id_fk', ['storeId'], {})
 @Index('store_promo_mea_promo_id_fk', ['promoId'], {})
@@ -28,13 +31,13 @@ import { PROMO_STATE } from '../config/enum-types';
 )
 @Entity('store_promo_mea', { schema: 'hg_promo_beta' })
 export class StorePromoMea extends BaseEntity {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
-  id: number;
+  // @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
+  // id: number;
 
-  @Column('int', { name: 'store_id' })
+  @Column('int', { primary: true, name: 'store_id' })
   storeId: number;
 
-  @Column('int', { name: 'promo_id' })
+  @Column('int', { primary: true, name: 'promo_id' })
   promoId: number;
 
   @Column('int', { name: 'officine_rejected_reason_id' })
@@ -46,12 +49,12 @@ export class StorePromoMea extends BaseEntity {
   @Column('tinyint', { name: 'active', nullable: true, width: 1 })
   active: boolean | null;
 
-  @Column('enum', {
-    name: 'state',
-    enum: PROMO_STATE,
-    default: () => 'PROMO_STATE.TO_JUSTIFY',
+  @Column('int', {
+    name: 'state_id',
+    nullable: false,
+    default: () => 1,
   })
-  state: PROMO_STATE;
+  stateId: number;
 
   @Column('int', { name: 'rejection_number', default: () => "'2'" })
   rejectionNumber: number;
@@ -107,6 +110,15 @@ export class StorePromoMea extends BaseEntity {
     { name: 'officine_rejected_reason_id', referencedColumnName: 'id' },
   ])
   rejectedReason: RejectionReason;
+
+  @ManyToOne(
+    () => StorePromoMeaStateType,
+    state => state.promos,
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
+  )
+  @JoinColumn([{ name: 'state_id', referencedColumnName: 'id' }])
+  state: StorePromoMeaStateType;
+
   @ManyToOne(
     () => Store,
     store => store.storePromoMeas,
