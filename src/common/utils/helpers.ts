@@ -1,10 +1,17 @@
-import * as snakeCaseKeys from 'snakecase-keys';
-import * as camelCaseKeys from 'camelcase-keys';
-import { _ } from 'lodash';
-import * as fs from 'fs';
-import * as request from 'request-promise';
 import { InternalServerErrorException } from '@nestjs/common';
+
+import * as snakeCaseKeys from 'snakecase-keys';
+
+import * as camelCaseKeys from 'camelcase-keys';
+
+import { _ } from 'lodash';
+
+import * as fs from 'fs';
+
+import * as request from 'request-promise';
+
 import * as archiver from 'archiver';
+
 import * as rimraf from 'rimraf';
 
 export const isNotEmptyArray = (array: any): boolean =>
@@ -15,7 +22,7 @@ export function arrayEquals(arr1: any[], arr2: any[]): boolean {
     Array.isArray(arr1) &&
     Array.isArray(arr2) &&
     arr1.length === arr2.length &&
-    arr1.every((val, index) => arr2.includes(val))
+    arr1.every(val => arr2.includes(val))
   );
 }
 export function convertToSnakeCase(result) {
@@ -81,7 +88,7 @@ export async function compressFiles(response, filesPath, zipName) {
   archive.pipe(output);
   // or write everything to disk
   output.on('close', () => {
-    response.download(`${filesPath}.zip`, `${zipName}.zip`, err => {
+    response.download(`${filesPath}.zip`, `${zipName}.zip`, () => {
       rimraf.sync(filesPath);
       rimraf.sync(`${filesPath}.zip`);
     });
