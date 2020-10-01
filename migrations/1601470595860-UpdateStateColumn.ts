@@ -1,6 +1,6 @@
-import { MigrationInterface, QueryRunner, Column, TableColumn } from 'typeorm';
+import { PROMO_STATE } from 'src/common/enum/enum-types';
 
-import { PROMO_STATE } from '../src/config/enum-types';
+import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
 
 export class UpdateStateColumn1601470595860 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<any> {

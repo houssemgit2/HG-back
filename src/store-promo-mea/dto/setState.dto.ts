@@ -8,7 +8,7 @@ import {
   ValidateIf,
 } from 'class-validator';
 
-import { PROMO_STATE, PROMO_STATE_ID } from '../../config/enum-types';
+import { PROMO_STATE, PROMO_STATE_ID } from '../../common/enum/enum-types';
 export class SetStateDto {
   @ApiProperty({
     required: true,

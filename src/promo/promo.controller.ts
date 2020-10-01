@@ -42,7 +42,6 @@ import { SetStateDto } from 'src/store-promo-mea/dto/setState.dto';
 import { DatesListValidationPipe } from 'src/common/pipes/dates.validation.pipe';
 import { RejectionReasonValidation } from 'src/common/pipes/rejection-reason.pipe';
 import { ListMeaToExportDto } from 'src/store-promo-mea/dto/list-mea-for-export.dto';
-import { meaS3MulterOptions, multerOptions } from 'src/config/multer';
 
 import { InjectEventEmitter } from 'nest-emitter';
 
@@ -53,6 +52,7 @@ import * as snakeCaseKeys from 'snakecase-keys';
 import { StorePromoMeaGuard } from 'src/auth/guards/store-promo-mea.guard';
 import { ClientGuard } from 'src/auth/guards/client.guard';
 import { StoreAdminGuard } from 'src/auth/guards/store-admin.guard';
+import { multerOptions, meaS3MulterOptions } from 'src/common/multer';
 
 import { UserReq } from '../auth/get-user.decorator';
 import { StorePromoMea } from '../entities/StorePromoMea';

@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsNumber, IsEnum, ValidateIf } from 'class-validator';
-import { PROMO_STATE } from 'src/config/enum-types';
+import { PROMO_STATE } from 'src/common/enum/enum-types';
 
 export class ImportedExcelPromosJSon {
   @IsNotEmpty()

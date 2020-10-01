@@ -6,10 +6,10 @@ import { getConnection } from 'typeorm';
 
 import moment = require('moment');
 
-import { meaS3MulterOptions } from 'src/config/multer';
+import { meaS3MulterOptions } from 'src/common/multer';
 
 import { StorePromoMea } from '../entities/StorePromoMea';
-import { PROMO_STATE_ID } from '../config/enum-types';
+import { PROMO_STATE_ID } from '../common/enum/enum-types';
 
 @Injectable()
 export class MeaUploadService {

@@ -1,19 +1,19 @@
-import { DocumentProvideType } from '../entities/DocumentProvideType';
-import { EligibilityFrancoType } from '../entities/EligibilityFrancoType';
-import { EmplacementType } from '../entities/EmplacementType';
-import { EqualConditionType } from '../entities/EqualConditionType';
-import { MeasureType } from '../entities/MeasureType';
-import { OperationType } from '../entities/OperationType';
-import { ProductConcernType } from '../entities/ProductConcernType';
-import { PromoConcernType } from '../entities/PromoConcernedType';
-import { RejectionReason } from '../entities/RejectionReason';
-import { RemunerationBaseType } from '../entities/RemunerationBaseType';
-import { RemunerationCaAnnualPlateType } from '../entities/RemunerationCaAnnualPlateType';
-import { RemunerationCaAnnualTargetType } from '../entities/RemunerationCaAnnualTargetType';
-import { RemunerationFixedType } from '../entities/RemunerationFixedType';
-import { RepaymentCircuitType } from '../entities/RepaymentCircuitType';
-import { Resource } from '../entities/Resource';
-import { PromoStatus } from '../entities/Status';
+import { DocumentProvideType } from '../../entities/DocumentProvideType';
+import { EligibilityFrancoType } from '../../entities/EligibilityFrancoType';
+import { EmplacementType } from '../../entities/EmplacementType';
+import { EqualConditionType } from '../../entities/EqualConditionType';
+import { MeasureType } from '../../entities/MeasureType';
+import { OperationType } from '../../entities/OperationType';
+import { ProductConcernType } from '../../entities/ProductConcernType';
+import { PromoConcernType } from '../../entities/PromoConcernedType';
+import { RejectionReason } from '../../entities/RejectionReason';
+import { RemunerationBaseType } from '../../entities/RemunerationBaseType';
+import { RemunerationCaAnnualPlateType } from '../../entities/RemunerationCaAnnualPlateType';
+import { RemunerationCaAnnualTargetType } from '../../entities/RemunerationCaAnnualTargetType';
+import { RemunerationFixedType } from '../../entities/RemunerationFixedType';
+import { RepaymentCircuitType } from '../../entities/RepaymentCircuitType';
+import { Resource } from '../../entities/Resource';
+import { PromoStatus } from '../../entities/Status';
 
 export enum PROMO_STATE {
   CONFIRMED = 'CONFIRMED',
