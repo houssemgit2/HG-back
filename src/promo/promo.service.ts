@@ -6,9 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import {
-  Repository,
-} from 'typeorm';
+import { Repository } from 'typeorm';
 
 import { User } from 'src/entities/User';
 
@@ -54,7 +52,7 @@ export class PromoService {
 
     @InjectRepository(PromoMeaDocumentProvide)
     private promoMeaDocumentProvide: Repository<PromoMeaDocumentProvide>,
-  ) { }
+  ) {}
   async validPromoType(type: string, promoId: number) {
     const isValidType = await this.promoOperationTypeRepository
       .createQueryBuilder('promoType')
@@ -113,9 +111,9 @@ export class PromoService {
       console.log(camelPromo);
       const created = await this.promoMeaRepository.save({
         promoId,
-        ...camelPromo
+        ...camelPromo,
       });
-      return created
+      return created;
     } catch (e) {
       this.logger.error('error on saving mea promo details');
       throw new InternalServerErrorException(e);
@@ -135,7 +133,7 @@ export class PromoService {
   async createPromoType(typeIds: number[]) {
     let promoId: number;
     return this.promoRepository
-      .save({ gammeId: null, statusId: 0 })
+      .save({ gammeId: null })
       .then(promo => {
         promoId = promo.id;
         const promoTypes = typeIds.map(item => ({

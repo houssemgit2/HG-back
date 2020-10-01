@@ -30,9 +30,7 @@ import {
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
-import {
-  BadRequestException,
-} from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 
 import * as fs from 'fs';
 
@@ -50,17 +48,18 @@ import { InjectEventEmitter } from 'nest-emitter';
 
 import { PromoEventEmitter } from 'src/app.events';
 
+import * as snakeCaseKeys from 'snakecase-keys';
+
+import { StorePromoMeaGuard } from 'src/auth/guards/store-promo-mea.guard';
+import { ClientGuard } from 'src/auth/guards/client.guard';
+import { StoreAdminGuard } from 'src/auth/guards/store-admin.guard';
+
 import { UserReq } from '../auth/get-user.decorator';
-import { StorePromoMeaInterceptor } from '../common/store-promo-mea.interceptor';
 import { StorePromoMea } from '../entities/StorePromoMea';
 import { User } from '../entities/User';
 import { StorePromoMeaService } from '../store-promo-mea/store-promo-mea.service';
 import { StorePromoSelectedService } from './../store-promo-selected/store-promo-selected.service';
-import {
-  AdminGuard,
-  StoreAdminGuard,
-  ClientGuard,
-} from '../auth/guards/admin.guard';
+import { AdminGuard } from '../auth/guards/admin.guard';
 import { ApiFile } from '../common/decorators/api-file.decorator';
 import { ActiveToggleDto } from '../store-promo-mea/dto/active-toggle.dto';
 import { ListMeaDto } from '../store-promo-mea/dto/list-mea.dto';
@@ -93,7 +92,7 @@ export class PromoController {
     private storePromoMeaService: StorePromoMeaService,
     private meaUploadService: MeaUploadService,
     @InjectEventEmitter() private readonly emitter: PromoEventEmitter,
-  ) { }
+  ) {}
   logger = new Logger('promo controller');
 
   @ApiTags('Promo')
@@ -215,6 +214,7 @@ export class PromoController {
   @UseGuards(AuthGuard(), AdminGuard)
   @UseInterceptors(FileInterceptor('promosMeaFile', multerOptionsForMeaExcel))
   async uploadedFile(@UploadedFile() file) {
+    if (!file) throw new BadRequestException('Make sure you upload a file');
     return await this.storePromoMeaService.updateMeaByExcel(file.path);
   }
 
@@ -228,13 +228,15 @@ export class PromoController {
   @ApiResponse({ status: 404, description: 'promo not found' })
   @ApiTags('Store-Promo-Mea')
   @Post('promo-mea/:id/set-to')
-  @UseGuards(AuthGuard(), StoreAdminGuard)
-  @UsePipes(new RejectionReasonValidation()) async changePromoState(@Body() body: SetStateDto, @Param('id') id: number) {
+  @UseGuards(AuthGuard(), StorePromoMeaGuard, StoreAdminGuard)
+  @UsePipes(new RejectionReasonValidation())
+  async changePromoState(@Body() body: SetStateDto, @Param('id') id: number) {
     return await this.storePromoMeaService.validateProof(
       id,
       body.store_id,
       body.reason_id,
       body.state,
+      body.state_id,
     );
   }
 
@@ -253,7 +255,7 @@ export class PromoController {
   })
   @ApiTags('Store-Promo-Mea')
   @Post('promo-mea/:id/upload-xl')
-  @UseGuards(AuthGuard(), StoreAdminGuard)
+  @UseGuards(AuthGuard(), StorePromoMeaGuard, StoreAdminGuard)
   async uploadPromoMeaProofSellsList(
     @Req() req: any,
     @Res() res: any,
@@ -270,7 +272,13 @@ export class PromoController {
       const location = parsed.path;
       await this.meaUploadService.afterUpload(id, storeId, null, location);
       const promo = await this.storePromoMeaService.doesPromoExist(id, storeId);
-      res.status(201).json(promo);
+      res.status(200).json({
+        satus: 200,
+        data: snakeCaseKeys({
+          ...promo,
+          urlSellsListing: req.files[0].location,
+        }),
+      });
     });
   }
 
@@ -282,27 +290,21 @@ export class PromoController {
   @ApiConsumes('multipart/form-data')
   @ApiTags('Store-Promo-Mea')
   @Post('promo-mea/:id')
-  @UseInterceptors(
-    new StorePromoMeaInterceptor(),
-    FileInterceptor('justif', meaS3MulterOptions),
-  )
+  @UseInterceptors(FileInterceptor('justif', meaS3MulterOptions))
   @ApiFile('justif')
-  @UseGuards(AuthGuard(), StoreAdminGuard)
+  @UseGuards(AuthGuard(), StorePromoMeaGuard, StoreAdminGuard)
   async uploadPromoMeaProofImage(
     @UploadedFile() file,
     @Param('id') id: number,
     @UserReq() user: User,
     @Query('store_id') storeId = user.storeId,
+    @Req() req: any,
   ): Promise<any> {
+    const promo = req.promo;
     this.logger.setContext(file);
-    if (!file) throw new BadRequestException('please upload a filre');
-    // await this.storePromoMeaService.validatePromoState(id, storeId);
-    // await this.storePromoMeaService.doesPromoExist(id, storeId).then(data => {
-    //   data.urlPicture = file.location;
-    //   return data;
-    // });
+    if (!file) throw new BadRequestException('please upload a file');
     await this.meaUploadService.afterUpload(id, storeId, file.key, null);
-    return { urlPicture: file.location };
+    return { ...promo, urlPicture: file.location };
   }
 
   @ApiOperation({ summary: 'toggle promo mea active' })
@@ -325,6 +327,7 @@ export class PromoController {
       storeId,
       promo.active,
       promo.reason,
+      promo.reason_id,
     );
   }
 
@@ -429,7 +432,6 @@ export class PromoController {
   }
   // *****
 
-
   @ApiTags('Promo-form')
   @Put(':promoId')
   @UseGuards(AuthGuard(), AdminGuard)
@@ -456,9 +458,10 @@ export class PromoController {
   @Get(':promoId')
   @UseGuards(AuthGuard(), AdminGuard)
   getPromoById(@Param('promoId') promoId: number, @UserReq() user: User) {
-    return this.promoService.getPromos({}, user, promoId).then(data => { if (data) return data; else return {} }
-    )
-
+    return this.promoService.getPromos({}, user, promoId).then(data => {
+      if (data) return data;
+      else return {};
+    });
   }
 
   @ApiTags('Promo')
