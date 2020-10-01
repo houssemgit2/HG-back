@@ -1,0 +1,16 @@
+stages:
+  - deploy
+beta:
+  stage: deploy
+  script:
+    - "which ssh-agent || ( apk --update add openssh-client )"
+    # run ssh-agent (inside the build environment)
+    - eval $(ssh-agent -s)
+    # add the ssh key stored in SSH_PRIVATE_KEY variable to the agent store
+    - echo "$SSH_PRIVATE_KEY" | ssh-add -
+    - mkdir -p ~/.ssh
+    - 'echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    - ssh -tt ubuntu@15.188.88.94 'bash  -i -c "cd ~/websites/beta-v2.api.healthygroup.smala.co && git checkout beta; git pull;yes | cp -rf .env.beta .env;yarn --ignore-engines && yarn start:prod"'
+  only:
+    - beta
+  environment: beta
