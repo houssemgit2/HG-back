@@ -4,13 +4,9 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
   BaseEntity,
-  AfterUpdate,
   AfterLoad,
 } from 'typeorm';
-
-import { PROMO_STATE } from '../config/enum-types';
 
 import { Promo } from './Promo';
 import { RejectionReason } from './RejectionReason';
@@ -117,7 +113,7 @@ export class StorePromoMea extends BaseEntity {
     { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
   )
   @JoinColumn([{ name: 'state_id', referencedColumnName: 'id' }])
-  state: StorePromoMeaStateType;
+  stateType: StorePromoMeaStateType;
 
   @ManyToOne(
     () => Store,

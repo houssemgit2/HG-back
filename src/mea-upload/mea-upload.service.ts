@@ -1,24 +1,15 @@
-import {
-  Req,
-  Res,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 
 import * as multer from 'multer';
-
-import * as AWS from 'aws-sdk';
 
 import { getConnection } from 'typeorm';
 
 import moment = require('moment');
 
-import * as url from 'url';
-
 import { meaS3MulterOptions } from 'src/config/multer';
-import { PROMO_STATE } from 'src/config/enum-types';
 
 import { StorePromoMea } from '../entities/StorePromoMea';
+import { PROMO_STATE_ID } from '../config/enum-types';
 
 @Injectable()
 export class MeaUploadService {
@@ -67,7 +58,7 @@ export class MeaUploadService {
         .set({
           urlPicture,
           urlSellsListing,
-          stateId: 2,
+          stateId: PROMO_STATE_ID.PENDING,
           uploadedAt,
         })
         .where('promo_id = :promoId AND store_id =:storeId', {

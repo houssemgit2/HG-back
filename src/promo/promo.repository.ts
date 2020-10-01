@@ -20,6 +20,8 @@ export class PromoRepository extends Repository<Promo> {
       .leftJoinAndSelect('p.gamme', 'gamme')
       .leftJoinAndSelect('p.laboratory', 'laboratory')
       .leftJoinAndSelect('p.promoType', 'promoType')
+      .leftJoinAndSelect('p.promoConcernType', 'promoConcernType')
+      .leftJoinAndSelect('p.productConcernType', 'productConcernType')
       .leftJoinAndSelect('p.status', 'status')
       .leftJoinAndSelect('promoType.operationType', 'operationType')
       .leftJoinAndSelect('p.promoAchat', 'promoAchat')
@@ -30,7 +32,6 @@ export class PromoRepository extends Repository<Promo> {
         'product',
         "(JSON_CONTAINS(p.product_ids,CONVERT(product.id,CHAR),'$'))",
       )
-
       .leftJoinAndSelect(
         'promoMea.promoMeaEmplacements',
         'promoMeaEmplacements',
@@ -94,7 +95,8 @@ export class PromoRepository extends Repository<Promo> {
         'emplacementType',
       );
     try {
-      if (promoId) return await sqlQuery.where('p.id =:promoId', { promoId }).getOne();
+      if (promoId)
+        return await sqlQuery.where('p.id =:promoId', { promoId }).getOne();
       if (filter.startDate && filter.endDate)
         sqlQuery.where(
           `(start_date BETWEEN :startDate AND :endDate
@@ -130,9 +132,13 @@ export class PromoRepository extends Repository<Promo> {
           promoTypeId: filter.promoTypeId,
         });
       if (filter.status)
-        sqlQuery.andWhere('p.status_id=:status or status.name like :statusName', {
-          status: filter.status, statusName: `%${filter.status}%`
-        });
+        sqlQuery.andWhere(
+          'p.status_id=:status or status.name like :statusName',
+          {
+            status: filter.status,
+            statusName: `%${filter.status}%`,
+          },
+        );
       if (filter.perPage && filter.page) {
         sqlQuery.skip(filter.perPage * (filter.page - 1)).take(filter.perPage);
       }

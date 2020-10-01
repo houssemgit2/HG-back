@@ -1,4 +1,3 @@
-
 import { DocumentProvideType } from '../entities/DocumentProvideType';
 import { EligibilityFrancoType } from '../entities/EligibilityFrancoType';
 import { EmplacementType } from '../entities/EmplacementType';
@@ -16,7 +15,6 @@ import { RepaymentCircuitType } from '../entities/RepaymentCircuitType';
 import { Resource } from '../entities/Resource';
 import { PromoStatus } from '../entities/Status';
 
-
 export enum PROMO_STATE {
   CONFIRMED = 'CONFIRMED',
   REJECTED = 'REJECTED',
@@ -26,6 +24,16 @@ export enum PROMO_STATE {
   OPERATION_REFUSED = 'OPERATION_REFUSED',
   UNJUSTIFIED = 'UNJUSTIFIED',
 }
+export enum PROMO_STATE_ID {
+  TO_JUSTIFY = 1,
+  PENDING = 2,
+  CONFIRMED = 3,
+  REJECTED = 4,
+  OPERATION_REFUSED = 5,
+  NOT_JUSTIFIED = 6,
+  UNJUSTIFIED = 7,
+}
+
 export const STATIC_TABLES = [
   {
     name: 'ca_target',

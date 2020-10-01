@@ -19,7 +19,7 @@ export class StorePromoMeaStateType extends BaseEntity {
 
   @OneToMany(
     () => StorePromoMea,
-    promo => promo.state,
+    promo => promo.stateType,
   )
   promos: Promo[];
 }
