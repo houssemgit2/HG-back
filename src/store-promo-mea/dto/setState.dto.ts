@@ -1,3 +1,5 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 import {
   IsNotEmpty,
   IsNumber,
@@ -5,8 +7,8 @@ import {
   IsEnum,
   ValidateIf,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
-import { PROMO_STATE } from '../../config/enum-types';
+
+import { PROMO_STATE, PROMO_STATE_ID } from '../../config/enum-types';
 export class SetStateDto {
   @ApiProperty({
     required: true,
@@ -14,7 +16,17 @@ export class SetStateDto {
   })
   @IsEnum(PROMO_STATE)
   @IsNotEmpty()
+  @ValidateIf(o => !o.state_id)
   public state: PROMO_STATE;
+  @ApiProperty({
+    required: true,
+    type: Number,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  @ValidateIf(o => !o.state)
+  public state_id: number;
+
   @ApiProperty({
     required: true,
     type: Number,
@@ -28,7 +40,12 @@ export class SetStateDto {
     type: String,
   })
   @IsNotEmpty()
-  @ValidateIf(o => o.state === PROMO_STATE.REJECTED && !o.reason_id)
+  @ValidateIf(
+    o =>
+      (o.state === PROMO_STATE.REJECTED ||
+        o.state_id === PROMO_STATE_ID.REJECTED) &&
+      !o.reason_id,
+  )
   public reason: string;
 
   @ApiProperty({
@@ -36,6 +53,11 @@ export class SetStateDto {
     type: Number,
   })
   @IsNotEmpty()
-  @ValidateIf(o => o.state === PROMO_STATE.REJECTED && !o.reason)
+  @ValidateIf(
+    o =>
+      (o.state === PROMO_STATE.REJECTED ||
+        o.state_id === PROMO_STATE_ID.REJECTED) &&
+      !o.reason,
+  )
   public reason_id: number;
 }

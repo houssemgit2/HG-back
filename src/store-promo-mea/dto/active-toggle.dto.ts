@@ -1,3 +1,5 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 import {
   IsNotEmpty,
   IsNumber,
@@ -5,7 +7,6 @@ import {
   IsBoolean,
   IsString,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
 
 export class ActiveToggleDto {
   @ApiProperty({
@@ -25,9 +26,16 @@ export class ActiveToggleDto {
   public store_id: number;
   @ApiProperty({
     required: false,
-    type: Number,
+    type: String,
   })
   @IsOptional()
   @IsString()
   public reason: string;
+  @ApiProperty({
+    required: false,
+    type: Number,
+  })
+  @IsOptional()
+  @IsNumber()
+  public reason_id: number;
 }
