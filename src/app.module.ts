@@ -41,7 +41,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
       port: 3306,
       username: 'hgbetaUser',
       password: 'AZcLpafyKMG6HPxs',
-      database: 'hg_promo_beta',
+      database: 'hg_promo_beta_new',
       synchronize: false,
       entities: entities,
       migrationsTableName: 'custom_migration_table',
