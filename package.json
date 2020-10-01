@@ -27,7 +27,8 @@
     "migration:generate": "ts-node node_modules/.bin/typeorm migration:generate --config ./ormconfig.json --name",
     "migration:create": "ts-node node_modules/.bin/typeorm migration:create --config ./ormconfig.json",
     "migration:run": "ts-node node_modules/.bin/typeorm migration:run --config ./ormconfig.json",
-    "migration:revert": "ts-node node_modules/.bin/typeorm migration:revert --config ./ormconfig.json"
+    "migration:revert": "ts-node node_modules/.bin/typeorm migration:revert --config ./ormconfig.json",
+    "install:dep": "nvm use stable && yarn"
   },
   "dependencies": {
     "@nestjs/common": "^7.0.0",

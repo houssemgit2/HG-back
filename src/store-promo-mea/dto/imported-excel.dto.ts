@@ -1,5 +1,6 @@
 import { IsNotEmpty, IsNumber, IsEnum, ValidateIf } from 'class-validator';
-import { PROMO_STATE } from 'src/config/enum-types';
+
+import { PROMO_STATE, PROMO_STATE_ID } from 'src/config/enum-types';
 
 export class ImportedExcelPromosJSon {
   @IsNotEmpty()
@@ -8,11 +9,15 @@ export class ImportedExcelPromosJSon {
 
   @IsNotEmpty()
   @IsNumber()
+  @ValidateIf(o => !o.state)
   storeId: number;
+
+  @IsNotEmpty()
   @IsEnum([PROMO_STATE.REJECTED, PROMO_STATE.CONFIRMED, undefined])
+  @ValidateIf(o => !o.stateId)
   state: PROMO_STATE.REJECTED | PROMO_STATE.CONFIRMED | undefined;
 
-  @ValidateIf(o => o.state === PROMO_STATE.REJECTED)
+  @ValidateIf(o => (o.state === PROMO_STATE.REJECTED || o.stateId === PROMO_STATE_ID.REJECTED))
   @IsNotEmpty()
   rejectionReason?: string;
 }

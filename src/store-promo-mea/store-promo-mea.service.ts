@@ -488,15 +488,12 @@ export class StorePromoMeaService {
       console.log(promos);
       console.log('-----');
       for (const promo of promos) {
+        console.log(promo);
         await validateOrReject(promo, {
           validationError: {
-            /**
-             * Indicates if target should be exposed in ValidationError.
-             */
+            // Indicates if target should be exposed in ValidationError.
             target: true,
-            /**
-             * Indicates if validated value should be exposed in ValidationError.
-             */
+            // Indicates if validated value should be exposed in ValidationError.
             value: true,
           },
         });
