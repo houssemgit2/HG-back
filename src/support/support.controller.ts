@@ -7,16 +7,20 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { SupportService } from './support.service';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
+
+import { multerOptions } from 'src/common/multer';
+
 import { UserReq } from '../auth/get-user.decorator';
 import { User } from '../entities/User';
-import { AuthGuard } from '@nestjs/passport';
-import { SupportDto } from './dto/sensSupport.dto';
-import { FilesInterceptor } from '@nestjs/platform-express';
-import { multerOptions } from '../config/multer';
-import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 import { ApiMultiFile } from '../common/decorators/api-multi-file.decorator';
+
+import { SupportService } from './support.service';
+
+import { SupportDto } from './dto/sensSupport.dto';
 const multerOptionsSupport: MulterOptions = multerOptions(
   null,
   `${__dirname}/../uploads/support-file/`,
@@ -27,8 +31,8 @@ const multerOptionsSupport: MulterOptions = multerOptions(
 @Controller('support')
 export class SupportController {
   constructor(private supportService: SupportService) {}
- 
- @ApiConsumes('multipart/form-data')
+
+  @ApiConsumes('multipart/form-data')
   @Post('/')
   //   @UseInterceptors(FilesInterceptor('coque', 10, multerOptionsS3))
   @UseInterceptors(FilesInterceptor('support', 10, multerOptionsSupport))

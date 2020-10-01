@@ -1,5 +1,5 @@
 import { PipeTransform, Injectable, ArgumentMetadata } from '@nestjs/common';
-import { STATIC_TABLES } from 'src/config/enum-types';
+import { STATIC_TABLES } from 'src/common/enum/enum-types';
 
 @Injectable()
 export class SelectValidationPipe implements PipeTransform {

@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsEnum, IsString, IsOptional } from 'class-validator';
 import { OptionalNameDto } from './optional-name.dto';
-import { STATIC_TABLES } from '../../config/enum-types';
+import { STATIC_TABLES } from '../../common/enum/enum-types';
 
 const tableENum = STATIC_TABLES.map(item => item.name);
 export class SelectStaticDto extends OptionalNameDto {

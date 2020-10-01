@@ -16,7 +16,7 @@ import { validateOrReject } from 'class-validator';
 import moment = require('moment');
 
 import { RejectionReasonRepository } from 'src/rejection-reason/rejection-reason.repository';
-import { PROMO_STATE } from 'src/config/enum-types';
+import { PROMO_STATE } from 'src/common/enum/enum-types';
 
 import { InjectEventEmitter } from 'nest-emitter';
 
@@ -24,7 +24,7 @@ import { PromoEventEmitter } from 'src/app.events';
 
 import * as url from 'url';
 
-import { PROMO_STATE_ID } from '../config/enum-types';
+import { PROMO_STATE_ID } from '../common/enum/enum-types';
 import { RejectionReason } from '../entities/RejectionReason';
 import { StorePromoMea } from '../entities/StorePromoMea';
 import { StorePromoMeaStateType } from '../entities/StorePromoMeaStateType';

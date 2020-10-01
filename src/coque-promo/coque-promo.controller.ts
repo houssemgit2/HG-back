@@ -23,27 +23,31 @@ import {
   ApiConsumes,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { AdminGuard } from '../auth/guards/admin.guard';
-import { CoquePromoService } from './coque-promo.service';
-import { CreateCoqueDto } from './dto/create-coque.dto';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { s3MulterOptions } from 'src/config/multer';
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
-import { JSONArrayValidation } from '../common/pipes/json-array.pipe';
+import { Logger, Res } from '@nestjs/common';
+
+import { s3MulterOptions } from 'src/common/multer';
 import { ApiMultiFile } from 'src/common/decorators/api-multi-file.decorator';
-import { ApiFile } from '../common/decorators/api-file.decorator';
-import { ListMeaDto } from './dto/list-coque.dto';
+import { compressFiles } from 'src/common/utils/helpers';
+
 import { UserReq } from '../auth/get-user.decorator';
 import { User } from '../entities/User';
-import { UpdateCoqueDto } from './dto/update.dto';
-import { CoqueIdDto } from './dto/coqueId.dto';
-import { GetFilesDto } from './dto/list-files.dto';
+import { AdminGuard } from '../auth/guards/admin.guard';
+import { ApiFile } from '../common/decorators/api-file.decorator';
+import { JSONArrayValidation } from '../common/pipes/json-array.pipe';
 import { JsonValidationPipe } from '../common/pipes/json.pipe';
-import { Logger, Res } from '@nestjs/common';
-import { CoqueFileIdDto } from './dto/coqueFileId.dto';
-import { UpdateCoqueFileDto } from './dto/update-file.dto';
 import { ValidationPipe } from '../common/pipes/validation.pipe';
-import { compressFiles } from 'src/common/utils/helpers';
+
+import { CoquePromoService } from './coque-promo.service';
+
+import { CoqueFileIdDto } from './dto/coqueFileId.dto';
+import { CoqueIdDto } from './dto/coqueId.dto';
+import { CreateCoqueDto } from './dto/create-coque.dto';
+import { ListMeaDto } from './dto/list-coque.dto';
+import { GetFilesDto } from './dto/list-files.dto';
+import { UpdateCoqueFileDto } from './dto/update-file.dto';
+import { UpdateCoqueDto } from './dto/update.dto';
 
 const multerOptionsS3: MulterOptions = s3MulterOptions(null, `coque-promo`);
 @ApiBearerAuth()

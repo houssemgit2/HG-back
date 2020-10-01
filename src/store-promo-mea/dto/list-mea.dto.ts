@@ -1,15 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 import {
-  IsNumber,
   IsOptional,
   IsString,
-  IsBoolean,
   IsEnum,
 } from 'class-validator';
 import { IsNumberString } from 'class-validator';
 
-import { PROMO_STATE } from 'src/config/enum-types';
+import { PROMO_STATE } from 'src/common/enum/enum-types';
 
 import { Type } from 'class-transformer';
 
