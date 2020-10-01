@@ -1,19 +1,19 @@
+import { Logger, InternalServerErrorException } from '@nestjs/common';
+
 import {
   FindConditions,
   Repository,
   EntityRepository,
   MoreThan,
-  Transaction,
 } from 'typeorm';
-import { StorePromoMea } from '../entities/StorePromoMea';
-import { Logger, InternalServerErrorException } from '@nestjs/common';
 import { getConnection } from 'typeorm';
+
 import { Store } from '../entities/Store';
-import { PROMO_STATE } from 'src/config/enum-types';
+import { StorePromoMea } from '../entities/StorePromoMea';
 
 @EntityRepository(StorePromoMea)
 export class StorePromoMeaRepository extends Repository<StorePromoMea> {
-  constructor(private storePromoMeaRepository: Repository<StorePromoMea>) {
+  constructor() {
     super();
   }
   logger = new Logger('PromoMea Repository');
@@ -22,12 +22,12 @@ export class StorePromoMeaRepository extends Repository<StorePromoMea> {
     queryCondition: FindConditions<StorePromoMea>,
     toSetObject: any,
   ) {
-    if (!queryCondition.state) queryCondition.rejectionNumber = MoreThan(0);
+    if (!queryCondition.stateId) queryCondition.rejectionNumber = MoreThan(0);
     const updateResult = await this.update(queryCondition, toSetObject);
     await this.decrement(queryCondition, 'rejectionNumber', 1);
     await this.update(
-      { state: PROMO_STATE.REJECTED, rejectionNumber: 0 },
-      { state: PROMO_STATE.OPERATION_REFUSED },
+      { stateId: 4, rejectionNumber: 0 }, // state REJECTED
+      { stateId: 5 },
     );
     return updateResult;
   }

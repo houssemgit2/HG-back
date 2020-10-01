@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/camelcase */
 import {
   Injectable,
   BadRequestException,
@@ -25,8 +24,10 @@ import { PromoEventEmitter } from 'src/app.events';
 
 import * as url from 'url';
 
+import { PROMO_STATE_ID } from '../config/enum-types';
 import { RejectionReason } from '../entities/RejectionReason';
 import { StorePromoMea } from '../entities/StorePromoMea';
+import { StorePromoMeaStateType } from '../entities/StorePromoMeaStateType';
 import { User } from '../entities/User';
 
 import { StorePromoMeaRepository } from './store-promo-mea.repository';
@@ -41,7 +42,7 @@ export class StorePromoMeaService {
     private storePromoMeaRepository: StorePromoMeaRepository,
     private rejectionReasonRepository: RejectionReasonRepository,
     @InjectEventEmitter() private readonly emitter: PromoEventEmitter,
-  ) { }
+  ) {}
   onModuleInit() {
     this.emitter.on('promoCreated', async promoId => {
       console.log(`validated new promo with id ${promoId}`);
@@ -63,10 +64,11 @@ export class StorePromoMeaService {
 
   @Cron('0 0 * * *')
   async handleCron() {
+    // TODO fix this cron after the bug in the v1
     this.logger.debug('this task run every 00:00:00');
     const daysAfterEndDate = 22;
     const filterPromos = new ListMeaDto();
-    filterPromos.end_date = moment()
+    filterPromos['end_date'] = moment()
       .subtract(daysAfterEndDate + 1, 'days')
       .format('YYYY-MM-DD');
     this.logger.debug(
@@ -143,26 +145,15 @@ export class StorePromoMeaService {
     promoId?: number,
     withTotalItem?: boolean,
   ): Promise<any> {
-    const {
-      start_date,
-      end_date,
-      state,
-      clusters,
-      active,
-      // lab,
-      // circuit_vers,
-      perPage,
-      page,
-      store_id,
-    } = filter;
     const selectedColumn = [
       'sp.promo_id as promoId',
+      'sp.store_id as id_cip',
       'promo.id as ID',
       'gamme.name as gamme',
       'clusters.name as cluster',
       'laboratory.name as laboratoire',
       'laboratory.name as lab',
-      'state',
+      'stateType.name as state',
       'active',
       'uploaded_at',
       'promo.start_date',
@@ -170,7 +161,6 @@ export class StorePromoMeaService {
       'store.cluster_id',
       '(SELECT name FROM rejection_reason WHERE rejection_reason.id=sp.siege_rejected_reason_id) as siege_rejected_reason',
       '(SELECT name FROM rejection_reason WHERE rejection_reason.id=sp.officine_rejected_reason_id) as officine_rejected_reason',
-      'sp.store_id as id_cip',
       `CONCAT('${process.env.AWS_S3_BASE_URL}/',sp.url_picture) as url_picture`,
       `CONCAT('${process.env.AWS_S3_BASE_URL}/',sp.url_sells_listing)  as url_sells_listing`,
       'operationType.name as type_off',
@@ -181,6 +171,7 @@ export class StorePromoMeaService {
       .leftJoinAndSelect('sp.promo', 'promo') //, 'promo.id = sp.promo_id')
       .leftJoinAndSelect('sp.store', 'store') //, 'store.cip = sp.store_id')
       .leftJoinAndSelect('promo.gamme', 'gamme')
+      .leftJoinAndSelect('sp.stateType', 'stateType')
       .leftJoinAndSelect('promo.laboratory', 'laboratory')
       .leftJoinAndSelect('promo.promoType', 'promoType')
       .leftJoinAndSelect('promoType.operationType', 'operationType')
@@ -191,6 +182,7 @@ export class StorePromoMeaService {
       .leftJoinAndSelect('sp.promo', 'promo', 'promo.id = sp.promo_id')
       .leftJoinAndSelect('sp.store', 'store', 'store.cip = sp.store_id')
       .leftJoinAndSelect('promo.gamme', 'gamme')
+      .leftJoinAndSelect('sp.stateType', 'stateType')
       .leftJoinAndSelect('promo.laboratory', 'laboratory')
       .leftJoinAndSelect('promo.promoType', 'promoType')
       .leftJoinAndSelect('promoType.operationType', 'operationType')
@@ -214,45 +206,48 @@ export class StorePromoMeaService {
           'owner.phone as phone_num',
           'owner.address',
         ]); // TODO  check the front resp
-    if (start_date && end_date)
+    if (filter.start_date && filter.end_date)
       sqlQuery.where(
-        `(promo.start_date BETWEEN :start_date AND :end_date
-      OR (promo.end_date BETWEEN :start_date AND :end_date)
-      OR (promo.start_date <= :start_date and promo.end_date>= :end_date) )`,
+        `(promo.start_date BETWEEN :startDate AND :endDate
+      OR (promo.end_date BETWEEN :startDate AND :endDate)
+      OR (promo.start_date <= :startDate and promo.end_date>= :endDate) )`,
         {
-          start_date,
-          end_date,
+          startDate: filter.start_date,
+          endDate: filter.end_date,
         },
       );
-    else if (end_date && !start_date)
-      sqlQuery.where(`promo.end_date<= :end_date`, {
-        end_date,
+    else if (filter.end_date && !filter.start_date)
+      sqlQuery.where(`promo.end_date<= :endDate`, {
+        endDate: filter.end_date,
       });
     // if (user && user.userRoleId === 1) sqlQuery.andWhere(`owner.is_owner=1`);
-    if (state) {
-      if (state === PROMO_STATE.UNJUSTIFIED)
-        sqlQuery.andWhere('sp.state IN(:...states)', {
+    if (filter.state) {
+      if (filter.state === PROMO_STATE.UNJUSTIFIED)
+        sqlQuery.andWhere('stateType.name IN(:...states)', {
           states: [PROMO_STATE.REJECTED, PROMO_STATE.TO_JUSTIFY],
         });
-      else if (state === PROMO_STATE.REJECTED)
-        sqlQuery.andWhere('sp.state IN(:...states)', {
+      else if (filter.state === PROMO_STATE.REJECTED)
+        sqlQuery.andWhere('stateType.name IN(:...states)', {
           states: [PROMO_STATE.REJECTED, PROMO_STATE.OPERATION_REFUSED],
         });
       else {
-        sqlQuery.andWhere('sp.state = :state', { state });
+        sqlQuery.andWhere('stateType.name = :state', { state: filter.state });
       }
     }
-    if (clusters) {
-      sqlQuery.andWhere('store.clusterId = :clusters', { clusters }); // TODO  make it by promoCluster table
+    if (filter.clusters) {
+      sqlQuery.andWhere('clusters.name = :clusters', {
+        clusters: filter.clusters,
+      }); // TODO  make it by promoCluster table
     }
-    if (active === true || active === false) {
-      sqlQuery.andWhere('sp.active = :active', { active });
+    if (filter.active === true || filter.active === false) {
+      // TODO fix this filter: always come as true even if user send false
+      sqlQuery.andWhere('sp.active = :active', { active: filter.active });
     }
-    if (store_id) {
-      sqlQuery.andWhere('sp.storeId = :store_id', { store_id });
+    if (filter.store_id) {
+      sqlQuery.andWhere('sp.storeId = :storeId', { storeId: filter.store_id });
     }
-    if (perPage && page) {
-      sqlQuery.skip(filter.perPage * (page - 1)).take(perPage);
+    if (filter.perPage && filter.page) {
+      sqlQuery.skip(filter.perPage * (filter.page - 1)).take(filter.perPage);
     }
     try {
       // return await this.storePromoMeaRepository.find();
@@ -262,7 +257,7 @@ export class StorePromoMeaService {
           .getRawOne();
       if (toImportExcel) {
         const promo = await sqlQuery.getMany();
-        return promo
+        return promo;
       }
       // const promos: StorePromoMea[] = await sqlQuery.getRawMany();
       const promos: StorePromoMea[] = await sqlQuery.getRawMany();
@@ -275,23 +270,23 @@ export class StorePromoMeaService {
       throw new InternalServerErrorException(e, 'error during fetch promos');
     }
   }
-  async findPromo(promoId: number, storeId: number, user?: User) {
-    const sqlQuery = this.storePromoMeaRepository
-      .createQueryBuilder('sp')
-      .leftJoinAndSelect('sp.promo', 'promo', 'promo.id = sp.promo_id')
-      .leftJoinAndSelect('sp.store', 'store', 'store.cip = sp.store_id');
-    if (user && user.userRoleId === 1)
-      sqlQuery.leftJoinAndSelect(
-        'store.users',
-        'owner',
-        'owner.store_id=store.cip && owner.is_owner=true',
-      );
-    sqlQuery.where({ promoId, storeId });
-    const promo = await sqlQuery.getOne();
-    if (!promo)
-      throw new NotFoundException('there is no promos with this filters');
-    return promo;
-  }
+  // async findPromo(promoId: number, storeId: number, user?: User) {
+  //   const sqlQuery = this.storePromoMeaRepository
+  //     .createQueryBuilder('sp')
+  //     .leftJoinAndSelect('sp.promo', 'promo', 'promo.id = sp.promo_id')
+  //     .leftJoinAndSelect('sp.store', 'store', 'store.cip = sp.store_id');
+  //   if (user && user.userRoleId === 1)
+  //     sqlQuery.leftJoinAndSelect(
+  //       'store.users',
+  //       'owner',
+  //       'owner.store_id=store.cip && owner.is_owner=true',
+  //     );
+  //   sqlQuery.where({ promoId, storeId });
+  //   const promo = await sqlQuery.getOne();
+  //   if (!promo)
+  //     throw new NotFoundException('there is no promos with this filters');
+  //   return promo;
+  // }
   async updateState(
     promoId: number,
     storeId: number | null,
@@ -354,56 +349,74 @@ export class StorePromoMeaService {
     promoId: number,
     storeId: number,
     reasonId: number,
-    state: PROMO_STATE,
+    state?: PROMO_STATE,
+    stateId?: number,
   ) {
     //  await this.updateState(promoId, storeId, state, reasonId);
     const promo: StorePromoMea = await this.doesPromoExist(promoId, storeId);
-    promo.state = state;
+    promo.stateId =
+      stateId ||
+      (await getConnection()
+        .getRepository(StorePromoMeaStateType)
+        .findOne({ where: { name: state } })
+        .then(data => {
+          promo.stateType = data;
+          return data.id;
+        }));
     promo.siegeRejectedReasonId = reasonId;
-    if (promo.state === PROMO_STATE.REJECTED && promo.rejectionNumber >= 1)
+    if (promo.stateId === PROMO_STATE_ID.REJECTED && promo.rejectionNumber >= 1)
       promo.rejectionNumber = promo.rejectionNumber - 1;
-    if (promo.state === PROMO_STATE.REJECTED && promo.rejectionNumber < 1)
-      promo.state = PROMO_STATE.OPERATION_REFUSED;
+    if (promo.stateId === PROMO_STATE_ID.REJECTED && promo.rejectionNumber < 1)
+      promo.stateId = PROMO_STATE_ID.OPERATION_REFUSED;
     await this.storePromoMeaRepository.save(promo);
     return promo;
   }
-  async savePictureUrl(promoId: number, storeId: number) {
-    // console.log('picture is online saving url...', location);
-    // const result = await getConnection()
-    //   .createQueryBuilder()
-    //   .update(StorePromoMea)
-    //   .set({ urlPicture: location, state: 'PENDING', uploadedAt: Date.now() })
-    //   .where('promo_id = :promo_id AND store_id =:storeId', {
-    //     promo_id,
-    //     storeId,
-    //   })
-    //   .execute();
-    // console.log(result);
-    const promo = await this.doesPromoExist(promoId, storeId);
-    return promo;
-  }
+  // async savePictureUrl(promoId: number, storeId: number) {
+  //   // console.log('picture is online saving url...', location);
+  //   // const result = await getConnection()
+  //   //   .createQueryBuilder()
+  //   //   .update(StorePromoMea)
+  //   //   .set({ urlPicture: location, state: 'PENDING', uploadedAt: Date.now() })
+  //   //   .where('promo_id = :promo_id AND store_id =:storeId', {
+  //   //     promo_id,
+  //   //     storeId,
+  //   //   })
+  //   //   .execute();
+  //   // console.log(result);
+  //   const promo = await this.doesPromoExist(promoId, storeId);
+  //   return promo;
+  // }
   async toggleActive(
     promoId: number,
     storeId: number,
     active: boolean,
     reason?: string,
+    reasonId?: number,
   ) {
-    const reasonId: number = reason
-      ? await this.rejectionReasonRepository
-        .getReasonId(reason)
-        .then(data => data.id)
-      : null;
+    reasonId =
+      reasonId ||
+      (reason
+        ? await this.rejectionReasonRepository
+            .getReasonId(reason)
+            .then(data => data.id)
+        : null);
     this.logger.debug(`reason is ${reason} and the reasonId is ${reasonId}`);
-    await getConnection()
-      .createQueryBuilder()
-      .update(StorePromoMea)
-      .set({ active: !active, officineRejectedReasonId: reasonId })
-      .where('promo_id = :promoId AND store_id =:storeId', {
-        promoId,
-        storeId,
-      })
-      .execute();
-    const promo = await this.doesPromoExist(promoId, storeId);
+    // await getConnection()
+    //   .createQueryBuilder()
+    //   .update(StorePromoMea)
+    //   .set({ active: !active, officineRejectedReasonId: reasonId })
+    //   .where('promo_id = :promoId AND store_id =:storeId', {
+    //     promoId,
+    //     storeId,
+    //   })
+    //   .execute();
+    const promo = await this.storePromoMeaRepository.save({
+      promoId,
+      storeId,
+      active: !active,
+      officineRejectedReasonId: reasonId,
+    });
+    // const promo = await this.doesPromoExist(promoId, storeId);
     return promo;
   }
   async doesPromoExist(
@@ -434,11 +447,11 @@ export class StorePromoMeaService {
       throw new InternalServerErrorException(e);
     });
     if (
-      promo.state === PROMO_STATE.OPERATION_REFUSED ||
-      promo.state === PROMO_STATE.NOT_JUSTIFIED
+      promo.stateType.name === PROMO_STATE.OPERATION_REFUSED ||
+      promo.stateType.name === PROMO_STATE.NOT_JUSTIFIED
     ) {
       throw new BadRequestException(
-        `Can't upload proof to ${!promo || promo.state} promo`,
+        `Can't upload proof to ${!promo || promo.stateType.name} promo`,
       );
     }
     return promo;
@@ -447,7 +460,6 @@ export class StorePromoMeaService {
     // if (!filter.state) filter.state = 'PENDING';
     // if (filter.active === undefined) filter.active = true;
     if (!filter.type) filter.type = 'csv';
-
     const promos = await this.findPromos(filter, user, true).then(promosMea => {
       this.logger.debug(`promosMea is array ${Array.isArray(promosMea)}`);
       this.logger.debug(`promosMea length ${promosMea.length}`);
@@ -472,8 +484,22 @@ export class StorePromoMeaService {
       const workSheet: XLSX.WorkSheet = workbook.Sheets[names[0]];
       const promoJson = XLSX.utils.sheet_to_json(workSheet);
       const promos = this.transformXLSMeaPromoList(promoJson);
+      this.logger.verbose('a list of the promo we will update theri state');
+      console.log(promos);
+      console.log('-----');
       for (const promo of promos) {
-        await validateOrReject(promo);
+        await validateOrReject(promo, {
+          validationError: {
+            /**
+             * Indicates if target should be exposed in ValidationError.
+             */
+            target: true,
+            /**
+             * Indicates if validated value should be exposed in ValidationError.
+             */
+            value: true,
+          },
+        });
       }
       for (const promo of promos) {
         if (
@@ -503,9 +529,9 @@ export class StorePromoMeaService {
     } catch (e) {
       const err = Array.isArray(e)
         ? e.map(item => ({
-          row: `${item.target.promoID}--${item.target.storeId}`,
-          constraints: item.constraints,
-        }))
+            row: `${item.target.promoID}--${item.target.storeId}`,
+            constraints: item.constraints,
+          }))
         : `something went wrong during update ${e}`;
       throw new BadRequestException(
         `failed file validation ${JSON.stringify(err)}`,
@@ -514,7 +540,7 @@ export class StorePromoMeaService {
   }
   promoToExportExcel(promoMea: StorePromoMea) {
     const idSys: string = promoMea.promoId + '--' + promoMea.storeId;
-    const lab = promoMea.promo.laboratory ? promoMea.promo.laboratory.name : ''
+    const lab = promoMea.promo.laboratory ? promoMea.promo.laboratory.name : '';
     const libelle = '';
     const gamme: string =
       promoMea.promo && promoMea.promo.gamme ? promoMea.promo.gamme.name : '';
@@ -522,20 +548,23 @@ export class StorePromoMeaService {
       promoMea.promo && promoMea.promo.promoType
         ? promoMea.promo.promoType
         : // TODO  fix this filter by the promo type
-        '';
+          '';
     const storeId: number = promoMea.storeId;
     const officineName: string =
       promoMea.store && promoMea.store.users[0]
         ? promoMea.store.users[0].firstName +
-        ' ' +
-        promoMea.store.users[0].lastName
+          ' ' +
+          promoMea.store.users[0].lastName
         : '';
     // promoMea.store.owner.firstName + ' ' + promoMea.store.owner.lastName;
     const cluster: string =
       promoMea.store && promoMea.store.clusters
         ? promoMea.store.clusters.name
         : '';
-    const urlPicture: string = url.parse(promoMea.urlPicture).host ? promoMea.urlPicture : `${process.env.AWS_S3_BASE_URL}${promoMea.urlPicture}`
+    const urlPicture: string =
+      promoMea.urlPicture && url.parse(promoMea.urlPicture).host
+        ? promoMea.urlPicture
+        : `${process.env.AWS_S3_BASE_URL}${promoMea.urlPicture}`;
     const state = this.stateMeaToExcel(promoMea);
     const rejectionReason = promoMea.rejectedReason
       ? promoMea.rejectedReason.name
@@ -555,8 +584,8 @@ export class StorePromoMeaService {
     };
   }
   stateMeaToExcel(promoMea: StorePromoMea): string {
-    if (promoMea.state === PROMO_STATE.REJECTED) return 'N';
-    if (promoMea.state === PROMO_STATE.CONFIRMED) return 'O';
+    if (promoMea.stateId === 4) return 'N';
+    if (promoMea.stateId === 3) return 'O';
     return '';
   }
   evalStateValue(
@@ -567,27 +596,23 @@ export class StorePromoMeaService {
     return undefined;
   }
   transformXLSMeaPromo(promo) {
-    const promo_json = new ImportedExcelPromosJSon();
-    promo_json.promoId = promo[`ID OP`]
+    const promoJson = new ImportedExcelPromosJSon();
+    promoJson.promoId = promo[`ID OP`]
       ? parseInt(promo[`ID OP`].split('--')[0])
       : null;
-    promo_json.storeId = promo[`ID OP`]
+    promoJson.storeId = promo[`ID OP`]
       ? parseInt(promo[`ID OP`].split('--')[1])
       : parseInt(promo[`CIP Officine`]);
-    promo_json.state = promo[`Validée(O)/Refusée(N)`]
+    promoJson.state = promo[`Validée(O)/Refusée(N)`]
       ? this.evalStateValue(promo[`Validée(O)/Refusée(N)`])
       : this.evalStateValue(promo['ValidÃ©e(O)/RefusÃ©e(N)']);
-    promo_json.rejectionReason = promo[`Motif du refus`];
-    return promo_json;
+    promoJson.rejectionReason = promo[`Motif du refus`];
+    return promoJson;
   }
   transformXLSMeaPromoList(promos) {
     return promos.map(promo => this.transformXLSMeaPromo(promo));
   }
-  async generateExcelFile(
-    promos,
-    filePath: string,
-    type: XLSX.BookType,
-  ) {
+  async generateExcelFile(promos, filePath: string, type: XLSX.BookType) {
     const workBook = XLSX.utils.book_new();
     workBook.SheetNames = ['promos', 'rejection_reason'];
     const workSheet = XLSX.utils.json_to_sheet(promos);
@@ -630,13 +655,19 @@ export class StorePromoMeaService {
         clusterId,
         storeId,
       );
-      return await this.storePromoMeaRepository.save(promos).then(data => {
-        if (data)
-          this.logger.log(
-            `store promo mea inserted successfully after validated promo ${promoId}`,
-          );
-        return data;
-      });
+      console.log(promos);
+      return await this.storePromoMeaRepository
+        .save(promos)
+        .catch(e => {
+          throw new Error(e);
+        })
+        .then(data => {
+          if (data)
+            this.logger.log(
+              `store promo mea inserted successfully after validated promo ${promoId}`,
+            );
+          return data;
+        });
     } catch (e) {
       console.log(e);
       throw new InternalServerErrorException(e);
