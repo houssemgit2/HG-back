@@ -27,8 +27,7 @@
     "migration:generate": "ts-node node_modules/.bin/typeorm migration:generate --config ./ormconfig.json --name",
     "migration:create": "ts-node node_modules/.bin/typeorm migration:create --config ./ormconfig.json",
     "migration:run": "ts-node node_modules/.bin/typeorm migration:run --config ./ormconfig.json",
-    "migration:revert": "ts-node node_modules/.bin/typeorm migration:revert --config ./ormconfig.json",
-    "install:dep": "nvm use stable && yarn"
+    "migration:revert": "ts-node node_modules/.bin/typeorm migration:revert --config ./ormconfig.json"
   },
   "dependencies": {
     "@nestjs/common": "^7.0.0",
@@ -86,16 +85,17 @@
     "url": "^0.11.0",
     "url-parse": "^1.4.7",
     "uuid": "^7.0.3",
-    "xlsx": "^0.16.1"
+    "xlsx": "^0.16.1",
+    "@types/express": "^4.17.6",
+    "@types/node ": " ^ 13.11 .1 ",
+    "@types/passport-jwt": "^3.0.3",
+    "typescript": "^4.0.2"
   },
   "devDependencies": {
     "@nestjs/cli": "^7.0.0",
     "@nestjs/schematics": "^7.0.0",
     "@nestjs/testing": "^7.0.0",
-    "@types/express": "^4.17.6",
     "@types/jest": "25.1.4",
-    "@types/node": "^13.11.1",
-    "@types/passport-jwt": "^3.0.3",
     "@types/supertest": "^2.0.8",
     "@typescript-eslint/eslint-plugin": "^2.23.0",
     "@typescript-eslint/parser": "^2.23.0",
@@ -108,8 +108,7 @@
     "ts-jest": "25.2.1",
     "ts-loader": "^6.2.1",
     "ts-node": "^8.6.2",
-    "tsconfig-paths": "^3.9.0",
-    "typescript": "^4.0.2"
+    "tsconfig-paths": "^3.9.0"
   },
   "jest": {
     "moduleFileExtensions": [
