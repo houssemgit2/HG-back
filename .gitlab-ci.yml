@@ -1,6 +1,31 @@
 stages:
+  - build
   - deploy
-beta:
+
+beta-build:
+  image: node:10
+  stage: build
+  script:
+    - npm i -g yarn
+    - yarn
+    - yarn  build
+    - rm -rf beta-v2.api.healthygroup.smala.co ; mv dist beta-v2.api.healthygroup.smala.co
+    - cp .env.beta beta-v2.api.healthygroup.smala.co/.env
+    - cp package.json beta-v2.api.healthygroup.smala.co/package.json
+  artifacts:
+    paths:
+      - beta-v2.api.healthygroup.smala.co
+    expire_in: 1 day
+  cache:
+    key: "$CI_PROJECT_ID"
+    paths:
+      - node_modules
+  only:
+    - beta
+  environment: beta
+
+beta-deploy:
+  image: alpine:3.7
   stage: deploy
   script:
     - "which ssh-agent || ( apk --update add openssh-client )"
@@ -10,7 +35,9 @@ beta:
     - echo "$SSH_PRIVATE_KEY" | ssh-add -
     - mkdir -p ~/.ssh
     - 'echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-    - ssh -tt ubuntu@15.188.88.94 'bash  -i -c "cd ~/websites/beta-v2.api.healthygroup.smala.co && git checkout beta; git pull;yes | cp -rf .env.beta .env;yarn --ignore-engines && yarn start:prod"'
+    - tar cvzf beta.tar.gz beta-v2.api.healthygroup.smala.co
+    - scp beta.tar.gz ubuntu@15.188.88.94:/home/ubuntu/websites
+    - ssh  -o StrictHostKeyChecking=no  -tt ubuntu@15.188.88.94 'bash  -i -c "cd ~/websites && rm -rf beta-v2.api.healthygroup.smala.co  && tar xvf beta.tar.gz && rm  beta.tar.gz;nvm use 10 && yarn && yarn deploy:beta"'
   only:
     - beta
   environment: beta
