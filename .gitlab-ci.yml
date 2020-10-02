@@ -36,7 +36,7 @@ beta-deploy:
     - 'echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
     - tar cvzf beta.tar.gz beta-v2.api.healthygroup.smala.co
     - scp beta.tar.gz ubuntu@15.188.88.94:/home/ubuntu/websites
-    - ssh  -o StrictHostKeyChecking=no  -tt ubuntu@15.188.88.94 'bash  -i -c "cd ~/websites && rm -rf beta-v2.api.healthygroup.smala.co  && tar xvf beta.tar.gz && rm  beta.tar.gz;nvm use 10 && yarn && yarn deploy:beta"'
+    - ssh  -o StrictHostKeyChecking=no  -tt ubuntu@15.188.88.94 'bash  -i -c "cd ~/websites && rm -rf beta-v2.api.healthygroup.smala.co  && tar xvf beta.tar.gz && rm  beta.tar.gz;nvm use 10 && cd beta-v2.api.healthygroup.smala.co && yarn && yarn deploy:beta"'
   only:
     - beta
   environment: beta
