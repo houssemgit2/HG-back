@@ -6,7 +6,6 @@ beta-build:
   image: node:10
   stage: build
   script:
-    - npm i -g yarn
     - yarn
     - yarn  build
     - rm -rf beta-v2.api.healthygroup.smala.co ; mv dist beta-v2.api.healthygroup.smala.co
