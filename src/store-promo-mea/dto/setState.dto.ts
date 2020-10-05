@@ -17,14 +17,14 @@ export class SetStateDto {
   @IsEnum(PROMO_STATE)
   @IsNotEmpty()
   @ValidateIf(o => !o.state_id)
-  public state: PROMO_STATE;
+  public newState: PROMO_STATE;
   @ApiProperty({
     required: true,
     type: Number,
   })
   @IsNotEmpty()
   @IsNumber()
-  @ValidateIf(o => !o.state)
+  @ValidateIf(o => !o.newState)
   public state_id: number;
 
   @ApiProperty({
@@ -42,7 +42,7 @@ export class SetStateDto {
   @IsNotEmpty()
   @ValidateIf(
     o =>
-      (o.state === PROMO_STATE.REJECTED ||
+      (o.newState === PROMO_STATE.REJECTED ||
         o.state_id === PROMO_STATE_ID.REJECTED) &&
       !o.reason_id,
   )
@@ -55,7 +55,7 @@ export class SetStateDto {
   @IsNotEmpty()
   @ValidateIf(
     o =>
-      (o.state === PROMO_STATE.REJECTED ||
+      (o.newState === PROMO_STATE.REJECTED ||
         o.state_id === PROMO_STATE_ID.REJECTED) &&
       !o.reason,
   )

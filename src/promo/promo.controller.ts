@@ -235,7 +235,7 @@ export class PromoController {
       id,
       body.store_id,
       body.reason_id,
-      body.state,
+      body.newState,
       body.state_id,
     );
   }

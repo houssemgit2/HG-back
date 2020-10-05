@@ -27,7 +27,7 @@ export class StorePromoMeaGuard implements CanActivate {
     const promoId = parseInt(request.params.id);
     const storeId =
       user.userRole.name === ADMIN
-        ? request.query.store_id || request.body.sotre_id
+        ? request.query.store_id || request.body.store_id
         : user.storeId;
     return getConnection()
       .createQueryBuilder()

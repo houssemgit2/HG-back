@@ -24,11 +24,11 @@ import { PromoEventEmitter } from 'src/app.events';
 
 import * as url from 'url';
 
-import { PROMO_STATE_ID } from '../common/enum/enum-types';
 import { RejectionReason } from '../entities/RejectionReason';
 import { StorePromoMea } from '../entities/StorePromoMea';
 import { StorePromoMeaStateType } from '../entities/StorePromoMeaStateType';
 import { User } from '../entities/User';
+import { PROMO_STATE_ID } from '../common/enum/enum-types';
 
 import { StorePromoMeaRepository } from './store-promo-mea.repository';
 
@@ -354,7 +354,8 @@ export class StorePromoMeaService {
   ) {
     //  await this.updateState(promoId, storeId, state, reasonId);
     const promo: StorePromoMea = await this.doesPromoExist(promoId, storeId);
-    promo.stateId =
+    const toSet = new StorePromoMea();
+    toSet.stateId =
       stateId ||
       (await getConnection()
         .getRepository(StorePromoMeaStateType)
@@ -363,13 +364,19 @@ export class StorePromoMeaService {
           promo.stateType = data;
           return data.id;
         }));
-    promo.siegeRejectedReasonId = reasonId;
-    if (promo.stateId === PROMO_STATE_ID.REJECTED && promo.rejectionNumber >= 1)
-      promo.rejectionNumber = promo.rejectionNumber - 1;
-    if (promo.stateId === PROMO_STATE_ID.REJECTED && promo.rejectionNumber < 1)
-      promo.stateId = PROMO_STATE_ID.OPERATION_REFUSED;
-    await this.storePromoMeaRepository.save(promo);
-    return promo;
+    toSet.siegeRejectedReasonId = reasonId;
+    if (toSet.stateId === PROMO_STATE_ID.REJECTED && promo.rejectionNumber >= 1)
+      toSet.rejectionNumber = promo.rejectionNumber - 1;
+    if (
+      toSet.stateId === PROMO_STATE_ID.REJECTED &&
+      (promo.rejectionNumber < 1 || toSet.rejectionNumber < 1)
+    )
+      toSet.stateId = PROMO_STATE_ID.OPERATION_REFUSED;
+    await this.storePromoMeaRepository.update(
+      { promoId: promo.promoId, storeId: promo.storeId },
+      toSet,
+    );
+    return await this.doesPromoExist(promoId, storeId);
   }
   // async savePictureUrl(promoId: number, storeId: number) {
   //   // console.log('picture is online saving url...', location);
