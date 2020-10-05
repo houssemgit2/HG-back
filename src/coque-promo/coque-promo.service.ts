@@ -166,7 +166,7 @@ export class CoquePromoService {
     }
   }
   async downloadFiles(coqueId: number, filter: GetFilesDto, user: User) {
-    const filesPath = `${__dirname}/../output/coqueZips/${uuidv1()}`;
+    const filesPath = `${__dirname}/output/coqueZips/${uuidv1()}`;
     const filesList = await this.listFiles(coqueId, filter, user).then(data =>
       data.map(item => {
         item.fileUrl = `${process.env.AWS_S3_BASE_URL}/${item.fileUrl}`;
@@ -183,7 +183,6 @@ export class CoquePromoService {
     );
     await allSettled(promises, { onlyFulfilled: true });
     return filesPath;
-
   }
   async addFile(coquePromoId: number, file: any) {
     try {

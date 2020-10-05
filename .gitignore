@@ -48,3 +48,5 @@ output/coqueZips/*
 uploads/*
 uploads/mea-state/*
 !uploads/.gitkeep
+output/exportedExcel/*
+!output/exportedExcel/.gitkeep

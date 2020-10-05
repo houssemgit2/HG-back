@@ -472,7 +472,7 @@ export class StorePromoMeaService {
     const fileName = `PromosList-${moment().format(
       moment().format('YYYYMMDD'),
     )}.${filter.type}`;
-    const filePath = `${__dirname}/../output/exportedExcel/${fileName}`;
+    const filePath = `${__dirname}/output/exportedExcel/${fileName}`;
     await this.generateExcelFile(promos, filePath, filter.type);
     return filePath;
   }
