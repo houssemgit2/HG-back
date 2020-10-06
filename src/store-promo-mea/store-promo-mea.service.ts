@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 
-import { getConnection } from 'typeorm';
+import { getConnection, UpdateResult } from 'typeorm';
 
 import * as XLSX from 'xlsx';
 
@@ -23,6 +23,10 @@ import { InjectEventEmitter } from 'nest-emitter';
 import { PromoEventEmitter } from 'src/app.events';
 
 import * as url from 'url';
+
+import { DAYS_AFTER_END_DATE } from 'src/common/const';
+
+import * as async from 'async';
 
 import { RejectionReason } from '../entities/RejectionReason';
 import { StorePromoMea } from '../entities/StorePromoMea';
@@ -58,6 +62,10 @@ export class StorePromoMeaService {
         throw new InternalServerErrorException(e);
       }
     });
+    this.handleCron(); // TODO you may have to remove this
+    // this.storePromoMeaRepository
+    //   .findExpiredPromo(1)
+    //   .then(tes => console.log(tes));
   }
 
   private logger = new Logger(StorePromoMeaService.name);
@@ -66,78 +74,98 @@ export class StorePromoMeaService {
   async handleCron() {
     // TODO fix this cron after the bug in the v1
     this.logger.debug('this task run every 00:00:00');
-    const daysAfterEndDate = 22;
-    const filterPromos = new ListMeaDto();
-    filterPromos['end_date'] = moment()
-      .subtract(daysAfterEndDate + 1, 'days')
+    const expiredEndDate = moment()
+      .subtract(DAYS_AFTER_END_DATE, 'days')
       .format('YYYY-MM-DD');
     this.logger.debug(
-      `fetching promo  where their end_date little then ${filterPromos.end_date} ${PROMO_STATE.NOT_JUSTIFIED}`,
+      `fetching promo  where their end_date little then ${expiredEndDate} ${PROMO_STATE.NOT_JUSTIFIED}`,
     );
     try {
-      const promos = await this.findPromos(filterPromos);
-      this.logger.debug(`there is  ${promos.length}`);
-
-      await this.updatePromoList(promos);
+      const promos = await this.storePromoMeaRepository.findExpiredPromo(
+        expiredEndDate,
+      );
+      if (promos.length) await this.updatePromoList(promos);
     } catch (e) {
       throw new InternalServerErrorException(e);
     }
   }
   async updatePromoList(promos) {
+    const errorList = [];
     if (promos && Array.isArray(promos))
-      return Promise.all(
-        promos.map(promo => {
-          if (this.isPromoExpired(promo.endDate)) {
-            this.logger.warn(
-              `the promo ${promo.promoId} are expired and his end date is ${promo.endDate}`,
-            );
-            return this.updatePromoByState(promo.promoId);
+      async.eachLimit(
+        promos,
+        100,
+        (promo, callback) => {
+          this.updatePromoByState(promo)
+            .catch(err => {
+              console.log(err);
+              errorList.push({
+                promoId: promo.promoId,
+                err,
+              });
+              callback();
+            })
+            .then(() => {
+              callback();
+            });
+        },
+        err => {
+          if (err) {
+            console.log('A promo failed to process');
+          } else {
+            console.log('All promos have been processed successfully');
           }
-        }),
+        },
       );
-    this.logger.debug(
-      `error during fetching promos with expired end dates,promos is not array`,
-    );
   }
-  isPromoExpired(endDate): boolean {
-    const idealEndDate = moment(endDate)
-      .endOf('month')
-      .format('YYYY-MM-DD');
-    const difference = moment().diff(moment(idealEndDate));
-    const differenceByDays = moment.duration(difference).asDays();
-    this.logger.verbose(differenceByDays + ' the difference ');
-    if (differenceByDays >= 22) return true;
-    return false;
-  }
-  async updatePromoByState(promoId: number) {
-    try {
-      await this.updateState(promoId, null, PROMO_STATE.TO_JUSTIFY, null, true);
-      await this.updateState(promoId, null, PROMO_STATE.REJECTED, null, true);
-    } catch (e) {
-      throw new InternalServerErrorException(e);
-    }
+  async updatePromoByState(promo: StorePromoMea) {
+    return new Promise((resolve, reject) => {
+      try {
+        if (promo.stateId === PROMO_STATE_ID.TO_JUSTIFY) {
+          return this.storePromoMeaRepository
+            .update(promo, {
+              stateId: PROMO_STATE_ID.NOT_JUSTIFIED,
+            })
+            .then((data: UpdateResult) => {
+              return resolve(true);
+            });
+        }
+        if (promo.stateId === PROMO_STATE_ID.REJECTED) {
+          return this.storePromoMeaRepository
+            .update(promo, {
+              stateId: PROMO_STATE_ID.OPERATION_REFUSED,
+            })
+            .then((data: UpdateResult) => {
+              return resolve(true);
+            });
+        }
+        // when opromo is postponed
+        if (promo.stateId === PROMO_STATE_ID.NOT_JUSTIFIED) {
+          return this.storePromoMeaRepository
+            .update(promo, {
+              stateId: PROMO_STATE_ID.TO_JUSTIFY,
+            })
+            .then((data: UpdateResult) => {
+              return resolve(true);
+            });
+        }
+        if (promo.stateId === PROMO_STATE_ID.OPERATION_REFUSED) {
+          return this.storePromoMeaRepository
+            .update(promo, {
+              stateId: PROMO_STATE_ID.REJECTED,
+              rejectionNumber: 1, // TODO check this
+            })
+            .then((data: UpdateResult) => {
+              return resolve(true);
+            });
+        }
+      } catch (e) {
+        return reject(e);
+      }
+    });
   }
   // TODO  optimize this
-  async afterPromoPostponed(promoId: number) {
-    try {
-      await this.updateState(
-        promoId,
-        null,
-        PROMO_STATE.NOT_JUSTIFIED,
-        null,
-        true,
-      );
-      await this.updateState(
-        promoId,
-        null,
-        PROMO_STATE.OPERATION_REFUSED,
-        null,
-        true,
-      );
-    } catch (e) {
-      throw new InternalServerErrorException(e);
-    }
-  }
+
   async findPromos(
     filter?: ListMeaDto,
     user?: User,
@@ -163,7 +191,7 @@ export class StorePromoMeaService {
       '(SELECT name FROM rejection_reason WHERE rejection_reason.id=sp.officine_rejected_reason_id) as officine_rejected_reason',
       `CONCAT('${process.env.AWS_S3_BASE_URL}/',sp.url_picture) as url_picture`,
       `CONCAT('${process.env.AWS_S3_BASE_URL}/',sp.url_sells_listing)  as url_sells_listing`,
-      'operationType.name as type_off',
+      // 'operationType.name as type_off',
     ];
     const sqlQueryForSelect = this.storePromoMeaRepository
       .createQueryBuilder('sp')
@@ -173,8 +201,8 @@ export class StorePromoMeaService {
       .leftJoinAndSelect('promo.gamme', 'gamme')
       .leftJoinAndSelect('sp.stateType', 'stateType')
       .leftJoinAndSelect('promo.laboratory', 'laboratory')
-      .leftJoinAndSelect('promo.promoType', 'promoType')
-      .leftJoinAndSelect('promoType.operationType', 'operationType')
+      // .leftJoinAndSelect('promo.promoType', 'promoType')
+      // .leftJoinAndSelect('promoType.operationType', 'operationType')
       .leftJoinAndSelect('store.clusters', 'clusters')
       .leftJoinAndSelect('sp.rejectedReason', 'rejectedReason');
     const sqlQueryToImportExcel = this.storePromoMeaRepository
@@ -239,6 +267,8 @@ export class StorePromoMeaService {
         clusters: filter.clusters,
       }); // TODO  make it by promoCluster table
     }
+    if (typeof filter.active === 'string')
+      filter.active = JSON.parse(filter.active); // TODO se termine dans
     if (filter.active === true || filter.active === false) {
       // TODO fix this filter: always come as true even if user send false
       sqlQuery.andWhere('sp.active = :active', { active: filter.active });
@@ -352,7 +382,6 @@ export class StorePromoMeaService {
     state?: PROMO_STATE,
     stateId?: number,
   ) {
-    //  await this.updateState(promoId, storeId, state, reasonId);
     const promo: StorePromoMea = await this.doesPromoExist(promoId, storeId);
     const toSet = new StorePromoMea();
     toSet.stateId =

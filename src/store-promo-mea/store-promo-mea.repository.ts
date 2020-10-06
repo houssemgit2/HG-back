@@ -10,6 +10,7 @@ import { getConnection } from 'typeorm';
 
 import { Store } from '../entities/Store';
 import { StorePromoMea } from '../entities/StorePromoMea';
+import { PROMO_STATE_ID } from '../common/enum/enum-types';
 
 @EntityRepository(StorePromoMea)
 export class StorePromoMeaRepository extends Repository<StorePromoMea> {
@@ -203,5 +204,27 @@ export class StorePromoMeaRepository extends Repository<StorePromoMea> {
     } catch (e) {
       throw new InternalServerErrorException(e);
     }
+  }
+
+  async findExpiredPromo(date: any): Promise<StorePromoMea[]> {
+    return new Promise((resolve, reject) =>
+      this.createQueryBuilder('sp')
+        .select([
+          'promo_id as promoId',
+          'store_id as storeId',
+          'state_id as stateId',
+        ])
+        .leftJoin('sp.promo', 'promo')
+        .where(`promo.end_date<= :date`, {
+          date,
+        })
+        .andWhere('sp.state_id=:rejected or sp.state_id=:toJsutify', {
+          rejected: PROMO_STATE_ID.REJECTED,
+          toJsutify: PROMO_STATE_ID.TO_JUSTIFY,
+        })
+        .getRawMany()
+        .catch(e => reject(e))
+        .then((data:StorePromoMea[]) =>  resolve(data)),
+    );
   }
 }

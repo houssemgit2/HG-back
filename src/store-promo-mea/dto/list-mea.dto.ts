@@ -4,12 +4,15 @@ import {
   IsOptional,
   IsString,
   IsEnum,
+  validate,
+  IsBoolean,
+  IsBooleanString,
 } from 'class-validator';
-import { IsNumberString } from 'class-validator';
+import { IsNumberString, ValidateIf } from 'class-validator';
 
 import { PROMO_STATE } from 'src/common/enum/enum-types';
 
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
@@ -45,7 +48,9 @@ export class ListMeaDto extends PaginationDto {
   clusters: string;
 
   @ApiProperty({ required: false })
-  @Type(() => Boolean)
+  // @Transform(o => JSON.parse(o))
+  @IsOptional()
+  @IsBooleanString()
   public active: boolean; // TODO fix it it's alwys true
   @ApiProperty({ required: false })
   @IsString()

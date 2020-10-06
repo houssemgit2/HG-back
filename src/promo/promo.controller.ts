@@ -54,6 +54,10 @@ import { ClientGuard } from 'src/auth/guards/client.guard';
 import { StoreAdminGuard } from 'src/auth/guards/store-admin.guard';
 import { multerOptions, meaS3MulterOptions } from 'src/common/multer';
 
+import * as moment from 'moment';
+
+import { DAYS_AFTER_END_DATE } from 'src/common/const';
+
 import { UserReq } from '../auth/get-user.decorator';
 import { StorePromoMea } from '../entities/StorePromoMea';
 import { User } from '../entities/User';
@@ -357,12 +361,22 @@ export class PromoController {
     this.logger.debug(
       `fetching promo_mea_id ${promoId} for the store cip ${storeId}`,
     );
-    const promo = await this.storePromoMeaService.findPromos(
-      filter,
-      user,
-      false,
-      promoId,
-    );
+    const promo = await this.storePromoMeaService
+      .findPromos(filter, user, false, promoId)
+      .then(data => {
+        // console.log('old_end_date', data.end_date);
+        data.end_date = moment(
+          moment(data.end_date)
+            .endOf('month')
+            .format('YYYY-MM-DD'),
+          'YYYY-MM-DD',
+        )
+          .add(DAYS_AFTER_END_DATE, 'days')
+          .format('YYYY-MM-DD');
+        // console.log('new_end_date', data.end_date);
+        return data;
+      });
+
     return promo;
   }
 
@@ -380,13 +394,23 @@ export class PromoController {
     @UserReq() user: User,
   ): Promise<StorePromoMea[]> {
     if (user.userRoleId !== 1) filter.store_id = user.storeId;
-    return await this.storePromoMeaService.findPromos(
-      filter,
-      user,
-      false,
-      null,
-      true,
-    );
+    return await this.storePromoMeaService
+      .findPromos(filter, user, false, null, true)
+      .then(data => {
+        data.map(item => {
+          console.log('old_end_date', item.end_date);
+          moment(
+            moment(item.end_date)
+              .endOf('month')
+              .format('YYYY-MM-DD'),
+            // .add(21, "days"),
+            'YYYY-MM-DD',
+          ).add(DAYS_AFTER_END_DATE, 'days');
+          console.log('new_end_date', item.end_date);
+          return item;
+        });
+        return data;
+      });
   }
   // end of store promo mea
   @ApiTags('Promo-form')

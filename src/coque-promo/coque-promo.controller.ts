@@ -64,6 +64,7 @@ export class CoquePromoController {
   @UsePipes(new JsonValidationPipe())
   @UseGuards(AuthGuard())
   async getCoquePromo(@Query() filter: ListMeaDto, @UserReq() user: User) {
+    // TODO fix this dto name
     if (user.userRoleId !== 1) {
       filter.coque_status = true;
       filter.file_status = true;
