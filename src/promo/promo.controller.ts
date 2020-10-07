@@ -181,8 +181,8 @@ export class PromoController {
   @ApiTags('Promo-form')
   @Post('/types')
   @UseGuards(AuthGuard(), AdminGuard)
-  async setPromoType(@Query() query: SavePromoTypeDto) {
-    return await this.promoService.createPromoType(query.type_ids);
+  async setPromoType(@Body() body: SavePromoTypeDto) {
+    return await this.promoService.createPromoType(body.type_ids);
   }
   // store promo mea
   @ApiOperation({ summary: 'Download mea list' })
