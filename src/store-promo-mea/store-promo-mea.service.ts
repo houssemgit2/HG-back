@@ -126,7 +126,7 @@ export class StorePromoMeaService {
             .update(promo, {
               stateId: PROMO_STATE_ID.NOT_JUSTIFIED,
             })
-            .then((data: UpdateResult) => {
+            .then(() => {
               return resolve(true);
             });
         }
@@ -135,7 +135,7 @@ export class StorePromoMeaService {
             .update(promo, {
               stateId: PROMO_STATE_ID.OPERATION_REFUSED,
             })
-            .then((data: UpdateResult) => {
+            .then(() => {
               return resolve(true);
             });
         }
@@ -145,7 +145,7 @@ export class StorePromoMeaService {
             .update(promo, {
               stateId: PROMO_STATE_ID.TO_JUSTIFY,
             })
-            .then((data: UpdateResult) => {
+            .then(() => {
               return resolve(true);
             });
         }
@@ -155,7 +155,7 @@ export class StorePromoMeaService {
               stateId: PROMO_STATE_ID.REJECTED,
               rejectionNumber: 1, // TODO check this
             })
-            .then((data: UpdateResult) => {
+            .then(() => {
               return resolve(true);
             });
         }

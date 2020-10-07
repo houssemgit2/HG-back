@@ -1,5 +1,5 @@
 import { CoquePromo } from '../entities/CoquePromo';
-import { Brackets, EntityRepository, Repository, Transaction } from 'typeorm';
+import { Brackets, EntityRepository, Repository } from 'typeorm';
 import { Logger, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { getConnection, In } from 'typeorm';

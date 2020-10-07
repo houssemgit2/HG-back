@@ -54,7 +54,6 @@ import { ClientGuard } from 'src/auth/guards/client.guard';
 import { StoreAdminGuard } from 'src/auth/guards/store-admin.guard';
 import { multerOptions, meaS3MulterOptions } from 'src/common/multer';
 
-import * as moment from 'moment';
 
 import { DAYS_AFTER_END_DATE } from 'src/common/const';
 

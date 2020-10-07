@@ -1,10 +1,14 @@
-import { Repository, EntityRepository } from 'typeorm';
-import { User } from '../entities/User';
-import { UserCredentialDto } from './dto/user-credential.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConflictException, Logger } from '@nestjs/common';
+
+import { Repository, EntityRepository } from 'typeorm';
+
 import * as bcrypt from 'bcrypt';
+
+import { User } from '../entities/User';
+
 import { LoginCredentialDto } from './dto/login-credential.dto';
+import { UserCredentialDto } from './dto/user-credential.dto';
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
   constructor(
