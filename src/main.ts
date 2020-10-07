@@ -10,6 +10,7 @@ import { AppModule } from './app.module';
 
 import { HttpExceptionFilter } from './common/http-exception.filter';
 import { TransformInterceptor } from './common/transform.interceptor';
+import { config } from './environments/environment';
 
 async function bootstrap() {
   const logger = new Logger('bootstrap_main.ts');
@@ -45,7 +46,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api', app, document);
 
-  const port = process.env.PORT;
+  const port = process.env.PORT || config.port;
   await app.listen(port);
 
   logger.verbose(`Application listening in port ${port}`);

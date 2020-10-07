@@ -30,18 +30,18 @@ import { StoreModule } from './store/store.module';
 import { SupportModule } from './support/support.module';
 import { UserModule } from './user/user.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { config } from './environments/environment';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      logging: true,
+      logging: config.dbLogging,
       name: 'default',
       type: 'mysql',
-      host:
-        'hg-referentiel-dev-instance-1.ceia1tvbrwoq.eu-west-3.rds.amazonaws.com',
-      port: 3306,
-      username: 'hgbetaUser',
-      password: 'AZcLpafyKMG6HPxs',
-      database: 'hg_promo_beta',
+      host: config.dbHost,
+      port: config.dbPort,
+      username: config.dbUser,
+      password: config.dbPassword,
+      database: config.database,
       synchronize: false,
       entities: entities,
       // migrationsTableName: 'custom_migration_table',
