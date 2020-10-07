@@ -65,6 +65,7 @@ import { StorePromoMeaService } from '../store-promo-mea/store-promo-mea.service
 import { StorePromoSelectedService } from './../store-promo-selected/store-promo-selected.service';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { ApiFile } from '../common/decorators/api-file.decorator';
+import { refreshDate } from '../common/utils/helpers';
 import { ActiveToggleDto } from '../store-promo-mea/dto/active-toggle.dto';
 import { ListMeaDto } from '../store-promo-mea/dto/list-mea.dto';
 import { PromoAchatValidationPipe } from '../common/pipes/promo/promo-achat.pipe';
@@ -364,16 +365,7 @@ export class PromoController {
     const promo = await this.storePromoMeaService
       .findPromos(filter, user, false, promoId)
       .then(data => {
-        // console.log('old_end_date', data.end_date);
-        data.end_date = moment(
-          moment(data.end_date)
-            .endOf('month')
-            .format('YYYY-MM-DD'),
-          'YYYY-MM-DD',
-        )
-          .add(DAYS_AFTER_END_DATE, 'days')
-          .format('YYYY-MM-DD');
-        // console.log('new_end_date', data.end_date);
+        data.end_date = refreshDate(data.end_date, DAYS_AFTER_END_DATE);
         return data;
       });
 
@@ -396,20 +388,13 @@ export class PromoController {
     if (user.userRoleId !== 1) filter.store_id = user.storeId;
     return await this.storePromoMeaService
       .findPromos(filter, user, false, null, true)
-      .then(data => {
-        data.map(item => {
+      .then(result => {
+        const data = result.data.map(item => {
           console.log('old_end_date', item.end_date);
-          moment(
-            moment(item.end_date)
-              .endOf('month')
-              .format('YYYY-MM-DD'),
-            // .add(21, "days"),
-            'YYYY-MM-DD',
-          ).add(DAYS_AFTER_END_DATE, 'days');
-          console.log('new_end_date', item.end_date);
+          item.end_date = refreshDate(item.end_date, DAYS_AFTER_END_DATE);
           return item;
         });
-        return data;
+        return { ...result, data };
       });
   }
   // end of store promo mea

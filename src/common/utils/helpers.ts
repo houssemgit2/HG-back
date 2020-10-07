@@ -13,6 +13,7 @@ import * as request from 'request-promise';
 import * as archiver from 'archiver';
 
 import * as rimraf from 'rimraf';
+import * as moment from 'moment';
 
 export const isNotEmptyArray = (array: any): boolean =>
   array && Array.isArray(array) && !!array.length;
@@ -106,4 +107,14 @@ export function filterObjectProperty(object: object, keys: string[]): object {
   });
 
   return object;
+}
+export function refreshDate(date: string, days: number) {
+  return moment(
+    moment(date)
+      .endOf('month')
+      .format('YYYY-MM-DD'),
+    'YYYY-MM-DD',
+  )
+    .add(days, 'days')
+    .format('YYYY-MM-DD');
 }

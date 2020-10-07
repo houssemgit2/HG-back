@@ -3,22 +3,29 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { CoquePromoRepository } from './coque-promo.repository';
-import { CreateCoqueDto } from './dto/create-coque.dto';
+
+import { getConnection, In, UpdateResult, DeleteResult } from 'typeorm';
+
+import { User } from 'src/entities/User';
+import { createPromiseFile } from 'src/common/utils/helpers';
+
+import { v1 as uuidv1 } from 'uuid';
+
+import * as allSettled from 'promise-all-settled';
+
 import { CoquePromo } from '../entities/CoquePromo';
 import { CoquePromoClusters } from '../entities/CoquePromoClusters';
-import { CoquePromoPeriods } from '../entities/CoquePromoPeriods';
-import { ListMeaDto } from './dto/list-coque.dto';
-import { UpdateCoqueDto } from './dto/update.dto';
 import { CoquePromoFiles } from '../entities/CoquePromoFiles';
-import { getConnection, In, UpdateResult, DeleteResult } from 'typeorm';
-import { GetFilesDto } from './dto/list-files.dto';
-import { User } from 'src/entities/User';
+import { CoquePromoPeriods } from '../entities/CoquePromoPeriods';
+
+import { CoquePromoRepository } from './coque-promo.repository';
+
 import { CoqueFileIdDto } from './dto/coqueFileId.dto';
+import { CreateCoqueDto } from './dto/create-coque.dto';
+import { ListMeaDto } from './dto/list-coque.dto';
+import { GetFilesDto } from './dto/list-files.dto';
 import { UpdateCoqueFileDto } from './dto/update-file.dto';
-import { createPromiseFile } from 'src/common/utils/helpers';
-import { v1 as uuidv1 } from 'uuid';
-import * as allSettled from 'promise-all-settled';
+import { UpdateCoqueDto } from './dto/update.dto';
 
 @Injectable()
 export class CoquePromoService {
@@ -166,7 +173,7 @@ export class CoquePromoService {
     }
   }
   async downloadFiles(coqueId: number, filter: GetFilesDto, user: User) {
-    const filesPath = `${__dirname}/output/coqueZips/${uuidv1()}`;
+    const filesPath = `${__dirname}/../output/coqueZips/${uuidv1()}`;
     const filesList = await this.listFiles(coqueId, filter, user).then(data =>
       data.map(item => {
         item.fileUrl = `${process.env.AWS_S3_BASE_URL}/${item.fileUrl}`;

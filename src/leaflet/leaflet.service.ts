@@ -91,7 +91,7 @@ export class LeafletService {
   }
   async downloadOrders(ordersIDs): Promise<any> {
     let promises;
-    const filesPath = `${__dirname}/output/ordersZips/${uuidv1()}`;
+    const filesPath = `${__dirname}/../output/ordersZips/${uuidv1()}`;
     try {
       const leaflets = await this.leafletRepository.find({
         where: [
