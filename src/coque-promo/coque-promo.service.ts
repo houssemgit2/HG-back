@@ -33,39 +33,43 @@ export class CoquePromoService {
   logger = new Logger('Coque COntroller');
 
   async updateCoque(coqueId: number, coque: UpdateCoqueDto, files) {
-    this.logger.verbose('start to update the coque');
-    const coqueClusters =
-      coque.clusters && coque.clusters.length
-        ? coque.clusters.map(item => ({ clusterId: item.cluster_id }))
-        : null;
-    const coquePeriods =
-      coque.periods && coque.periods.length ? coque.periods : null;
-    const coqueFiles =
-      files && files.length
-        ? files.map((item, index) => ({
-            name: coque.filesName[index],
-            fileUrl: item.key,
-            status: true,
-          }))
-        : null;
-    const filesToRemove =
-      coque.filesToRemove && coque.filesToRemove.length
-        ? coque.filesToRemove
-        : null;
-    const coquePromo =
-      coque.status || coque.status === false || coque.name
-        ? { ...coque }
-        : null;
-    this.logger.verbose(`coque promo update name and status`);
-    console.log(coquePromo);
-    return await this.coquePromoRepository.updateCoque(
-      coqueId,
-      coquePromo,
-      filesToRemove,
-      coqueFiles,
-      coqueClusters,
-      coquePeriods,
-    );
+    try {
+      this.logger.verbose('start to update the coque');
+      const coqueClusters =
+        coque.clusters && coque.clusters.length
+          ? coque.clusters.map(item => ({ clusterId: item.cluster_id }))
+          : null;
+      const coquePeriods =
+        coque.periods && coque.periods.length ? coque.periods : null;
+      const coqueFiles =
+        files && files.length
+          ? files.map((item, index) => ({
+              name: coque.filesName[index],
+              fileUrl: item.key,
+              status: true,
+            }))
+          : null;
+      const filesToRemove =
+        coque.filesToRemove && coque.filesToRemove.length
+          ? coque.filesToRemove
+          : null;
+      const coquePromo =
+        coque.status || coque.status === false || coque.name
+          ? { ...coque }
+          : null;
+      this.logger.verbose(`coque promo update name and status`);
+      return await this.coquePromoRepository.updateCoque(
+        coqueId,
+        coquePromo,
+        filesToRemove,
+        coqueFiles,
+        coqueClusters,
+        coquePeriods,
+      );
+    } catch (e) {
+      console.error(e);
+      throw new InternalServerErrorException(e);
+    }
   }
 
   async addCoque(coque: CreateCoqueDto, files) {

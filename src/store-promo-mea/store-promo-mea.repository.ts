@@ -126,7 +126,7 @@ export class StorePromoMeaRepository extends Repository<StorePromoMea> {
         promoId,
       );
       this.logger.debug('start checking promo mea in new cluster');
-      console.log(promoStoreList);
+      // console.log(promoStoreList);
       const concernedStores: {
         storeId: number;
       }[] = await this.find({

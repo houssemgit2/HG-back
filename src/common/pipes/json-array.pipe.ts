@@ -10,7 +10,6 @@ export class JSONArrayValidation implements PipeTransform {
   logger = new Logger('JSON ARRAY VALIDATION');
   transform(value: any, metadata: ArgumentMetadata) {
     this.logger.verbose('value before transform');
-    console.log(value);
     if (value && value.clusters && Array.isArray(value.clusters)) {
       const clusters = value.clusters.map(item => {
         return JSON.parse(item);
@@ -24,7 +23,6 @@ export class JSONArrayValidation implements PipeTransform {
       value.periods = periods;
     }
     this.logger.verbose('value after transform');
-    console.log(value);
     return value;
   }
 }

@@ -140,7 +140,7 @@ export class StoreService implements OnModuleInit {
     permissions: StorePermissionDto[],
   ) {
     const store: Store = await this.storeRepository.getOne(cip);
-    console.log(store);
+    // console.log(store);
     const oldStoreClusterId = store.clusterId;
     store.cip = cip;
     if (addStore.clu_id) store.clusterId = addStore.clu_id;

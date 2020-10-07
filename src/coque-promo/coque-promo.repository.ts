@@ -106,7 +106,7 @@ export class CoquePromoRepository extends Repository<CoquePromo> {
       coque.name = coquePromo.name;
       coque.status = true;
       const newCoque = await queryRunner.manager.save(coque);
-      console.log(newCoque);
+      // console.log(newCoque);
       const coquePromoId = newCoque.id;
       this.logger.debug('the new coque id is ****->');
       this.logger.verbose(`Coque id = ${coquePromoId}`);

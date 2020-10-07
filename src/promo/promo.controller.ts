@@ -390,7 +390,6 @@ export class PromoController {
       .findPromos(filter, user, false, null, true)
       .then(result => {
         const data = result.data.map(item => {
-          console.log('old_end_date', item.end_date);
           item.end_date = refreshDate(item.end_date, DAYS_AFTER_END_DATE);
           return item;
         });

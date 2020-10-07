@@ -53,14 +53,14 @@ export class PromoAchatValidationPipe implements PipeTransform<any> {
       value.achat_advantage_discount_details
         .achat_advantage_discount_type_id === 1
     ) {
-      console.log('the actual group is euro');
+      // console.log('the actual group is euro');
       groups.push('euro');
     } else if (
       value.achat_advantage_discount_details &&
       value.achat_advantage_discount_details
         .achat_advantage_discount_type_id === 3
     ) {
-      console.log('the actual group is freeUnit');
+      // console.log('the actual group is freeUnit');
 
       groups.push('freeUnit');
     } else if (
@@ -68,7 +68,7 @@ export class PromoAchatValidationPipe implements PipeTransform<any> {
       value.achat_advantage_discount_details
         .achat_advantage_discount_type_id === 2
     ) {
-      console.log('the actual group is percentage  ');
+      // console.log('the actual group is percentage  ');
 
       groups.push('percentage');
       if (value.percentage_details && Array.isArray(value.percentage_details)) {

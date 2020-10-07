@@ -20,8 +20,8 @@ export class PromoValidationPipe implements PipeTransform<any> {
         const startDate = moment(value.start_date, 'DD-MM-YYYY').valueOf();
         const endDate = moment(value.end_date, 'DD-MM-YYYY').valueOf();
         if (startDate > endDate) {
-          console.log('diff ********');
-          console.log(startDate, '-----', endDate);
+          // console.log('diff ********');
+          // console.log(startDate, '-----', endDate);
           throw new BadRequestException(
             'End Date must be bigger than start date',
           );
