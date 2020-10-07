@@ -163,14 +163,15 @@ export class CoquePromoService {
   }
   async listFiles(coqueId: number, filter: GetFilesDto, user: User) {
     try {
-      const findConditions: any = { where: {} };
+      const findConditions: any = { where: { coquePromoId: coqueId } };
       if (user.userRoleId !== 1) findConditions.where.status = 1;
       else findConditions.where.status = filter.status;
       if (filter.idsList && filter.idsList.length)
         findConditions.where.id = In(filter.idsList);
       const coqueFiles = await getConnection()
         .getRepository(CoquePromoFiles)
-        .find({ where: { coquePromoId: coqueId, ...findConditions } });
+        .find(findConditions);
+      console.log('we find our bug in list fuiles');
       return coqueFiles;
     } catch (e) {
       throw new InternalServerErrorException(e);
