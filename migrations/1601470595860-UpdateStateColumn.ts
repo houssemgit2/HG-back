@@ -1,4 +1,3 @@
-import { PROMO_STATE } from 'src/common/enum/enum-types';
 
 import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
 
@@ -22,15 +21,15 @@ export class UpdateStateColumn1601470595860 implements MigrationInterface {
       new TableColumn({
         name: 'state',
         type: 'enum',
-        default: PROMO_STATE.TO_JUSTIFY,
+        default: 'TO_JUSTIFY',
         enum: [
-          PROMO_STATE.TO_JUSTIFY,
-          PROMO_STATE.CONFIRMED,
-          PROMO_STATE.NOT_JUSTIFIED,
-          PROMO_STATE.OPERATION_REFUSED,
-          PROMO_STATE.PENDING,
-          PROMO_STATE.REJECTED,
-          PROMO_STATE.UNJUSTIFIED,
+          'TO_JUSTIFY',
+          'CONFIRMED',
+          'NOT_JUSTIFIED',
+          'OPERATION_REFUSED',
+          'PENDING',
+          'REJECTED',
+          'UNJUSTIFIED',
         ],
       }),
     );
