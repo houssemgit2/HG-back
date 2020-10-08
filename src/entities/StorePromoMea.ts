@@ -102,10 +102,19 @@ export class StorePromoMea extends BaseEntity {
     { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
   )
   @JoinColumn([
-    { name: 'siege_rejected_reason_id', referencedColumnName: 'id' },
     { name: 'officine_rejected_reason_id', referencedColumnName: 'id' },
   ])
-  rejectedReason: RejectionReason;
+  officineRejectedReason: RejectionReason;
+
+  @ManyToOne(
+    () => RejectionReason,
+    rejectionReason => rejectionReason.storePromoMeas,
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
+  )
+  @JoinColumn([
+    { name: 'siege_rejected_reason_id', referencedColumnName: 'id' },
+  ])
+  siegeRejectedReason: RejectionReason;
 
   @ManyToOne(
     () => StorePromoMeaStateType,

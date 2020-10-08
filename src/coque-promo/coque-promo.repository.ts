@@ -1,12 +1,14 @@
-import { CoquePromo } from '../entities/CoquePromo';
-import { Brackets, EntityRepository, Repository } from 'typeorm';
 import { Logger, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+
+import { Brackets, EntityRepository, Repository } from 'typeorm';
 import { getConnection, In } from 'typeorm';
-import { CoquePromoFiles } from '../entities/CoquePromoFiles';
-import { CoquePromoClusters } from '../entities/CoquePromoClusters';
-import { CoquePromoPeriods } from '../entities/CoquePromoPeriods';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+
+import { CoquePromo } from '../entities/CoquePromo';
+import { CoquePromoClusters } from '../entities/CoquePromoClusters';
+import { CoquePromoFiles } from '../entities/CoquePromoFiles';
+import { CoquePromoPeriods } from '../entities/CoquePromoPeriods';
 
 @EntityRepository(CoquePromo)
 export class CoquePromoRepository extends Repository<CoquePromo> {
@@ -134,7 +136,7 @@ export class CoquePromoRepository extends Repository<CoquePromo> {
       const newPeriods = periods.map(item => ({
         coquePromoId,
         month: item.month,
-        year: item.month,
+        year: item.year,
       }));
       await Promise.all(
         newPeriods.map(item =>

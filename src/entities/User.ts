@@ -9,10 +9,12 @@ import {
   BaseEntity,
   OneToOne,
 } from 'typeorm';
+
+import * as bcrypt from 'bcrypt';
+
 import { RefreshToken } from './RefreshToken';
 import { Store } from './Store';
 import { UserRole } from './UserRole';
-import * as bcrypt from 'bcrypt';
 
 @Index('user_store_id_fk', ['storeId'], {})
 @Index('user_user_role_id_fk', ['userRoleId'], {})
@@ -71,6 +73,11 @@ export class User extends BaseEntity {
   )
   refreshTokens: RefreshToken[];
 
+  @OneToOne(
+    () => Store,
+    store => store.owner,
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
+  )
   @ManyToOne(
     () => Store,
     store => store.users,

@@ -1,9 +1,12 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsArray, ValidateNested } from 'class-validator';
+
+import { IsString, IsNotEmpty, IsArray, IsJSON } from 'class-validator';
+
 import { Type } from 'class-transformer';
-import { PeriodsDto } from './periods.dto';
+
 import { ClusterIdDto } from './clusters.dto';
+import { PeriodsDto } from './periods.dto';
 
 export class CreateCoqueDto {
   @ApiProperty()
@@ -17,9 +20,9 @@ export class CreateCoqueDto {
     isArray: true,
     example: [{ month: 5, year: 2020 }],
   })
-  @IsArray()
+  // @IsArray()
   @IsNotEmpty()
-  @ValidateNested({ each: true, always: true })
+  // @ValidateNested({ each: true, always: true })
   @Type(() => PeriodsDto)
   periods: PeriodsDto[];
 
@@ -29,9 +32,10 @@ export class CreateCoqueDto {
     isArray: true,
     example: [{ cluster_id: 5 }],
   })
-  @IsArray()
+  // @IsArray()
   @IsNotEmpty()
-  @ValidateNested({ each: true })
+  // @ValidateNested({ each: true })
+  @IsJSON()
   @Type(() => ClusterIdDto)
   clusters: ClusterIdDto[];
 

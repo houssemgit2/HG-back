@@ -1,16 +1,28 @@
-import { Body, Controller, Get, Post, Query, UsePipes } from '@nestjs/common';
-import { SelectService } from './select.service';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  UseGuards,
+  UsePipes,
+} from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { Product } from '../entities/Product';
-import { AddProductDto } from './dto/addProduct.dto';
-import { GetProductDto } from './dto/get-product.dto';
-import { GetGammeDto } from './dto/get-gamme.dto';
+import { AuthGuard } from '@nestjs/passport';
+
 import { Gamme } from '../entities/Gamme';
-import { DiscountDto } from './dto/discount.dto';
-import { SelectStaticDto } from './dto/select-static.dto';
+import { Product } from '../entities/Product';
 import { SelectValidationPipe } from '../common/pipes/select.pipe';
 
-@ApiBearerAuth()
+import { SelectService } from './select.service';
+
+import { AddProductDto } from './dto/addProduct.dto';
+import { DiscountDto } from './dto/discount.dto';
+import { GetGammeDto } from './dto/get-gamme.dto';
+import { GetProductDto } from './dto/get-product.dto';
+import { SelectStaticDto } from './dto/select-static.dto';
+
+@UseGuards(AuthGuard())
 @Controller('')
 export class SelectController {
   constructor(private readonly appService: SelectService) {}

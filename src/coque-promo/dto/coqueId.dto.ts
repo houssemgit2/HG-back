@@ -1,14 +1,19 @@
-import { IsOptional, IsNumberString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsExist } from '../../common/decorators/isUnique.validation';
+
+import { IsNumberString } from 'class-validator';
+
+import { Type } from 'class-transformer';
+
 import { CoquePromo } from '../../entities/CoquePromo';
+import { IsExist } from '../../common/decorators/isUnique.validation';
 export class CoqueIdDto {
   @ApiProperty({ required: true })
-  @IsNumberString()
+  // @IsNumberString()
   @IsExist(
     { message: 'coque promo not found' },
     { entityName: 'coquePromo', entity: CoquePromo, key: 'id' },
     false,
   )
+  @Type(() => Number)
   coqueId: number;
 }

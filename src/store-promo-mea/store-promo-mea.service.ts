@@ -195,16 +195,26 @@ export class StorePromoMeaService {
     ];
     const sqlQueryForSelect = this.storePromoMeaRepository
       .createQueryBuilder('sp')
-      .select(selectedColumn)
+      .select()
       .leftJoinAndSelect('sp.promo', 'promo') //, 'promo.id = sp.promo_id')
       .leftJoinAndSelect('sp.store', 'store') //, 'store.cip = sp.store_id')
       .leftJoinAndSelect('promo.gamme', 'gamme')
       .leftJoinAndSelect('sp.stateType', 'stateType')
       .leftJoinAndSelect('promo.laboratory', 'laboratory')
-      // .leftJoinAndSelect('promo.promoType', 'promoType')
-      // .leftJoinAndSelect('promoType.operationType', 'operationType')
+      .leftJoinAndSelect('promo.promoType', 'promoType')
+      .leftJoinAndSelect('promo.promoConcernType', 'promoConcernType')
+      .leftJoinAndSelect('promoType.operationType', 'operationType')
       .leftJoinAndSelect('store.clusters', 'clusters')
-      .leftJoinAndSelect('sp.rejectedReason', 'rejectedReason');
+      .leftJoinAndSelect(
+        'sp.officineRejectedReason',
+        'officineRejectedReason',
+        'sp.officineRejectedReasonId=officineRejectedReason.id',
+      )
+      .leftJoinAndSelect(
+        'sp.siegeRejectedReason',
+        'siegeRejectedReason',
+        'sp.siegeRejectedReasonId=siegeRejectedReason.id',
+      );
     const sqlQueryToImportExcel = this.storePromoMeaRepository
       .createQueryBuilder('sp')
       .leftJoinAndSelect('sp.promo', 'promo', 'promo.id = sp.promo_id')
@@ -215,16 +225,12 @@ export class StorePromoMeaService {
       .leftJoinAndSelect('promo.promoType', 'promoType')
       .leftJoinAndSelect('promoType.operationType', 'operationType')
       .leftJoinAndSelect('store.clusters', 'clusters')
-      .leftJoinAndSelect('sp.rejectedReason', 'rejectedReason');
+      .leftJoinAndSelect('sp.siegeRejectedReason', 'siegeRejectedReason');
     const sqlQuery = toImportExcel ? sqlQueryToImportExcel : sqlQueryForSelect;
     // const sqlQuery = sqlQueryForSelect;
-    if (user && user.userRoleId === 1)
+    if (user && user.userRoleId === 1 && toImportExcel)
       sqlQuery
-        .leftJoinAndSelect(
-          'store.users',
-          'owner',
-          //          'owner.store_id=store.cip && is_owner=true',
-        )
+        .leftJoinAndSelect('store.users', 'owner')
         .addSelect([
           'store.name as descr',
           'CONCAT(owner.first_name," ",owner.last_name) as officine_name',
@@ -233,7 +239,15 @@ export class StorePromoMeaService {
           'owner.email',
           'owner.phone as phone_num',
           'owner.address',
-        ]); // TODO  check the front resp
+        ]);
+    // TODO  check the front resp
+    else if (user && user.userRoleId === 1)
+      sqlQuery.leftJoinAndSelect(
+        'store.owner',
+        'owner',
+        //          'owner.store_id=store.cip && is_owner=true',
+      );
+
     if (filter.start_date && filter.end_date)
       sqlQuery.where(
         `(promo.start_date BETWEEN :startDate AND :endDate
@@ -284,13 +298,13 @@ export class StorePromoMeaService {
       if (promoId)
         return await sqlQuery
           .andWhere('sp.promo_id= :promoId', { promoId })
-          .getRawOne();
+          .getOne();
       if (toImportExcel) {
         const promo = await sqlQuery.getMany();
         return promo;
       }
       // const promos: StorePromoMea[] = await sqlQuery.getRawMany();
-      const promos: StorePromoMea[] = await sqlQuery.getRawMany();
+      const promos: StorePromoMea[] = await sqlQuery.getMany();
       const totalItem = await sqlQuery.getCount();
       // if (!promos.length)
       //   throw new NotFoundException('there is no promos with this filters');
@@ -521,7 +535,7 @@ export class StorePromoMeaService {
       const promoJson = XLSX.utils.sheet_to_json(workSheet);
       const promos = this.transformXLSMeaPromoList(promoJson);
       this.logger.verbose('a list of the promo we will update theri state');
-      console.log(promos);
+      // console.log(promos);
       console.log('-----');
       for (const promo of promos) {
         console.log(promo);
@@ -599,8 +613,8 @@ export class StorePromoMeaService {
         ? promoMea.urlPicture
         : `${process.env.AWS_S3_BASE_URL}${promoMea.urlPicture}`;
     const state = this.stateMeaToExcel(promoMea);
-    const rejectionReason = promoMea.rejectedReason
-      ? promoMea.rejectedReason.name
+    const rejectionReason = promoMea.siegeRejectedReason
+      ? promoMea.siegeRejectedReason.name
       : '';
     return {
       idSys,

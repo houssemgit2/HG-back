@@ -13,8 +13,10 @@ import * as request from 'request-promise';
 import * as archiver from 'archiver';
 
 import * as rimraf from 'rimraf';
+
 import * as moment from 'moment';
 
+const fsPromises = fs.promises;
 export const isNotEmptyArray = (array: any): boolean =>
   array && Array.isArray(array) && !!array.length;
 
@@ -55,14 +57,19 @@ export async function createPromiseFile(
   urlKey: string,
 ) {
   try {
-    await fs.mkdirSync(filesPath);
+    const mkdir = await fsPromises.mkdir(filesPath);
+    console.log('mkdir return');
+    console.log(mkdir);
+
     const promises = filesList.map((item, index) => {
-      return new Promise((resolve, reject) => {
+      return new Promise(async (resolve, reject) => {
         const filepath = `${filesPath}/${index}-${item[nameKey].replace(
           '/',
           ' ',
         )}.${fileType || item[urlKey].split('.').pop()}`;
-        const file = fs.createWriteStream(filepath);
+        const file = await fs.createWriteStream(filepath);
+        console.log('file fs createWriteStreal');
+        console.log(item[urlKey]);
         request
           .get(`${item[urlKey]}`)
           .pipe(file)
@@ -70,10 +77,13 @@ export async function createPromiseFile(
             resolve(filepath);
           })
           .on('error', error => {
+            console.log('error in createWriteStream');
+            console.log(error);
             reject(error);
           });
       });
     });
+
     return promises;
   } catch (e) {
     throw new InternalServerErrorException(e);
@@ -81,25 +91,29 @@ export async function createPromiseFile(
 }
 
 export async function compressFiles(response, filesPath, zipName) {
-  const output = fs.createWriteStream(`${filesPath}.zip`);
-  const archive = archiver('zip', {
-    zlib: { level: 9 }, // Sets the compression level.
-  });
-  archive.directory(`${filesPath}/`, false);
-  archive.pipe(output);
-  // or write everything to disk
-  output.on('close', () => {
-    response.download(`${filesPath}.zip`, `${zipName}.zip`, () => {
-      rimraf.sync(filesPath);
-      rimraf.sync(`${filesPath}.zip`);
+  try {
+    const output = fs.createWriteStream(`${filesPath}.zip`);
+    const archive = archiver('zip', {
+      zlib: { level: 9 }, // Sets the compression level.
     });
-  });
+    archive.directory(`${filesPath}/`, false);
+    archive.pipe(output);
+    // or write everything to disk
+    output.on('close', () => {
+      response.download(`${filesPath}.zip`, `${zipName}.zip`, () => {
+        rimraf.sync(filesPath);
+        rimraf.sync(`${filesPath}.zip`);
+      });
+    });
 
-  output.on('error', error => {
-    console.log(error);
-    return error;
-  });
-  archive.finalize();
+    output.on('error', error => {
+      console.log(error);
+      return error;
+    });
+    archive.finalize();
+  } catch (err) {
+    throw new InternalServerErrorException(err);
+  }
 }
 export function filterObjectProperty(object: object, keys: string[]): object {
   Object.keys(object).forEach(el => {

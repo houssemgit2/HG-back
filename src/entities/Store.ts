@@ -9,6 +9,7 @@ import {
   BaseEntity,
   OneToOne,
 } from 'typeorm';
+
 import { Cluster } from './Cluster';
 import { StorePermission } from './StorePermission';
 import { StorePromoMea } from './StorePromoMea';
@@ -75,6 +76,12 @@ export class Store extends BaseEntity {
     user => user.store,
   )
   users: User[];
+
+  @OneToOne(
+    () => User,
+    user => user.store,
+  )
+  owner: User;
 
   // @OneToOne(
   //   () => User,

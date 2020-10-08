@@ -52,6 +52,7 @@ import { UpdateCoqueDto } from './dto/update.dto';
 const multerOptionsS3: MulterOptions = s3MulterOptions(null, `coque-promo`);
 @ApiBearerAuth()
 @ApiTags('Coque-promo')
+@UseGuards(AuthGuard())
 @Controller('coque-promo')
 export class CoquePromoController {
   constructor(private coquePromoService: CoquePromoService) {}
@@ -81,15 +82,14 @@ export class CoquePromoController {
   @ApiConsumes('multipart/form-data')
   @Post('/')
   @UsePipes(new JSONArrayValidation())
-  @UseInterceptors(FilesInterceptor('coque', 10, multerOptionsS3))
-  @ApiMultiFile('coque')
+  @UseInterceptors(FilesInterceptor('file', 10, multerOptionsS3))
+  @ApiMultiFile('file')
   @UseGuards(AuthGuard(), AdminGuard)
   async createCoquePromo(
     @UploadedFiles() files,
     @Query() coque: CreateCoqueDto,
     @Req() req: any,
   ) {
-    console.log(req);
     return await this.coquePromoService.addCoque(coque, req.files);
   }
 
@@ -100,8 +100,8 @@ export class CoquePromoController {
   @ApiConsumes('multipart/form-data')
   @UsePipes(new JsonValidationPipe())
   @UsePipes(new JSONArrayValidation())
-  @UseInterceptors(FilesInterceptor('coque', 10, multerOptionsS3))
-  @ApiMultiFile('coque')
+  @UseInterceptors(FilesInterceptor('file', 10, multerOptionsS3))
+  @ApiMultiFile('file')
   @UseGuards(AuthGuard(), AdminGuard)
   async updateCoque(
     @Query() coque: UpdateCoqueDto,
@@ -164,6 +164,7 @@ export class CoquePromoController {
     @Param() coqueCred: CoqueIdDto,
     @UploadedFile() file,
     @Query('fileName') fileName: string,
+    @Req() req: any,
   ) {
     return this.coquePromoService.addFile(coqueCred.coqueId, {
       fileUrl: file.key,
@@ -182,6 +183,7 @@ export class CoquePromoController {
     @Param() coqueCred: CoqueFileIdDto,
     @Query() query: UpdateCoqueFileDto,
   ) {
+    console.log(query);
     const updated = await this.coquePromoService.editCoqueFile(
       coqueCred,
       query,
@@ -216,6 +218,7 @@ export class CoquePromoController {
       filter,
       user,
     );
-    compressFiles(response, path, 'coque');
+    console.log(path);
+    await compressFiles(response, path, 'coque');
   }
 }

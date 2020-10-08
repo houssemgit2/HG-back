@@ -75,33 +75,23 @@ export class CoquePromoService {
   async addCoque(coque: CreateCoqueDto, files) {
     try {
       this.logger.debug('start serializing data');
-      console.log(coque);
       const coqueFiles = files.map((item, index) => ({
         name: coque.filesName[index],
         fileUrl: item.key,
-        status: 0,
       }));
-      this.logger.debug('files ---->');
-      console.log(coqueFiles);
       const coquePromo = new CoquePromo();
       coquePromo.name = coque.name;
-      coquePromo.status = false;
       const clusters = coque.clusters.map(item => {
         const coqueCluster = new CoquePromoClusters();
         coqueCluster.clusterId = item.cluster_id;
         return coqueCluster;
       });
-      this.logger.debug('clusters ---->');
-      console.log(clusters);
       const periods: any = coque.periods.map(item => {
         const coquePeriod = new CoquePromoPeriods();
         coquePeriod.month = item.month;
         coquePeriod.year = item.year;
         return coquePeriod;
       });
-      this.logger.debug('periods ---->');
-      console.log(periods);
-
       const result = await this.coquePromoRepository.addNew(
         coquePromo,
         coqueFiles,
@@ -165,36 +155,39 @@ export class CoquePromoService {
     try {
       const findConditions: any = { where: { coquePromoId: coqueId } };
       if (user.userRoleId !== 1) findConditions.where.status = 1;
-      else findConditions.where.status = filter.status;
+      else if (filter.status) findConditions.where.status = filter.status;
       if (filter.idsList && filter.idsList.length)
         findConditions.where.id = In(filter.idsList);
       const coqueFiles = await getConnection()
         .getRepository(CoquePromoFiles)
         .find(findConditions);
-      console.log('we find our bug in list fuiles');
       return coqueFiles;
     } catch (e) {
       throw new InternalServerErrorException(e);
     }
   }
   async downloadFiles(coqueId: number, filter: GetFilesDto, user: User) {
-    const filesPath = `${__dirname}/../output/coqueZips/${uuidv1()}`;
-    const filesList = await this.listFiles(coqueId, filter, user).then(data =>
-      data.map(item => {
-        item.fileUrl = `${process.env.AWS_S3_BASE_URL}/${item.fileUrl}`;
-        return item;
-      }),
-    );
-    console.log(filesList);
-    const promises = await createPromiseFile(
-      filesPath,
-      null,
-      filesList,
-      'name',
-      'fileUrl',
-    );
-    await allSettled(promises, { onlyFulfilled: true });
-    return filesPath;
+    try {
+      const filesPath = `${__dirname}/../output/coqueZips/${uuidv1()}`;
+      const filesList = await this.listFiles(coqueId, filter, user).then(data =>
+        data.map(item => {
+          item.fileUrl = `${process.env.AWS_S3_BASE_URL}/${item.fileUrl}`;
+          return item;
+        }),
+      );
+      console.log(filesList);
+      const promises = await createPromiseFile(
+        filesPath,
+        null,
+        filesList,
+        'name',
+        'fileUrl',
+      );
+      await allSettled(promises, { onlyFulfilled: true });
+      return filesPath;
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
   }
   async addFile(coquePromoId: number, file: any) {
     try {
