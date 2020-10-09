@@ -742,6 +742,7 @@ export class StorePromoMeaService {
     // const promoMea = nestedObjectsUtil.flatten(promo);
     const newPromo = {
       ...promo,
+      ID: promo.promoId,
       state: promo.stateType.name,
       endDate: promo.promo.endDate,
       typeOff: promo.promo.promoType
