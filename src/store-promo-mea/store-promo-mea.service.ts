@@ -28,6 +28,7 @@ import { DAYS_AFTER_END_DATE } from 'src/common/const';
 
 import * as async from 'async';
 
+import { Laboratory } from '../entities/Laboratory';
 import { RejectionReason } from '../entities/RejectionReason';
 import { StorePromoMea } from '../entities/StorePromoMea';
 import { StorePromoMeaStateType } from '../entities/StorePromoMeaStateType';
@@ -287,6 +288,12 @@ export class StorePromoMeaService {
         clusters: filter.clusters,
       }); // TODO  make it by promoCluster table
     }
+    if (filter.lab) {
+      sqlQuery.andWhere('clusters.name = :clusters', {
+        clusters: filter.clusters,
+      }); // TODO  make it by promoCluster table
+    }
+
     if (typeof filter.active === 'string')
       filter.active = JSON.parse(filter.active); // TODO se termine dans
     if (filter.active === true || filter.active === false) {
@@ -735,6 +742,13 @@ export class StorePromoMeaService {
       console.log(e);
       throw new InternalServerErrorException(e);
     }
+  }
+
+  async getLabs() {
+    // this function will be user just for old mobile app version
+    return await getConnection()
+      .getRepository(Laboratory)
+      .find();
   }
 }
 // repository.find({

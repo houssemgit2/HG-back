@@ -192,8 +192,6 @@ export class PromoController {
   @ApiTags('Store-Promo-Mea')
   @Get('promo-mea/xl')
   @UseGuards(AuthGuard(), AdminGuard)
-  // @UsePipes(new DatesListValidationPipe())
-  // @UseInterceptors(FileInterceptor('image'))
   async downloadFile(
     @Query(new DatesListValidationPipe()) filter: ListMeaToExportDto,
     @UserReq() user: User,
@@ -205,7 +203,11 @@ export class PromoController {
     );
     res.status(200).download(filePath);
   }
-
+  @ApiOperation({ summary: 'Download mea list' })
+  @ApiResponse({
+    status: 200,
+    description: 'Download promo mea excel to update state (reject or confirm)',
+  })
   @ApiOperation({ summary: 'update state mea list' })
   @ApiResponse({
     status: 200,
@@ -219,6 +221,11 @@ export class PromoController {
   async uploadedFile(@UploadedFile() file) {
     if (!file) throw new BadRequestException('Make sure you upload a file');
     return await this.storePromoMeaService.updateMeaByExcel(file.path);
+  }
+  @ApiTags('Select list')
+  @Get('promo-mea/labs')
+  async getLabos(): Promise<any[]> {
+    return await this.storePromoMeaService.getLabs();
   }
 
   @ApiOperation({ summary: 'Update promo mea state' })
