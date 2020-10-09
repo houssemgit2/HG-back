@@ -22,6 +22,8 @@ import { GetGammeDto } from './dto/get-gamme.dto';
 import { GetProductDto } from './dto/get-product.dto';
 import { SelectStaticDto } from './dto/select-static.dto';
 
+@ApiBearerAuth()
+@UseGuards(AuthGuard())
 @UseGuards(AuthGuard())
 @Controller('')
 export class SelectController {

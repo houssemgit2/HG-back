@@ -14,6 +14,7 @@ import { DocumentProvideType } from './DocumentProvideType';
 import { Promo } from './Promo';
 import { PromoMeaEmplacement } from './PromoMeaEmplacement';
 import { RepaymentCircuitType } from './RepaymentCircuitType';
+import { StorePromoMea } from './StorePromoMea';
 
 @Index('fkIdx_415', ['promoId'], {})
 @Index('fkIdx_459', ['repaymentCircuitTypeId'], {})

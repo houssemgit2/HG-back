@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 
 import { Promo } from './Promo';
+import { PromoMea } from './PromoMea';
 import { RejectionReason } from './RejectionReason';
 import { Store } from './Store';
 import { StorePromoMeaStateType } from './StorePromoMeaStateType';

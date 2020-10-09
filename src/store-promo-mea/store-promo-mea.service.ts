@@ -199,6 +199,11 @@ export class StorePromoMeaService {
       .leftJoinAndSelect('sp.promo', 'promo') //, 'promo.id = sp.promo_id')
       .leftJoinAndSelect('sp.store', 'store') //, 'store.cip = sp.store_id')
       .leftJoinAndSelect('promo.gamme', 'gamme')
+      .leftJoinAndSelect('promo.promoMea', 'promoMea')
+      .leftJoinAndSelect(
+        'promoMea.repaymentCircuitType',
+        'repaymentCircuitType',
+      )
       .leftJoinAndSelect('sp.stateType', 'stateType')
       .leftJoinAndSelect('promo.laboratory', 'laboratory')
       .leftJoinAndSelect('promo.promoType', 'promoType')
@@ -263,6 +268,7 @@ export class StorePromoMeaService {
         endDate: filter.end_date,
       });
     // if (user && user.userRoleId === 1) sqlQuery.andWhere(`owner.is_owner=1`);
+    console.log(filter);
     if (filter.state) {
       if (filter.state === PROMO_STATE.UNJUSTIFIED)
         sqlQuery.andWhere('stateType.name IN(:...states)', {
@@ -290,6 +296,15 @@ export class StorePromoMeaService {
     if (filter.store_id) {
       sqlQuery.andWhere('sp.storeId = :storeId', { storeId: filter.store_id });
     }
+    if (filter.circuit_vers) {
+      sqlQuery.andWhere(
+        'repaymentCircuitType.name = :repaymentCircuit or repaymentCircuitType.id = :repaymentCircuitId',
+        {
+          repaymentCircuit: filter.circuit_vers,
+          repaymentCircuitId: filter.circuit_vers_id,
+        },
+      );
+    }
     if (filter.perPage && filter.page) {
       sqlQuery.skip(filter.perPage * (filter.page - 1)).take(filter.perPage);
     }
@@ -305,6 +320,7 @@ export class StorePromoMeaService {
       }
       // const promos: StorePromoMea[] = await sqlQuery.getRawMany();
       const promos: StorePromoMea[] = await sqlQuery.getMany();
+      // console.log(promos);
       const totalItem = await sqlQuery.getCount();
       // if (!promos.length)
       //   throw new NotFoundException('there is no promos with this filters');

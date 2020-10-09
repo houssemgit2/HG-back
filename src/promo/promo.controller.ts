@@ -53,8 +53,6 @@ import { StorePromoMeaGuard } from 'src/auth/guards/store-promo-mea.guard';
 import { ClientGuard } from 'src/auth/guards/client.guard';
 import { StoreAdminGuard } from 'src/auth/guards/store-admin.guard';
 import { multerOptions, meaS3MulterOptions } from 'src/common/multer';
-
-
 import { DAYS_AFTER_END_DATE } from 'src/common/const';
 
 import { UserReq } from '../auth/get-user.decorator';
@@ -87,6 +85,7 @@ const multerOptionsForMeaExcel: MulterOptions = multerOptions(
   `${__dirname}/../uploads/mea-state/`,
 );
 @ApiBearerAuth()
+@UseGuards(AuthGuard())
 @Controller('promos')
 export class PromoController {
   constructor(

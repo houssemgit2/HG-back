@@ -1,18 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import {
-  IsOptional,
-  IsString,
-  IsEnum,
-  validate,
-  IsBoolean,
-  IsBooleanString,
-} from 'class-validator';
-import { IsNumberString, ValidateIf } from 'class-validator';
+import { IsOptional, IsString, IsEnum, IsBoolean } from 'class-validator';
+import { IsNumberString, IsNumber } from 'class-validator';
 
 import { PROMO_STATE } from 'src/common/enum/enum-types';
 
-import { Type, Transform } from 'class-transformer';
+import { Type } from 'class-transformer';
 
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
@@ -48,9 +41,9 @@ export class ListMeaDto extends PaginationDto {
   clusters: string;
 
   @ApiProperty({ required: false })
-  // @Transform(o => JSON.parse(o))
+  @Type(() => Boolean)
   @IsOptional()
-  @IsBooleanString()
+  @IsBoolean()
   public active: boolean; // TODO fix it it's alwys true
   @ApiProperty({ required: false })
   @IsString()
@@ -60,11 +53,18 @@ export class ListMeaDto extends PaginationDto {
   @IsString()
   @IsOptional()
   public circuit_vers: string;
+  @ApiProperty({ required: false })
+  @Type(() => Number)
+  @IsOptional()
+  @IsNumber()
+  public circuit_vers_id: number;
 
-  end_date?: string;
-  start_date?: string;
   @ApiProperty({ required: false })
   @IsOptional()
   @IsNumberString()
+  @Type(() => Number)
   store_id?: number;
+
+  end_date?: string;
+  start_date?: string;
 }
