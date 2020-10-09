@@ -755,7 +755,9 @@ export class StorePromoMeaService {
       detRen: 'det _ ren',
       zoneMis: ' zone _ mis',
     };
+    console.log('-*-*-*-*-*-*-*-*-*-*-*-*-*-');
     console.log(newPromo);
+
     return newPromo;
   }
 }
