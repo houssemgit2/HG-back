@@ -60,10 +60,16 @@ export class ListMeaDto extends PaginationDto {
   public circuit_vers_id: number;
 
   @ApiProperty({ required: false })
-  @IsOptional()
-  @IsNumberString()
   @Type(() => Number)
+  @IsOptional()
+  @IsNumber()
   store_id?: number;
+
+  @ApiProperty({ required: false, type: Boolean })
+  @Type(() => Boolean)
+  @IsOptional()
+  @IsBoolean()
+  v2 = false;
 
   end_date?: string;
   start_date?: string;

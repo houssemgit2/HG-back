@@ -4,9 +4,9 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   BaseEntity,
 } from 'typeorm';
+
 import { OperationType } from './OperationType';
 import { Promo } from './Promo';
 

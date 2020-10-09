@@ -132,3 +132,13 @@ export function refreshDate(date: string, days: number) {
     .add(days, 'days')
     .format('YYYY-MM-DD');
 }
+export function objectCorresp(
+  originalObject: object,
+  oldKeys: string[],
+  newKeys: string[],
+): object {
+  oldKeys.map((item, index) => {
+    originalObject[newKeys[index]] = originalObject[oldKeys[index]];
+  });
+  return originalObject;
+}

@@ -373,8 +373,12 @@ export class PromoController {
     const promo = await this.storePromoMeaService
       .findPromos(filter, user, false, promoId)
       .then(data => {
-        data.end_date = refreshDate(data.end_date, DAYS_AFTER_END_DATE);
-        return data;
+        data.promo.endDate = refreshDate(
+          data.promo.endDate,
+          DAYS_AFTER_END_DATE,
+        );
+        return this.storePromoMeaService.correspondancePromo(data);
+        // return data;
       });
 
     return promo;
@@ -398,8 +402,11 @@ export class PromoController {
       .findPromos(filter, user, false, null, true)
       .then(result => {
         const data = result.data.map(item => {
-          item.end_date = refreshDate(item.end_date, DAYS_AFTER_END_DATE);
-          return item;
+          item.promo.endDate = refreshDate(
+            item.promo.endDate,
+            DAYS_AFTER_END_DATE,
+          );
+          return this.storePromoMeaService.correspondancePromo(item);
         });
         return { ...result, data };
       });

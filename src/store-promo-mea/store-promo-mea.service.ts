@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 
-import { getConnection, UpdateResult } from 'typeorm';
+import { getConnection } from 'typeorm';
 
 import * as XLSX from 'xlsx';
 
@@ -174,28 +174,9 @@ export class StorePromoMeaService {
     promoId?: number,
     withTotalItem?: boolean,
   ): Promise<any> {
-    const selectedColumn = [
-      'sp.promo_id as promoId',
-      'sp.store_id as id_cip',
-      'promo.id as ID',
-      'gamme.name as gamme',
-      'clusters.name as cluster',
-      'laboratory.name as laboratoire',
-      'laboratory.name as lab',
-      'stateType.name as state',
-      'active',
-      'uploaded_at',
-      'promo.start_date',
-      'promo.end_date',
-      'store.cluster_id',
-      '(SELECT name FROM rejection_reason WHERE rejection_reason.id=sp.siege_rejected_reason_id) as siege_rejected_reason',
-      '(SELECT name FROM rejection_reason WHERE rejection_reason.id=sp.officine_rejected_reason_id) as officine_rejected_reason',
-      `CONCAT('${process.env.AWS_S3_BASE_URL}/',sp.url_picture) as url_picture`,
-      `CONCAT('${process.env.AWS_S3_BASE_URL}/',sp.url_sells_listing)  as url_sells_listing`,
-      // 'operationType.name as type_off',
-    ];
     const sqlQueryForSelect = this.storePromoMeaRepository
       .createQueryBuilder('sp')
+      // .select(filter.v2 ? null : selectedColumnForMobile)
       .select()
       .leftJoinAndSelect('sp.promo', 'promo') //, 'promo.id = sp.promo_id')
       .leftJoinAndSelect('sp.store', 'store') //, 'store.cip = sp.store_id')
@@ -207,10 +188,16 @@ export class StorePromoMeaService {
       )
       .leftJoinAndSelect('sp.stateType', 'stateType')
       .leftJoinAndSelect('promo.laboratory', 'laboratory')
-      .leftJoinAndSelect('promo.promoType', 'promoType')
       .leftJoinAndSelect('promo.promoConcernType', 'promoConcernType')
+      .leftJoinAndSelect('promo.promoType', 'promoType')
       .leftJoinAndSelect('promoType.operationType', 'operationType')
       .leftJoinAndSelect('store.clusters', 'clusters')
+      .leftJoinAndMapMany(
+        'p.promoProducts',
+        'product',
+        'product',
+        "(JSON_CONTAINS(promo.product_ids,CONVERT(product.id,CHAR),'$'))",
+      )
       .leftJoinAndSelect(
         'sp.officineRejectedReason',
         'officineRejectedReason',
@@ -327,7 +314,7 @@ export class StorePromoMeaService {
       }
       // const promos: StorePromoMea[] = await sqlQuery.getRawMany();
       const promos: StorePromoMea[] = await sqlQuery.getMany();
-      // console.log(promos);
+
       const totalItem = await sqlQuery.getCount();
       // if (!promos.length)
       //   throw new NotFoundException('there is no promos with this filters');
@@ -375,7 +362,7 @@ export class StorePromoMeaService {
         queryCondition.state = PROMO_STATE.NOT_JUSTIFIED;
       if (state === PROMO_STATE.REJECTED) {
         queryCondition.state = PROMO_STATE.OPERATION_REFUSED;
-        queryCondition.rejection_time = 2;
+        queryCondition['rejection_time'] = 2;
       }
       if (state === PROMO_STATE.NOT_JUSTIFIED)
         queryCondition.state = PROMO_STATE.TO_JUSTIFY;
@@ -707,7 +694,7 @@ export class StorePromoMeaService {
     });
     const workSheetReasons = XLSX.utils.json_to_sheet(reasons);
 
-    workBook.Sheets.rejection_reason = workSheetReasons;
+    workBook.Sheets['rejection_reason'] = workSheetReasons;
 
     // XLSX.utils.book_append_sheet(workBook, workSheet, fileName);
     // XLSX.utils.book_append_sheet(workBook, worksheetReasons, fileName);
@@ -750,7 +737,29 @@ export class StorePromoMeaService {
       .getRepository(Laboratory)
       .find();
   }
+
+  correspondancePromo(promo: StorePromoMea) {
+    // const promoMea = nestedObjectsUtil.flatten(promo);
+    const newPromo = {
+      ...promo,
+      state: promo.stateType.name,
+      endDate: promo.promo.endDate,
+      typeOff: promo.promo.promoType
+        .map(item => item.operationType.name)
+        .join(' + '),
+      gamme: promo.promo.gamme.name,
+      libelle: '',
+      // lab : promo.promo.gamme.brand.laboratory.name
+      lab: promo.promo.laboratory.name,
+      detMis: 'det _ mis',
+      detRen: 'det _ ren',
+      zoneMis: ' zone _ mis',
+    };
+    console.log(newPromo);
+    return newPromo;
+  }
 }
+
 // repository.find({
 //   count1: LessThen(5), // < operator
 //   count2: MoreThen(10), // > operator
