@@ -224,8 +224,11 @@ export class PromoController {
   }
   @ApiTags('Select list')
   @Get('promo-mea/labs')
-  async getLabos(): Promise<any[]> {
-    return await this.storePromoMeaService.getLabs();
+  async getLabos(): Promise<any> {
+    return await this.storePromoMeaService.getLabs().then(data => ({
+      labLength: data.length,
+      results: data.map(item => item.name),
+    }));
   }
 
   @ApiOperation({ summary: 'Update promo mea state' })
