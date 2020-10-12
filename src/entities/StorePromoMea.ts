@@ -43,7 +43,12 @@ export class StorePromoMea extends BaseEntity {
   @Column('int', { name: 'siege_rejected_reason_id' })
   siegeRejectedReasonId: number;
 
-  @Column('tinyint', { name: 'active', nullable: true, width: 1 })
+  @Column('tinyint', {
+    name: 'active',
+    nullable: false,
+    width: 1,
+    default: () => 1,
+  })
   active: boolean | null;
 
   @Column('int', {
