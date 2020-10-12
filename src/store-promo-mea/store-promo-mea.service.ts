@@ -52,12 +52,13 @@ export class StorePromoMeaService {
     this.emitter.on('promoCreated', async promoId => {
       console.log(`validated new promo with id ${promoId}`);
       try {
+        this.logger.verbose('promoCreated emitted');
         const promoStore = await this.insertPromoMea(promoId, null, null);
         // await this.storePromoMeaRepository.removeNotConcerned(
         //   promoId,
         //   promoStore.map(item => item.storeId),
         // );
-        console.log(promoStore);
+        // console.log(promoStore);
       } catch (e) {
         this.logger.error('Error in event emit after promo validation ');
         throw new InternalServerErrorException(e);
@@ -756,8 +757,6 @@ export class StorePromoMeaService {
       detRen: 'det _ ren',
       zoneMis: ' zone _ mis',
     };
-    console.log('-*-*-*-*-*-*-*-*-*-*-*-*-*-');
-    console.log(newPromo);
 
     return newPromo;
   }

@@ -145,7 +145,7 @@ export class StorePromoMeaRepository extends Repository<StorePromoMea> {
         },
       );
       this.logger.verbose('store to insert');
-      console.log(promoStoreToInsert);
+      // console.log(promoStoreToInsert);
       const storeToRemove = concernedStores.filter(promo => {
         return !promoStoreList.some(mea => mea.storeId === promo.storeId);
       });
