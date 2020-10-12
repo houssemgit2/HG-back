@@ -209,22 +209,18 @@ export class StorePromoMeaRepository extends Repository<StorePromoMea> {
   async findExpiredPromo(date: any): Promise<StorePromoMea[]> {
     return new Promise((resolve, reject) =>
       this.createQueryBuilder('sp')
-        .select([
-          'promo_id as promoId',
-          'store_id as storeId',
-          'state_id as stateId',
-        ])
+        .select(['promo_id as promoId', 'store_id as storeId'])
         .leftJoin('sp.promo', 'promo')
         .where(`promo.end_date<= :date`, {
           date,
         })
-        .andWhere('sp.state_id=:rejected or sp.state_id=:toJsutify', {
+        .andWhere('(sp.state_id=:rejected or sp.state_id=:toJsutify)', {
           rejected: PROMO_STATE_ID.REJECTED,
           toJsutify: PROMO_STATE_ID.TO_JUSTIFY,
         })
         .getRawMany()
         .catch(e => reject(e))
-        .then((data:StorePromoMea[]) =>  resolve(data)),
+        .then((data: StorePromoMea[]) => resolve(data)),
     );
   }
 }
