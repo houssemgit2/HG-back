@@ -7,20 +7,27 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserCredentialDto } from './dto/user-credential.dto';
-import { User } from '../entities/User';
-import { UserRepository } from './user.repository';
 import { JwtService } from '@nestjs/jwt';
-import { JwtPayload } from './interface/jwt-payload.interface';
+
+import * as generator from 'generate-password';
+
+import * as AWS from 'aws-sdk';
+
+import moment = require('moment');
+
+import { getRepository } from 'typeorm';
+
+import { updatePasswordEmail } from '../common/email-body';
+import { Resource } from '../entities/Resource';
+import { StorePermission } from '../entities/StorePermission';
+import { User } from '../entities/User';
+
+import { UserRepository } from './user.repository';
+
 import { LoginCredentialDto } from './dto/login-credential.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import * as generator from 'generate-password';
-import * as AWS from 'aws-sdk';
-import moment = require('moment');
-import { getRepository } from 'typeorm';
-import { StorePermission } from '../entities/StorePermission';
-import { Resource } from '../entities/Resource';
-import { updatePasswordEmail } from '../common/email-body';
+import { UserCredentialDto } from './dto/user-credential.dto';
+import { JwtPayload } from './interface/jwt-payload.interface';
 AWS.config.update({ region: 'us-east-1' });
 
 @Injectable()

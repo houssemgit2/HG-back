@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+import { Type } from 'class-transformer';
+
 import {
   IsNotEmpty,
   IsNumber,
@@ -18,10 +20,12 @@ export class SetStateDto {
   @IsNotEmpty()
   @ValidateIf(o => !o.state_id)
   public newState: PROMO_STATE;
+
   @ApiProperty({
     required: true,
     type: Number,
   })
+  @Type(() => Number)
   @IsNotEmpty()
   @IsNumber()
   @ValidateIf(o => !o.newState)
@@ -31,6 +35,7 @@ export class SetStateDto {
     required: true,
     type: Number,
   })
+  @Type(() => Number)
   @IsNotEmpty()
   @IsNumber()
   public store_id: number;
@@ -52,6 +57,7 @@ export class SetStateDto {
     required: true,
     type: Number,
   })
+  @Type(() => Number)
   @IsNotEmpty()
   @ValidateIf(
     o =>

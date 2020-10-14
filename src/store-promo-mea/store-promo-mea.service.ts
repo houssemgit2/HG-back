@@ -517,6 +517,7 @@ export class StorePromoMeaService {
     }
     return promo;
   }
+  // FUNCTION TO GENERATE EXCEL FILE WITH STORE PROMO MEA TO UPDATE STATE WITH FILE
   async exportExcelPromoState(filter: ListMeaToExportDto, user?: User) {
     // if (!filter.state) filter.state = 'PENDING';
     // if (filter.active === undefined) filter.active = true;
@@ -547,9 +548,8 @@ export class StorePromoMeaService {
       const promos = this.transformXLSMeaPromoList(promoJson);
       this.logger.verbose('a list of the promo we will update theri state');
       // console.log(promos);
-      console.log('-----');
       for (const promo of promos) {
-        console.log(promo);
+        // VALIDATE BY SINGLE PROMO
         await validateOrReject(promo, {
           validationError: {
             // Indicates if target should be exposed in ValidationError.
@@ -561,7 +561,7 @@ export class StorePromoMeaService {
       }
       for (const promo of promos) {
         if (
-          promo.state === PROMO_STATE.REJECTED &&
+          promo.stateId === PROMO_STATE_ID.REJECTED &&
           parseInt(promo.rejectionReason)
         ) {
           this.logger.verbose('fetching the reason id');
@@ -648,9 +648,18 @@ export class StorePromoMeaService {
   }
   evalStateValue(
     value: 'N' | 'O',
-  ): PROMO_STATE.CONFIRMED | PROMO_STATE.REJECTED | undefined {
-    if (value === 'O') return PROMO_STATE.CONFIRMED;
-    if (value === 'N') return PROMO_STATE.REJECTED;
+  ): PROMO_STATE_ID.CONFIRMED | PROMO_STATE_ID.REJECTED | undefined {
+    console.log(
+      'value is ',
+      value,
+      value === 'O'
+        ? PROMO_STATE.CONFIRMED
+        : value === 'N'
+        ? PROMO_STATE.REJECTED
+        : null,
+    );
+    if (value === 'O') return PROMO_STATE_ID.CONFIRMED;
+    if (value === 'N') return PROMO_STATE_ID.REJECTED;
     return undefined;
   }
   transformXLSMeaPromo(promo) {
@@ -661,10 +670,11 @@ export class StorePromoMeaService {
     promoJson.storeId = promo[`ID OP`]
       ? parseInt(promo[`ID OP`].split('--')[1])
       : parseInt(promo[`CIP Officine`]);
-    promoJson.state = promo[`Validée(O)/Refusée(N)`]
+    promoJson.stateId = promo[`Validée(O)/Refusée(N)`]
       ? this.evalStateValue(promo[`Validée(O)/Refusée(N)`])
       : this.evalStateValue(promo['ValidÃ©e(O)/RefusÃ©e(N)']);
     promoJson.rejectionReason = promo[`Motif du refus`];
+
     return promoJson;
   }
   transformXLSMeaPromoList(promos) {
@@ -744,6 +754,7 @@ export class StorePromoMeaService {
     const newPromo = {
       ...promo,
       ID: promo.promoId,
+      idCip: promo.storeId,
       state: promo.stateType.name,
       endDate: promo.promo.endDate,
       typeOff: promo.promo.promoType

@@ -12,7 +12,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 
-import { multerOptions } from 'src/common/multer';
+import { s3MulterOptions } from 'src/common/multer';
 
 import { UserReq } from '../auth/get-user.decorator';
 import { User } from '../entities/User';
@@ -21,10 +21,7 @@ import { ApiMultiFile } from '../common/decorators/api-multi-file.decorator';
 import { SupportService } from './support.service';
 
 import { SupportDto } from './dto/sensSupport.dto';
-const multerOptionsSupport: MulterOptions = multerOptions(
-  null,
-  `${__dirname}/../uploads/support-file/`,
-);
+const multerOptionsSupport: MulterOptions = s3MulterOptions(null, `support`);
 
 @ApiBearerAuth()
 @ApiTags('Support')
@@ -44,7 +41,7 @@ export class SupportController {
     @UserReq() user: User,
     @Query() support: SupportDto,
   ) {
-    await this.supportService.sendSupport(support, user.email);
-    return user.email;
+    await this.supportService.addSupport(req, support, user, files);
+    return { email: user.email };
   }
 }

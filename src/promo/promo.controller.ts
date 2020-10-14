@@ -362,9 +362,9 @@ export class PromoController {
   async getPromoDetails(
     @Param('id') promoId: number,
     @UserReq() user: User,
-    @Query('store_id') store_id = user.storeId,
+    @Query('store_id') store_id: number,
   ) {
-    const storeId = store_id || user.storeId;
+    const storeId = user.userRoleId === 1 ? store_id : user.storeId;
     const filter = new ListMeaDto();
     filter.store_id = storeId;
     this.logger.debug(

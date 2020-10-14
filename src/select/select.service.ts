@@ -1,17 +1,20 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { Product } from '../entities/Product';
 import { InjectRepository } from '@nestjs/typeorm';
+
 import { Like, Repository, getConnection, ObjectType } from 'typeorm';
-import { Gamme } from '../entities/Gamme';
-import { Laboratory } from '../entities/Laboratory';
-import { AddProductDto } from './dto/addProduct.dto';
-import { GetProductDto } from './dto/get-product.dto';
-import { GetGammeDto } from './dto/get-gamme.dto';
-import { OperationType } from '../entities/OperationType';
 import { BaseEntity } from 'typeorm';
+
 import { AchatAdvantageDiscountType } from '../entities/AchatAdvantageDiscountType';
 import { AchatSubAdvantageDiscountType } from '../entities/AchatSubAdvantageDiscountType';
+import { Gamme } from '../entities/Gamme';
+import { Laboratory } from '../entities/Laboratory';
+import { OperationType } from '../entities/OperationType';
+import { Product } from '../entities/Product';
+
+import { AddProductDto } from './dto/addProduct.dto';
 import { DiscountDto } from './dto/discount.dto';
+import { GetGammeDto } from './dto/get-gamme.dto';
+import { GetProductDto } from './dto/get-product.dto';
 
 @Injectable()
 export class SelectService {
