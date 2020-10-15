@@ -778,7 +778,7 @@ export class StorePromoMeaService {
       zoneMis: promo.promo?.promoMea?.promoMeaEmplacements
         .map((item: PromoMeaEmplacement) => {
           return `${item.emplacementType.name} ${!item.details ||
-            `(${item.details})`} /n`;
+            `(${item.details})`} \n`;
         })
         .join(','),
     };
