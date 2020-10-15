@@ -9,7 +9,7 @@ export interface IEqualCondition {
   value_max: number;
   comment: string;
 }
-
+export type IEligibilityCaRangeDetails = IEqualCondition[];
 export interface IRemunerationUnitProductDetail {
   eligibility_ca_range_type_id: number;
   value: number;

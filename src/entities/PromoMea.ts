@@ -1,4 +1,11 @@
 import {
+  IEligibilityMinimumDetails,
+  IEligibilityCaRangeDetails,
+  IRemunerationUnitProductDetail,
+  IRemunerationFixedDetails,
+  IRemunerationCaAnnualDetails,
+} from 'src/promo/interface/mea.interface';
+import {
   Column,
   Entity,
   Index,
@@ -14,7 +21,6 @@ import { DocumentProvideType } from './DocumentProvideType';
 import { Promo } from './Promo';
 import { PromoMeaEmplacement } from './PromoMeaEmplacement';
 import { RepaymentCircuitType } from './RepaymentCircuitType';
-import { StorePromoMea } from './StorePromoMea';
 
 @Index('fkIdx_415', ['promoId'], {})
 @Index('fkIdx_459', ['repaymentCircuitTypeId'], {})
@@ -30,13 +36,13 @@ export class PromoMea {
   hasEligibilityMinimumOrder: boolean;
 
   @Column('json', { name: 'eligibility_minimum_details' })
-  eligibilityMinimumDetails: object;
+  eligibilityMinimumDetails: IEligibilityMinimumDetails;
 
   @Column('tinyint', { name: 'has_eligibility_ca_range' })
   hasEligibilityCaRange: boolean;
 
   @Column('json', { name: 'eligibility_ca_range_details' })
-  eligibilityCaRangeDetails: object;
+  eligibilityCaRangeDetails: IEligibilityCaRangeDetails;
 
   @Column('tinyint', { name: 'has_eligibility_other' })
   hasEligibilityOther: boolean;
@@ -51,19 +57,19 @@ export class PromoMea {
   hasRemunerationUnitProduct: boolean;
 
   @Column('json', { name: 'remuneration_unit_product_details' })
-  remunerationUnitProductDetails: object;
+  remunerationUnitProductDetails: IRemunerationUnitProductDetail;
 
   @Column('tinyint', { name: 'has_remuneration_fixed' })
   hasRemunerationFixed: boolean;
 
   @Column('json', { name: 'remuneration_fixed_details' })
-  remunerationFixedDetails: object;
+  remunerationFixedDetails: IRemunerationFixedDetails;
 
   @Column('tinyint', { name: 'has_remuneration_ca_annual' })
   hasRemunerationCaAnnual: boolean;
 
   @Column('json', { name: 'remuneration_ca_annual_details' })
-  remunerationCaAnnualDetails: object;
+  remunerationCaAnnualDetails: IRemunerationCaAnnualDetails;
 
   @Column('tinyint', { name: 'has_remuneration_other' })
   hasRemunerationOther: boolean;
