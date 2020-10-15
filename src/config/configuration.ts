@@ -1,0 +1,17 @@
+export default () => ({
+  environement: process.env.NODE_ENV,
+  port: parseInt(process.env.PORT, 10),
+  database: {
+    host: process.env.DATABASE_HOST,
+    port: parseInt(process.env.DB_PORT, 10) || 3306,
+    user: process.env.DB_USER,
+    name: process.env.DB_DATABASE,
+    password: process.env.DB_PASSWORD,
+    logging: JSON.parse(process.env.DB_LOGGING),
+  },
+  mailTo: process.env.MAIL_TO_ADDRESSES,
+  mailBcc: process.env.MAIL_BCC_ADDRESSES,
+  mailSource: process.env.MAIL_SOURCE,
+  awsS3BaseUrl: process.env.AWS_S3_BASE_URL,
+  bucket: process.env.BUCKET,
+});
