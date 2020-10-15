@@ -29,6 +29,7 @@ import { DAYS_AFTER_END_DATE } from 'src/common/const';
 import * as async from 'async';
 
 import { Laboratory } from '../entities/Laboratory';
+import { PromoMeaEmplacement } from '../entities/PromoMeaEmplacement';
 import { RejectionReason } from '../entities/RejectionReason';
 import { StorePromoMea } from '../entities/StorePromoMea';
 import { StorePromoMeaStateType } from '../entities/StorePromoMeaStateType';
@@ -186,6 +187,14 @@ export class StorePromoMeaService {
       .leftJoinAndSelect(
         'promoMea.repaymentCircuitType',
         'repaymentCircuitType',
+      )
+      .leftJoinAndSelect(
+        'promoMea.promoMeaEmplacements',
+        'promoMeaEmplacements',
+      )
+      .leftJoinAndSelect(
+        'promoMeaEmplacements.emplacementType',
+        'emplacementType',
       )
       .leftJoinAndSelect('sp.stateType', 'stateType')
       .leftJoinAndSelect('promo.laboratory', 'laboratory')
@@ -764,9 +773,14 @@ export class StorePromoMeaService {
       libelle: '',
       // lab : promo.promo.gamme.brand.laboratory.name
       lab: promo.promo.laboratory.name,
-      detMis: 'det _ mis',
-      detRen: 'det _ ren',
-      zoneMis: ' zone _ mis',
+      detMis: 'det_mis',
+      detRen: 'det_ren',
+      zoneMis: promo.promo?.promoMea?.promoMeaEmplacements
+        .map((item: PromoMeaEmplacement) => {
+          return `${item.emplacementType.name} ${!item.details ||
+            `(${item.details})`} /n`;
+        })
+        .join(','),
     };
 
     return newPromo;

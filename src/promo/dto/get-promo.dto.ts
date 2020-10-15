@@ -1,17 +1,7 @@
-import {
-  IsNotEmpty,
-  IsNumber,
-  MaxLength,
-  IsOptional,
-  IsDate,
-  IsString,
-  IsBoolean,
-  ValidateIf,
-  Max,
-  IsArray,
-} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+
+import { Type, Transform } from 'class-transformer';
+
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
 export class GetPromoDto extends PaginationDto {
@@ -40,6 +30,18 @@ export class GetPromoDto extends PaginationDto {
   promoConcernTypeId: number;
 
   @ApiProperty({ required: false })
+  @Type(() => Number)
+  promoTypeId: number;
+
+  @ApiProperty({ required: false })
+  @Transform(value => JSON.parse(value))
+  include_av_cli: boolean;
+  @ApiProperty({ required: false })
   @Type(() => String)
-  promoTypeId: string;
+  type_off: string;
+
+  @ApiProperty({ required: false })
+  // @Type(() => Boolean)
+  @Transform(value => JSON.parse(value))
+  toDownloadPdf: boolean;
 }

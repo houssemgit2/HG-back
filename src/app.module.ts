@@ -17,6 +17,7 @@ import { AccessPermissionsModule } from './access-permissions/access-permissions
 import { AuthModule } from './auth/auth.module';
 import { ClustersModule } from './clusters/clusters.module';
 import { CoquePromoModule } from './coque-promo/coque-promo.module';
+import { config } from './environments/environment';
 import { LeafletModule } from './leaflet/leaflet.module';
 import { LefletPeriodModule } from './leflet-period/leflet-period.module';
 import { MeaUploadModule } from './mea-upload/mea-upload.module';
@@ -29,8 +30,9 @@ import { StorePromoSelectedModule } from './store-promo-selected/store-promo-sel
 import { StoreModule } from './store/store.module';
 import { SupportModule } from './support/support.module';
 import { UserModule } from './user/user.module';
+import configuration from './config/configuration';
+
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
-import { config } from './environments/environment';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -52,6 +54,7 @@ import { config } from './environments/environment';
     }),
     ConfigModule.forRoot({
       isGlobal: true,
+      // load: [configuration],
     }),
     ScheduleModule.forRoot(),
     AuthModule,

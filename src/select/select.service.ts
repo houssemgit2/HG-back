@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Like, Repository, getConnection, ObjectType } from 'typeorm';
@@ -81,14 +85,27 @@ export class SelectService {
       throw new InternalServerErrorException(e);
     }
   }
-  async getOpTypes(name?: string): Promise<any[]> {
-    try {
-      const condition: any = {};
-      if (name) condition.name = Like(`%${name}%`);
-      return await this.laboratoryRepository.find(condition);
-    } catch (e) {
-      throw new InternalServerErrorException(e);
-    }
+  getStaticElementId(
+    name: string,
+    entityTarget: ObjectType<BaseEntity>,
+    entityName: string,
+  ) {
+    return getConnection()
+      .createQueryBuilder()
+      .select(entityName) // table, Entity, key
+      .from(entityTarget, entityName)
+      .where(`name = :name`, {
+        name: `%${name.trim()}%`,
+      })
+      .getOne()
+      .catch(e => {
+        throw new InternalServerErrorException(e);
+      })
+      .then((item: any) => {
+        if (!item)
+          throw new BadRequestException(`there is no ${name} in ${entityName}`);
+        else return item.id;
+      });
   }
 
   async GetByName(

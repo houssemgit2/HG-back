@@ -79,6 +79,10 @@ import { PromoMeaDto } from './dto/promo-mea.dto';
 import { PromoAchatDto } from './dto/promo.achat.dto';
 import { SavePromoTypeDto } from './dto/save-promo-types.dto';
 import { SaveSelectedDto } from './dto/save-selected.dto';
+import { PdfCalendarGeneratorService } from '../../libs/pdf-calendar-generator/src/pdf-calendar-generator.service';
+import { SelectService } from '../select/select.service';
+import { OperationType } from '../entities/OperationType';
+import { query } from 'express';
 
 const multerOptionsForMeaExcel: MulterOptions = multerOptions(
   /xlsm|xlsx|xlsb|xls|xla|xlml|ods|csv|.xlsx|csv/,
@@ -94,10 +98,21 @@ export class PromoController {
     private storePromoSelectedService: StorePromoSelectedService,
     private storePromoMeaService: StorePromoMeaService,
     private meaUploadService: MeaUploadService,
+    private pdfCalendarGeneratorService: PdfCalendarGeneratorService,
+    private statisTableService: SelectService,
     @InjectEventEmitter() private readonly emitter: PromoEventEmitter,
   ) {}
   logger = new Logger('promo controller');
 
+  @ApiTags('Promo')
+  @Get('generate/calendar')
+  async generateCalendar(@Query() query: GetPromoDto, @UserReq() user: User) {
+    const promos = await this.promoService.getPromos(query, user);
+    console.log(query);
+    if (query.toDownloadPdf === false) {
+      return promos;
+    }
+  }
   @ApiTags('Promo')
   @Post('generate/promos')
   @Header('Content-Type', 'image/pdf')

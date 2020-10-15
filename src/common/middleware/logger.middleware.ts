@@ -6,7 +6,6 @@ import { Request, Response } from 'express';
 export class LoggerMiddleware implements NestMiddleware {
   private logger = new Logger('http');
   use(req: Request, res: Response, next: Function) {
-    // console.log(req.query);
     this.logger.debug(`LoggerMiddleware path:   ${req.path}`);
     next();
   }

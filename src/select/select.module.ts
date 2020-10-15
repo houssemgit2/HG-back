@@ -25,5 +25,6 @@ import { AchatSubAdvantageDiscountType } from '../entities/AchatSubAdvantageDisc
   ],
   controllers: [SelectController],
   providers: [SelectService],
+  exports: [SelectService],
 })
 export class SelectModule {}

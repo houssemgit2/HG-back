@@ -17,6 +17,8 @@ import { PromoMeaEmplacement } from '../entities/PromoMeaEmplacement';
 import { PromoConso } from '../entities/PromoConso';
 import { StorePromoMea } from '../entities/StorePromoMea';
 import { PromoMeaDocumentProvide } from '../entities/PromoMeaDocumentProvide';
+import { PdfCalendarGeneratorModule } from '../../libs/pdf-calendar-generator/src/pdf-calendar-generator.module';
+import { SelectModule } from '../select/select.module';
 
 @Module({
   imports: [
@@ -33,10 +35,12 @@ import { PromoMeaDocumentProvide } from '../entities/PromoMeaDocumentProvide';
     ]),
     AuthModule,
     PdfPromoGeneratorModule,
+    PdfCalendarGeneratorModule,
     RejectionReasonModule,
     StorePromoSelectedModule,
     StorePromoMeaModule,
     MeaUploadModule,
+    SelectModule
   ],
   controllers: [PromoController],
   providers: [PromoService],
