@@ -30,7 +30,7 @@ export function arrayEquals(arr1: any[], arr2: any[]): boolean {
 }
 export function convertToSnakeCase(result) {
   const { isObject, isArray } = _;
-  if (isArray(result)) {
+  if (isArray(result) && result.every(item=>isObject(item))) {
     return result.map(innerObj => snakeCaseKeys(innerObj));
   } else if (isObject(result)) {
     return snakeCaseKeys(result);

@@ -30,8 +30,6 @@ import { StorePromoSelectedModule } from './store-promo-selected/store-promo-sel
 import { StoreModule } from './store/store.module';
 import { SupportModule } from './support/support.module';
 import { UserModule } from './user/user.module';
-import configuration from './config/configuration';
-
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 @Module({
   imports: [

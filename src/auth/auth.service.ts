@@ -104,7 +104,7 @@ store_cip: "3", resource: "LOT1"
         permissions = await getRepository(StorePermission)
           .find({
             select: ['resourceId', 'allow'],
-            where: { storeId: user.store.cip },
+            where: { storeId: user?.store?.cip },
             relations: ['resource'],
           })
           .then(data => {

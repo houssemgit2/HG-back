@@ -55,6 +55,7 @@ import { StoreAdminGuard } from 'src/auth/guards/store-admin.guard';
 import { multerOptions, meaS3MulterOptions } from 'src/common/multer';
 import { DAYS_AFTER_END_DATE } from 'src/common/const';
 
+
 import { UserReq } from '../auth/get-user.decorator';
 import { StorePromoMea } from '../entities/StorePromoMea';
 import { User } from '../entities/User';
@@ -71,6 +72,7 @@ import { PromoTransformPipe } from '../common/pipes/promo/transform-promo.pipe';
 
 import { PromoService } from './promo.service';
 
+import { GeneratePdfPromosDto } from './dto/generate-pdf-promos.dto';
 import { GetPromoDto } from './dto/get-promo.dto';
 import { GetSelectedDto } from './dto/get-selected.dto';
 import { PromoGeneralPromoDto } from './dto/promo-general.dto';
@@ -79,10 +81,6 @@ import { PromoMeaDto } from './dto/promo-mea.dto';
 import { PromoAchatDto } from './dto/promo.achat.dto';
 import { SavePromoTypeDto } from './dto/save-promo-types.dto';
 import { SaveSelectedDto } from './dto/save-selected.dto';
-import { PdfCalendarGeneratorService } from '../../libs/pdf-calendar-generator/src/pdf-calendar-generator.service';
-import { SelectService } from '../select/select.service';
-import { OperationType } from '../entities/OperationType';
-import { query } from 'express';
 
 const multerOptionsForMeaExcel: MulterOptions = multerOptions(
   /xlsm|xlsx|xlsb|xls|xla|xlml|ods|csv|.xlsx|csv/,
@@ -98,8 +96,6 @@ export class PromoController {
     private storePromoSelectedService: StorePromoSelectedService,
     private storePromoMeaService: StorePromoMeaService,
     private meaUploadService: MeaUploadService,
-    private pdfCalendarGeneratorService: PdfCalendarGeneratorService,
-    private statisTableService: SelectService,
     @InjectEventEmitter() private readonly emitter: PromoEventEmitter,
   ) {}
   logger = new Logger('promo controller');
@@ -117,7 +113,7 @@ export class PromoController {
   @Post('generate/promos')
   @Header('Content-Type', 'image/pdf')
   @Header('Content-Disposition', 'attachment; filename=promos.pdf')
-  async generatePromos(@Body() body: any, @Res() response) {
+  async generatePromos(@Body() body: GeneratePdfPromosDto, @Res() response) {
     const file: string = await this.pdfPromoGeneratorService.generatePDF(
       body.promos,
     );

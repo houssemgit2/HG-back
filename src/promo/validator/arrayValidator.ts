@@ -14,7 +14,7 @@ export function IsArrayOfObject(validationOptions?: ValidationOptions) {
       options: validationOptions,
       validator: {
         validate(value: any, args: ValidationArguments) {
-          return Array.isArray(value) && value.some(item => item.ID);
+          return Array.isArray(value) && value.some(item => item.id);
         },
       },
     });

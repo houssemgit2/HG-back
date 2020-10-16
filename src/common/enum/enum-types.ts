@@ -80,7 +80,6 @@ export const STATIC_TABLES = [
     targetEntity: DocumentProvideType,
     entityName: 'DocumentProvideType',
   },
-  ,
   {
     name: 'concerned-type',
     targetEntity: PromoConcernType,

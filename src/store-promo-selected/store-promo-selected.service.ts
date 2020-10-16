@@ -1,9 +1,12 @@
-import { StorePromoSelected } from './../entities/StorePromoSelected';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Injectable } from '@nestjs/common';
-import { Repository, In, Not } from 'typeorm';
-import { PROMO_TYPES } from './../../libs/pdf-promo-generator/src/consts';
+import { Injectable, Logger } from '@nestjs/common';
+
+import { Repository } from 'typeorm';
+
 import { _ } from 'lodash';
+
+import { StorePromoSelected } from './../entities/StorePromoSelected';
+import { PROMO_TYPES } from './../../libs/pdf-promo-generator/src/consts';
 
 const groupBy = require('group-array-items').default;
 
@@ -13,12 +16,14 @@ export class StorePromoSelectedService {
     @InjectRepository(StorePromoSelected)
     private storePromoSelectedRepository: Repository<StorePromoSelected>,
   ) {}
+  logger = new Logger();
   async savedPromos(storeId, month, year, promos) {
+    console.log(storeId);
     await this.storePromoSelectedRepository
       .createQueryBuilder()
       .delete()
       .where('promo_id NOT IN (:...ids)', {
-        ids: promos.map(prm => prm.ID),
+        ids: promos.map(prm => prm.id),
       })
       // eslint-disable-next-line @typescript-eslint/camelcase
       .andWhere('store_id = :store_id', { store_id: storeId })
@@ -31,7 +36,7 @@ export class StorePromoSelectedService {
         if (promo.micro_type === PROMO_TYPES.FIXED_PRICE) {
           priceRef = promo.price || 0;
         }
-        const promoId = promo.ID;
+        const promoId = promo.id;
         return this.storePromoSelectedRepository.save({
           promoId,
           storeId,
@@ -53,7 +58,7 @@ export class StorePromoSelectedService {
   }
   async savePrintConfig(storeId, month, year, promos) {
     const groupedPromos = groupBy(promos, {
-      groupBy: 'ID',
+      groupBy: 'promo_id',
       childElement: 'print_config',
     });
     // this variable is used to record updatedPromos IDs so that we can clean up deleted promos from the db
@@ -61,7 +66,7 @@ export class StorePromoSelectedService {
 
     await Promise.all(
       groupedPromos.map(promo => {
-        currentMonthPromos.push(promo.ID);
+        currentMonthPromos.push(promo['promo_id']);
         const printConfgJson = promo.print_config.map(config =>
           _.pick(config, [
             'priceRef',
@@ -72,9 +77,10 @@ export class StorePromoSelectedService {
             'mention2',
           ]),
         );
+        console.log(JSON.stringify(JSON.stringify(printConfgJson)));
         return this.storePromoSelectedRepository.query(
           'INSERT INTO `store_promo_selected` (`promo_id`, `store_id`, `year`, `month`, `print_config`) VALUES (' +
-            promo.ID +
+            promo['promo_id'] +
             ',' +
             storeId +
             ',' +

@@ -65,7 +65,7 @@ export class StorePromoMeaService {
         throw new InternalServerErrorException(e);
       }
     });
-    this.handleCron(); // TODO you may have to remove this
+    // this.handleCron(); // TODO you may have to remove this
     // this.storePromoMeaRepository
     //   .findExpiredPromo(1)
     //   .then(tes => console.log(tes));
