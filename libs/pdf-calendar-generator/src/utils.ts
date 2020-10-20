@@ -145,6 +145,13 @@ const PROMO_TYPES = {
   Remise_en_pour_sur_le_2eme_gamme: val => `${val || ''}% SUR 2 ÈME GAM`,
   Prix_en_baisse: val => `PRIX BAIS (${val}€)`,
 };
+function formatPromoType(microType, val) {
+  if (typeof PROMO_TYPES[microType] !== 'function') {
+    return PROMO_TYPES.Generic(val);
+  }
+  return PROMO_TYPES[microType](val);
+}
+
 export function serializePromosValues(promos, opType) {
   let actualColumns = displayedColumns;
   let actualHeaders = headers;
@@ -163,36 +170,57 @@ export function serializePromosValues(promos, opType) {
       actualColumns.splice(6, 1);
     }
   }
-
+  console.log(actualColumns);
   const res = promos.map((promo, index) =>
     actualColumns.map(key => {
       if (key === 'macro_type')
-        return `${promo.dataValues.macro_type}  ${formatPromoType(
-          promo.dataValues.micro_type,
-          promo.dataValues.price,
+        return `${promo.macro_type}  ${formatPromoType(
+          promo.micro_type,
+          promo.price,
         )}`;
       if (key === 'gamme')
-        return `${promo.dataValues.gamme} ${
-          promo.dataValues.libelle ? '-' + promo.dataValues.libelle : ''
-        }`;
+        return `${promo.gamme} ${promo.libelle ? '-' + promo.libelle : ''}`;
       if (key === 'contenance')
-        return `${promo.dataValues.contenance} ( ${promo.dataValues.mes_unit})`;
+        return `${promo.contenance} ( ${promo.mes_unit})`;
       if (key === 'contenance')
-        return `${
-          promo.dataValues.lot_phys
-            ? 'OUI (' + promo.dataValues.qte_lot + ')'
-            : 'NON'
-        })`;
-      return promo.dataValues[key];
+        return `${promo.lot_phys ? 'OUI (' + promo.qte_lot + ')' : 'NON'})`;
+      return promo[key] ?? '';
     }),
   );
   res.splice(0, 0, actualHeaders);
 
   return res;
 }
-function formatPromoType(microType, val) {
-  if (typeof PROMO_TYPES[microType] !== 'function') {
-    return PROMO_TYPES.Generic(val);
-  }
-  return PROMO_TYPES[microType](val);
+export function sortByLaboAndPromoType(promosObjects, keyLabo, keyType, keyID) {
+  const orderByType = [
+    'MEA',
+    'MEA + OP CONSO',
+    'MEA + OP ACHAT',
+    'MEA + OP CONSO + OP ACHAT',
+    'OP CONSO',
+    'OP ACHAT',
+    'OP CONSO + OP ACHAT',
+  ];
+  promosObjects.sort((x, y) => {
+    if (x[keyLabo] < y[keyLabo]) {
+      return -1;
+    }
+    if (x[keyLabo] > y[keyLabo]) {
+      return 1;
+    }
+    if (orderByType.indexOf(x[keyType]) < orderByType.indexOf(y[keyType])) {
+      return -1;
+    }
+    if (orderByType.indexOf(x[keyType]) > orderByType.indexOf(y[keyType])) {
+      return 1;
+    }
+    if (x[keyID] < y[keyID]) {
+      return -1;
+    }
+    if (x[keyID] > y[keyID]) {
+      return 1;
+    }
+    return 0;
+  });
+  return promosObjects;
 }
