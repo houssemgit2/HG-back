@@ -6092,6 +6092,11 @@ nest-emitter@^1.1.1:
   resolved "https://registry.yarnpkg.com/nest-emitter/-/nest-emitter-1.1.1.tgz#7237432afb926a7439c5d1e00ea6d003bb97b8d3"
   integrity sha512-lsDJIuMl3A2xT4CYbHMNpoUdbIHUomRLcJJcLy4ZJzLoj09DXw79jVx1T/8YcTDKgk0smAKTq5JocXO6Hwy4tQ==
 
+nested-objects-util@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/nested-objects-util/-/nested-objects-util-1.1.1.tgz#1bf094946c05e4d5aca2d5e6cd454b9c7c7349db"
+  integrity sha512-KWq+HR4h8Rbl1d+k34eKuhEiVjTefwhXI2MPuQdOFafdJTyUCGmZ5qbv/3qE2vQySlGBiiNLE0z2f0UwHO571A==
+
 next-tick@1:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/next-tick/-/next-tick-1.1.0.tgz#1836ee30ad56d67ef281b22bd199f709449b35eb"

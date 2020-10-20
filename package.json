@@ -70,6 +70,7 @@
     "multer-s3": "^2.9.0",
     "mysql": "^2.18.1",
     "nest-emitter": "^1.1.1",
+    "nested-objects-util": "^1.1.1",
     "node-gyp": "^6.1.0",
     "node-xlsx": "^0.15.0",
     "nodemailer": "^6.4.14",
