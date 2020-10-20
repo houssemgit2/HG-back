@@ -7,7 +7,6 @@ import {
   ValidateNested,
   IsNumber,
   IsString,
-  IsArray,
 } from 'class-validator';
 
 import { IsNotEmptyArray } from '../validator/empty-array.validator';
