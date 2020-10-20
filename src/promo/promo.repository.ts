@@ -26,6 +26,10 @@ export class PromoRepository extends Repository<Promo> {
       .leftJoinAndSelect('promoType.operationType', 'operationType')
       .leftJoinAndSelect('p.promoAchat', 'promoAchat')
       .leftJoinAndSelect('p.promoMea', 'promoMea')
+      .leftJoinAndSelect('p.promoConso', 'promoConso')
+      .leftJoinAndSelect('promoConso.microType', 'microType')
+      .leftJoinAndSelect('promoConso.circuitType', 'circuitType')
+      .leftJoinAndSelect('promoConso.remunerationBase','remunerationBase')
       .leftJoinAndMapMany(
         'p.promoProducts',
         'product',

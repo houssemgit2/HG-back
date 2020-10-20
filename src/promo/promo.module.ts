@@ -1,24 +1,28 @@
-import { StorePromoSelectedModule } from './../store-promo-selected/store-promo-selected.module';
+import { PdfPromoGeneratorModule } from '@app/pdf-promo-generator';
+import { PdfCalendarGeneratorModule } from '@app/pdf-calendar-generator';
+
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PromoController } from './promo.controller';
+
 import { AuthModule } from 'src/auth/auth.module';
-import { PromoService } from './promo.service';
-import { PromoRepository } from './promo.repository';
-import { PdfPromoGeneratorModule } from '@app/pdf-promo-generator';
 import { RejectionReasonModule } from 'src/rejection-reason/rejection-reason.module';
-import { StorePromoMeaModule } from '../store-promo-mea/store-promo-mea.module';
 import { MeaUploadModule } from 'src/mea-upload/mea-upload.module';
-import { PromoOperationType } from '../entities/PromoType';
-import { PromoCluster } from '../entities/PromoCluster';
+
 import { PromoAchat } from '../entities/PromoAchat';
-import { PromoMea } from '../entities/PromoMea';
-import { PromoMeaEmplacement } from '../entities/PromoMeaEmplacement';
+import { PromoCluster } from '../entities/PromoCluster';
 import { PromoConso } from '../entities/PromoConso';
-import { StorePromoMea } from '../entities/StorePromoMea';
+import { PromoMea } from '../entities/PromoMea';
 import { PromoMeaDocumentProvide } from '../entities/PromoMeaDocumentProvide';
-import { PdfCalendarGeneratorModule } from '../../libs/pdf-calendar-generator/src/pdf-calendar-generator.module';
+import { PromoMeaEmplacement } from '../entities/PromoMeaEmplacement';
+import { PromoOperationType } from '../entities/PromoType';
+import { StorePromoMea } from '../entities/StorePromoMea';
 import { SelectModule } from '../select/select.module';
+import { StorePromoMeaModule } from '../store-promo-mea/store-promo-mea.module';
+import { StorePromoSelectedModule } from './../store-promo-selected/store-promo-selected.module';
+
+import { PromoController } from './promo.controller';
+import { PromoRepository } from './promo.repository';
+import { PromoService } from './promo.service';
 
 @Module({
   imports: [
@@ -40,7 +44,7 @@ import { SelectModule } from '../select/select.module';
     StorePromoSelectedModule,
     StorePromoMeaModule,
     MeaUploadModule,
-    SelectModule
+    SelectModule,
   ],
   controllers: [PromoController],
   providers: [PromoService],
