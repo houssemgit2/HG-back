@@ -158,8 +158,6 @@ export function serializePromosValues(promos, opType) {
   if (opType.toLowerCase().indexOf('mea') !== -1) {
     actualColumns = displayedColumnsMEA;
     actualHeaders = headersMEA;
-    console.log(actualColumns);
-    console.log(actualHeaders);
   } else {
     if (opType === 'OP ACHAT') {
       actualHeaders.splice(7, 4);
@@ -170,7 +168,6 @@ export function serializePromosValues(promos, opType) {
       actualColumns.splice(6, 1);
     }
   }
-  console.log(actualColumns);
   const res = promos.map((promo, index) =>
     actualColumns.map(key => {
       if (key === 'macro_type')

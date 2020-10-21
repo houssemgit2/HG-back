@@ -5,10 +5,14 @@ import { Injectable, Logger } from '@nestjs/common';
 import * as fs from 'fs';
 
 import { v1 as uuidv1 } from 'uuid';
-import { sortByLaboAndPromoType } from './utils';
+
 import * as XLSX from 'xlsx';
 
 import PdfPrinter = require('pdfmake');
+
+import { Promo } from '../../../src/entities/Promo';
+
+import { sortByLaboAndPromoType } from './utils';
 const fontsDirPath = `${__dirname}/resources/fonts`;
 const availableFonts = {
   SharpGrostek: {
@@ -114,5 +118,28 @@ export class PdfCalendarGeneratorService {
       });
       return promoObj;
     });
+  }
+  promoKeysCorrespondant(promos: Promo[]) {
+    return promos.map(item => ({
+      ...item,
+      ID: item.id,
+      laboratoire: item.laboratory?.name, // TODO item.gamme?.barnd?.laboratory?.name
+      lab: item.gamme?.brand?.name,
+      gamme: item.gamme.name,
+      ean: item.promoProducts[0]?.ean,
+      cond_el: item.promoAchat?.eligibilityAdditionalInformation,
+      det_mec: item.promoConso?.microType.name,
+      achat_vente: item.promoAchat?.eligibilityOther,
+      detail_comp: item.promoAchat?.achatAdvantageDiscountDetails?.data,
+      circ_rev: item.promoConso?.remunerationBase?.name,
+      per_cont_comp: item.promoConso?.circuitType?.name,
+      micro_type: item.promoConso?.microType?.name,
+      macro_type: item.promoConso?.microType?.macroType?.name,
+      price: item.promoConso?.price,
+      mes_unit: item.promoProducts[0]?.measureType?.name,
+      contenance: item.promoProducts[0]?.measureValue,
+      lot_phys: item.promoConso?.physicalLot,
+      qte_lot: item.promoConso?.quantityLot,
+    }));
   }
 }

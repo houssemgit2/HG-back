@@ -12,7 +12,6 @@ import { map } from 'rxjs/operators';
 import { convertToSnakeCase } from './utils/helpers';
 
 export interface Response<T> {
-  code: number;
   statusCode: number;
   data: T;
 }
@@ -35,7 +34,6 @@ export class TransformInterceptor implements NestInterceptor {
       // make the response standard {status,data}
       return next.handle().pipe(
         map(data => ({
-          code: status,
           statusCode: status,
           // code: status, // TODO keep just the statusCode and front team has to use statusCode
           data:

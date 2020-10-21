@@ -325,7 +325,6 @@ export class PromoService {
     try {
       if (user.userRoleId !== 1) filter.status = 1;
       return await this.promoRepository.findAll(filter, promoId);
-      // return await this.promoMeaRepository.find()
     } catch (err) {
       this.logger.error('Error on fetching All Promos');
       throw new InternalServerErrorException(err);

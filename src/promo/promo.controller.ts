@@ -56,7 +56,9 @@ import { StoreAdminGuard } from 'src/auth/guards/store-admin.guard';
 import { multerOptions, meaS3MulterOptions } from 'src/common/multer';
 import { DAYS_AFTER_END_DATE } from 'src/common/const';
 
+
 import { UserReq } from '../auth/get-user.decorator';
+import { Promo } from '../entities/Promo';
 import { StorePromoMea } from '../entities/StorePromoMea';
 import { User } from '../entities/User';
 import { StorePromoMeaService } from '../store-promo-mea/store-promo-mea.service';
@@ -72,6 +74,7 @@ import { PromoTransformPipe } from '../common/pipes/promo/transform-promo.pipe';
 
 import { PromoService } from './promo.service';
 
+import { CalendarDto } from './dto/calendar.dto';
 import { GeneratePdfPromosDto } from './dto/generate-pdf-promos.dto';
 import { GetPromoDto } from './dto/get-promo.dto';
 import { GetSelectedDto } from './dto/get-selected.dto';
@@ -81,8 +84,6 @@ import { PromoMeaDto } from './dto/promo-mea.dto';
 import { PromoAchatDto } from './dto/promo.achat.dto';
 import { SavePromoTypeDto } from './dto/save-promo-types.dto';
 import { SaveSelectedDto } from './dto/save-selected.dto';
-import { flatten } from 'nested-objects-util';
-import { Promo } from '../entities/Promo';
 const multerOptionsForMeaExcel: MulterOptions = multerOptions(
   /xlsm|xlsx|xlsb|xls|xla|xlml|ods|csv|.xlsx|csv/,
   `${__dirname}/../uploads/mea-state/`,
@@ -103,6 +104,48 @@ export class PromoController {
   logger = new Logger('promo controller');
 
   @ApiTags('Promo')
+  @Post('generate/calendar/csv')
+  @Header('Content-Type', 'image/xlsx')
+  @Header('Content-Disposition', 'attachment; filename=promos.xlsx')
+  async generateMeaCalendarCsv(
+    @Body() { idList }: CalendarDto,
+    @UserReq() user: User,
+    @Res() response,
+  ) {
+    const promos = await this.promoService.getPromos({ idList }, user);
+    const v1PromosKeys = this.pdfCalendarGeneratorService.promoKeysCorrespondant(
+      promos,
+    );
+
+    const filePath = await this.pdfCalendarGeneratorService.generateCsvCalendar(
+      v1PromosKeys,
+      'MEA',
+      'xlsx',
+    );
+    return response.status(200).download(filePath);
+  }
+
+  @ApiTags('Promo')
+  @Post('generate/calendar')
+  @Header('Content-Type', 'image/pdf')
+  @Header('Content-Disposition', 'attachment; filename=promos.pdf')
+  async generateMeaCalendar(
+    @Body() { idList }: CalendarDto,
+    @UserReq() user: User,
+    @Res() response,
+  ) {
+    const promos = await this.promoService.getPromos({ idList }, user);
+    const v1PromosKeys = this.pdfCalendarGeneratorService.promoKeysCorrespondant(
+      promos,
+    );
+
+    const filePath = await this.pdfCalendarGeneratorService.generate(
+      v1PromosKeys,
+      'MEA',
+    );
+    return response.status(200).download(filePath);
+  }
+  @ApiTags('Promo')
   @Get('generate/calendar')
   async generateCalendar(
     @Query() query: GetPromoDto,
@@ -110,54 +153,36 @@ export class PromoController {
     @Res() res: any,
   ) {
     const promos: Promo[] = await this.promoService.getPromos(query, user);
-    const corresPromo = promos.map(item => ({
-      ...item,
-      ID: item.id,
-      laboratoire: item.laboratory?.name, // TODO item.gamme?.barnd?.laboratory?.name
-      lab: item.gamme?.brand?.name,
-      gamme: item.gamme.name,
-      ean: item.promoProducts[0]?.ean,
-      cond_el: item.promoAchat?.eligibilityAdditionalInformation,
-      det_mec: item.promoConso?.microType.name,
-      achat_vente: item.promoAchat?.eligibilityOther,
-      detail_comp: item.promoAchat?.achatAdvantageDiscountDetails?.data,
-      circ_rev: item.promoConso?.remunerationBase?.name,
-      per_cont_comp: item.promoConso?.circuitType?.name,
-      micro_type: item.promoConso?.microType?.name,
-      macro_type: item.promoConso?.microType?.macroType?.name,
-      price: item.promoConso?.price,
-      mes_unit: item.promoProducts[0]?.measureType?.name,
-      contenance: item.promoProducts[0]?.measureValue,
-      lot_phys: item.promoConso?.physicalLot,
-      qte_lot: item.promoConso?.quantityLot,
-    }));
+    const v1PromosKeys = this.pdfCalendarGeneratorService.promoKeysCorrespondant(
+      promos,
+    );
     this.logger.debug(`${promos.length} promos found * _ *`);
     if (query.toDownloadPdf === false) {
-      const result = corresPromo.map(item => convertToSnakeCase(item));
+      const result = v1PromosKeys.map(item => convertToSnakeCase(item));
 
       return res.status(200).json({
         statusCode: 200,
-        code: 200,
         data: result.map(item => ({ ID: item.id, ...item })),
       });
     }
-    const flattenPromos = promos.map(promo => flatten(promo));
+    // const flattenPromos = promos.map(promo => flatten(promo));
     let filePath: any;
     if (query.csv)
       filePath = await this.pdfCalendarGeneratorService.generateCsvCalendar(
-        corresPromo,
+        v1PromosKeys,
         query.type_off,
         'xlsx',
       );
     else
       filePath = await this.pdfCalendarGeneratorService.generate(
-        corresPromo,
+        v1PromosKeys,
         // promos, // .map(item => ({ ID: item.id, ...item })),
         query.type_off,
       );
     this.logger.debug(`pdf generagted at ${filePath}`);
     return res.status(200).download(filePath);
   }
+
   @ApiTags('Promo')
   @Post('generate/promos')
   @Header('Content-Type', 'image/pdf')

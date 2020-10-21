@@ -29,7 +29,7 @@ export class PromoRepository extends Repository<Promo> {
       .leftJoinAndSelect('p.promoConso', 'promoConso')
       .leftJoinAndSelect('promoConso.microType', 'microType')
       .leftJoinAndSelect('promoConso.circuitType', 'circuitType')
-      .leftJoinAndSelect('promoConso.remunerationBase','remunerationBase')
+      .leftJoinAndSelect('promoConso.remunerationBase', 'remunerationBase')
       .leftJoinAndMapMany(
         'p.promoProducts',
         'product',
@@ -99,6 +99,10 @@ export class PromoRepository extends Repository<Promo> {
         'emplacementType',
       );
     try {
+      if (filter.idList)
+        sqlQuery.where('p.id IN (:idList)', {
+          idList: filter.idList,
+        });
       if (promoId)
         return await sqlQuery.where('p.id =:promoId', { promoId }).getOne();
       if (filter.startDate && filter.endDate)
@@ -135,6 +139,11 @@ export class PromoRepository extends Repository<Promo> {
         sqlQuery.andWhere('promoType.operation_type_id=:promoTypeId', {
           promoTypeId: filter.promoTypeId,
         });
+      if (filter.type_off)
+        sqlQuery.andWhere('operationType.name like :promoTypeName', {
+          promoTypeName: `${filter.type_off}`,
+        });
+
       if (filter.status)
         sqlQuery.andWhere(
           'p.status_id=:status or status.name like :statusName',
@@ -142,6 +151,12 @@ export class PromoRepository extends Repository<Promo> {
             status: filter.status,
             statusName: `%${filter.status}%`,
           },
+        );
+      if (filter.include_av_cli)
+        // TODO to update, separate it to
+        sqlQuery.andWhere(
+          'promoMea.has_promo_achat_linked=:isInclude and promoMea.has_promo_conso_linked=:isInclude',
+          { isInclude: filter.include_av_cli },
         );
       if (filter.perPage && filter.page) {
         sqlQuery.skip(filter.perPage * (filter.page - 1)).take(filter.perPage);
