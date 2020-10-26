@@ -9,21 +9,21 @@ import {
   PrimaryGeneratedColumn,
   BaseEntity,
 } from 'typeorm';
+
 import { Emplacement } from './Emplacement';
 import { Gamme } from './Gamme';
-import { PromoOperationType } from './PromoType';
-import { StorePromoMea } from './StorePromoMea';
-import { StorePromoSelected } from './StorePromoSelected';
-import { PromoCluster } from './PromoCluster';
-import { PromoAchat } from './PromoAchat';
-import { PromoConso } from './PromoConso';
-import { PromoMea } from './PromoMea';
-import { PromoStatus } from './Status';
-import { PromoConcernType } from './PromoConcernedType';
-import { ProductConcernType } from './ProductConcernType';
 import { Laboratory } from './Laboratory';
 import { Product } from './Product';
-import { ManyToMany } from 'typeorm';
+import { ProductConcernType } from './ProductConcernType';
+import { PromoAchat } from './PromoAchat';
+import { PromoCluster } from './PromoCluster';
+import { PromoConcernType } from './PromoConcernedType';
+import { PromoConso } from './PromoConso';
+import { PromoMea } from './PromoMea';
+import { PromoOperationType } from './PromoType';
+import { PromoStatus } from './Status';
+import { StorePromoMea } from './StorePromoMea';
+import { StorePromoSelected } from './StorePromoSelected';
 
 @Index('promo_gamme_id_fk', ['gammeId'], {})
 @Index('promo_status_id_fk', ['statusId'], {})
@@ -38,8 +38,8 @@ export class Promo extends BaseEntity {
   @Column('int', { name: 'gamme_id', nullable: true })
   gammeId: number | null;
 
-  @Column('int', { name: 'laboratory_id', nullable: true })
-  laboratoryId: number | null;
+  // @Column('int', { name: 'laboratory_id', nullable: true })
+  // laboratoryId: number | null;
 
   @Column('date', { name: 'start_date', nullable: true })
   startDate: Date | null;
@@ -58,8 +58,6 @@ export class Promo extends BaseEntity {
 
   @Column('json', { name: 'product_ids', nullable: true })
   productIds: object | null;
-
-
 
   @Column('text', { name: 'comment', nullable: true })
   comment: string;
@@ -98,13 +96,13 @@ export class Promo extends BaseEntity {
   @JoinColumn([{ name: 'gamme_id', referencedColumnName: 'id' }])
   gamme: Gamme;
 
-  @ManyToOne(
-    () => Laboratory,
-    laboratory => laboratory.promos,
-    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
-  )
-  @JoinColumn([{ name: 'laboratory_id', referencedColumnName: 'id' }])
-  laboratory: Laboratory;
+  // @ManyToOne(
+  //   () => Laboratory,
+  //   laboratory => laboratory.promos,
+  //   { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
+  // )
+  // @JoinColumn([{ name: 'laboratory_id', referencedColumnName: 'id' }])
+  // laboratory: Laboratory;
 
   @ManyToOne(
     () => PromoStatus,

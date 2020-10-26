@@ -8,8 +8,9 @@ import {
   PrimaryGeneratedColumn,
   BaseEntity,
 } from 'typeorm';
-import { Laboratory } from './Laboratory';
+
 import { Gamme } from './Gamme';
+import { Laboratory } from './Laboratory';
 
 @Index('brand_laboratory_id_fk', ['laboratoryId'], {})
 @Entity('brand', { schema: 'hg_promo_beta' })
@@ -26,7 +27,7 @@ export class Brand extends BaseEntity {
   @ManyToOne(
     () => Laboratory,
     laboratory => laboratory.brands,
-    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
   )
   @JoinColumn([{ name: 'laboratory_id', referencedColumnName: 'id' }])
   laboratory: Laboratory;

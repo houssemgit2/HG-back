@@ -8,6 +8,7 @@ import {
   PrimaryGeneratedColumn,
   BaseEntity,
 } from 'typeorm';
+
 import { Brand } from './Brand';
 import { Product } from './Product';
 import { Promo } from './Promo';
@@ -27,7 +28,7 @@ export class Gamme extends BaseEntity {
   @ManyToOne(
     () => Brand,
     brand => brand.gammes,
-    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
   )
   @JoinColumn([{ name: 'brand_id', referencedColumnName: 'id' }])
   brand: Brand;

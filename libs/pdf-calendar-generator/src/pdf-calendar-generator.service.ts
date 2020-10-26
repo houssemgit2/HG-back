@@ -123,9 +123,9 @@ export class PdfCalendarGeneratorService {
     return promos.map(item => ({
       ...item,
       ID: item.id,
-      laboratoire: item.laboratory?.name, // TODO item.gamme?.barnd?.laboratory?.name
+      laboratoire: item.gamme?.brand?.laboratory?.name, // item.laboratory?.name
       lab: item.gamme?.brand?.name,
-      gamme: item.gamme.name,
+      gamme: item.gamme?.name,
       ean: item.promoProducts[0]?.ean,
       cond_el: item.promoAchat?.eligibilityAdditionalInformation,
       det_mec: item.promoConso?.microType.name,

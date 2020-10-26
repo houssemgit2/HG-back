@@ -18,7 +18,8 @@ export class PromoRepository extends Repository<Promo> {
       .leftJoinAndSelect('p.promoClusters', 'promoCluster')
       .leftJoinAndSelect('promoCluster.cluster', 'c')
       .leftJoinAndSelect('p.gamme', 'gamme')
-      .leftJoinAndSelect('p.laboratory', 'laboratory')
+      .leftJoinAndSelect('gamme.brand', 'brand')
+      .leftJoinAndSelect('brand.laboratory', 'laboratory')
       .leftJoinAndSelect('p.promoType', 'promoType')
       .leftJoinAndSelect('p.promoConcernType', 'promoConcernType')
       .leftJoinAndSelect('p.productConcernType', 'productConcernType')
@@ -28,6 +29,7 @@ export class PromoRepository extends Repository<Promo> {
       .leftJoinAndSelect('p.promoMea', 'promoMea')
       .leftJoinAndSelect('p.promoConso', 'promoConso')
       .leftJoinAndSelect('promoConso.microType', 'microType')
+      .leftJoinAndSelect('microType.macroType', 'macroType')
       .leftJoinAndSelect('promoConso.circuitType', 'circuitType')
       .leftJoinAndSelect('promoConso.remunerationBase', 'remunerationBase')
       .leftJoinAndMapMany(

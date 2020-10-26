@@ -607,7 +607,7 @@ export class StorePromoMeaService {
   }
   promoToExportExcel(promoMea: StorePromoMea) {
     const idSys: string = promoMea.promoId + '--' + promoMea.storeId;
-    const lab = promoMea.promo.laboratory ? promoMea.promo.laboratory.name : '';
+    const lab = promoMea?.promo?.gamme?.brand?.laboratory?.name ?? '';
     const libelle = '';
     const gamme: string =
       promoMea.promo && promoMea.promo.gamme ? promoMea.promo.gamme.name : '';
@@ -772,7 +772,7 @@ export class StorePromoMeaService {
       gamme: promo.promo.gamme.name,
       libelle: '',
       // lab : promo.promo.gamme.brand.laboratory.name
-      lab: promo.promo.laboratory.name,
+      lab: promo.promo.gamme.brand.laboratory.name,
       detMis: 'det_mis',
       detRen: 'det_ren',
       zoneMis: promo.promo?.promoMea?.promoMeaEmplacements

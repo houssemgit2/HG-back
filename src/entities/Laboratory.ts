@@ -21,10 +21,4 @@ export class Laboratory extends BaseEntity {
     brand => brand.laboratory,
   )
   brands: Brand[];
-
-  @OneToMany(
-    () => Promo,
-    promo => promo.laboratory,
-  )
-  promos: Promo[];
 }
