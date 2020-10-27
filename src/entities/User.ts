@@ -85,7 +85,12 @@ export class User extends BaseEntity {
   )
   @JoinColumn([{ name: 'store_id', referencedColumnName: 'cip' }])
   store: Store;
-
+  @OneToOne(
+    () => Store,
+    store => store.owner,
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
+  )
+  myStore: Store;
   @ManyToOne(
     () => UserRole,
     userRole => userRole.users,
@@ -94,11 +99,6 @@ export class User extends BaseEntity {
   @JoinColumn([{ name: 'user_role_id', referencedColumnName: 'id' }])
   userRole: UserRole;
 
-  @OneToOne(
-    () => Store,
-    store => store.cip,
-    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
-  )
   async validatePassword(password: string): Promise<boolean> {
     const hash = await bcrypt.hash(password, this.salt);
     return hash === this.password;

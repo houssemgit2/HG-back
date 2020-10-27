@@ -45,7 +45,7 @@ export class StoreRepository extends Repository<Store> {
     try {
       const query = this.createQueryBuilder('store')
         .leftJoinAndSelect(
-          'store.users',
+          'store.owner',
           'owner',
           'owner.store_id=store.cip && is_owner=true',
         )
@@ -54,10 +54,10 @@ export class StoreRepository extends Repository<Store> {
           'clusters',
           'clusters.id=store.cluster_id',
         );
+
       if (filter.perPage && filter.page) {
         query.skip(filter.perPage * (filter.page - 1)).take(filter.perPage);
       }
-      query.getMany();
       const result = await query.getMany();
       return result;
     } catch (e) {

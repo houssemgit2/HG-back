@@ -67,10 +67,27 @@ export class SelectService {
   async getGamme(gamme: GetGammeDto): Promise<Gamme[]> {
     try {
       const gammeCondition: any = {};
-      if (gamme.name) gammeCondition.name = Like(`%${gamme.name}%`);
-      if (gamme.brand_id) gammeCondition.brandId = gamme.brand_id;
+      // if (gamme.laboratory_id)
+      const query = getConnection()
+        .createQueryBuilder()
+        .select('gamme') // table, Entity, key
+        .from(Gamme, 'gamme')
+        .leftJoinAndSelect('gamme.brand', 'brand');
+      // .leftJoin('brand.laboratory', 'laboratory');
+      console.log('gamme brand labo');
+      if (gamme.laboratory_id)
+        query.andWhere('brand.laboratory_id = :labo', {
+          labo: gamme.laboratory_id,
+        });
 
-      return await this.gammeRepository.find(gammeCondition);
+      if (gamme.name)
+        query.andWhere('gamme.name like :name', { name: `%${gamme.name}%` });
+
+      if (gamme.brand_id)
+        query.andWhere('gamme.brand_id = :brand', { brand: gamme.brand_id });
+
+      // return await this.gammeRepository.find(gammeCondition);
+      return await query.getMany();
     } catch (e) {
       throw new InternalServerErrorException(e);
     }

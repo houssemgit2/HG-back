@@ -183,6 +183,8 @@ export class StorePromoMeaService {
       .leftJoinAndSelect('sp.promo', 'promo') //, 'promo.id = sp.promo_id')
       .leftJoinAndSelect('sp.store', 'store') //, 'store.cip = sp.store_id')
       .leftJoinAndSelect('promo.gamme', 'gamme')
+      .leftJoinAndSelect('gamme.brand', 'brand')
+      .leftJoinAndSelect('brand.laboratory', 'laboratory')
       .leftJoinAndSelect('promo.promoMea', 'promoMea')
       .leftJoinAndSelect(
         'promoMea.repaymentCircuitType',
@@ -197,7 +199,7 @@ export class StorePromoMeaService {
         'emplacementType',
       )
       .leftJoinAndSelect('sp.stateType', 'stateType')
-      .leftJoinAndSelect('promo.laboratory', 'laboratory')
+      // .leftJoinAndSelect('promo.laboratory', 'laboratory')
       .leftJoinAndSelect('promo.promoConcernType', 'promoConcernType')
       .leftJoinAndSelect('promo.promoType', 'promoType')
       .leftJoinAndSelect('promoType.operationType', 'operationType')
@@ -224,7 +226,7 @@ export class StorePromoMeaService {
       .leftJoinAndSelect('sp.store', 'store', 'store.cip = sp.store_id')
       .leftJoinAndSelect('promo.gamme', 'gamme')
       .leftJoinAndSelect('sp.stateType', 'stateType')
-      .leftJoinAndSelect('promo.laboratory', 'laboratory')
+      // .leftJoinAndSelect('promo.laboratory', 'laboratory')
       .leftJoinAndSelect('promo.promoType', 'promoType')
       .leftJoinAndSelect('promoType.operationType', 'operationType')
       .leftJoinAndSelect('store.clusters', 'clusters')
@@ -526,6 +528,7 @@ export class StorePromoMeaService {
     }
     return promo;
   }
+
   // FUNCTION TO GENERATE EXCEL FILE WITH STORE PROMO MEA TO UPDATE STATE WITH FILE
   async exportExcelPromoState(filter: ListMeaToExportDto, user?: User) {
     // if (!filter.state) filter.state = 'PENDING';
@@ -770,9 +773,12 @@ export class StorePromoMeaService {
         .map(item => item.operationType.name)
         .join(' + '),
       gamme: promo.promo.gamme.name,
-      libelle: '',
-      // lab : promo.promo.gamme.brand.laboratory.name
+      libelle:
+        promo?.promo?.promoConcernTypeId === 2
+          ? !promo?.promo?.promoProducts || promo?.promo?.promoProducts[0]?.name
+          : '',
       lab: promo.promo.gamme.brand.laboratory.name,
+      laboratoire: promo.promo.gamme.brand.laboratory.name,
       detMis: 'det_mis',
       detRen: 'det_ren',
       zoneMis: promo.promo?.promoMea?.promoMeaEmplacements

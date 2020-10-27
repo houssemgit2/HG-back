@@ -54,10 +54,6 @@ export class StoreService implements OnModuleInit {
         .values(promosIds)
         .execute();
     this.logger.warn(`no store promo mea concern store ${storeId}`);
-    this.logger.error(`no store promo mea concern store ${storeId}`);
-    this.logger.verbose(`no store promo mea concern store ${storeId}`);
-    this.logger.log(`no store promo mea concern store ${storeId}`);
-    this.logger.debug(`no store promo mea concern store ${storeId}`);
     this.logger.setContext(`no store promo mea concern store ${storeId}`);
     return null;
   }
@@ -225,7 +221,7 @@ export class StoreService implements OnModuleInit {
     }
     // const owner: any = store.owner;
     const owner: any =
-      store.users && Array.isArray(store.users) ? store.users[0] : null;
+      store.users && Array.isArray(store.users) ? store.users[0] : store.owner;
     delete store.users;
     if (owner) {
       owner.lst_name = owner.lastName;
@@ -233,14 +229,9 @@ export class StoreService implements OnModuleInit {
       owner.phone_num = owner.phone;
       owner.store_cip = owner.store_id;
       owner.role = owner.userRoleId === 1 ? 'admin' : 'client';
-      delete store.name;
-      delete owner.firstName;
-      delete owner.lastName;
-      delete owner.store_id;
     }
 
     storeV1.owner = owner;
-    delete store.clusterId;
-    return { ...storeV1, ...store };
+    return { ...store, ...storeV1 };
   }
 }

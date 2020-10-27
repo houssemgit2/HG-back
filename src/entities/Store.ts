@@ -80,6 +80,7 @@ export class Store extends BaseEntity {
   @OneToOne(
     () => User,
     user => user.store,
+    { onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
   )
   owner: User;
 
