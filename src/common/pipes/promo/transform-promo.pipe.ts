@@ -7,25 +7,33 @@ import {
 import { Gamme } from 'src/entities/Gamme';
 import { Product } from 'src/entities/Product';
 import { getConnection } from 'typeorm';
+import { Brand } from '../../../entities/Brand';
 
 @Injectable()
 export class PromoTransformPipe implements PipeTransform<any> {
   async transform(value: any, { type }: ArgumentMetadata) {
     if (type === 'body') {
       if (value.gamme) {
-        value.gammeId =
-          value.gamme.id ||
-          (await getConnection()
+        if (value.gamme.id) value.gammeId = value.gamme.id;
+        else {
+          const brands: Brand[] = await getConnection()
+            .createQueryBuilder()
+            .select('brand')
+            .from(Brand, 'brand')
+            .where('brand.laboratory_id =:id', { id: value.laboratory_id })
+            .execute();
+          value.gammeId = await getConnection()
             .createQueryBuilder()
             .insert()
             .into(Gamme)
-            .values({ name: value.gamme.name })
+            .values({ name: value.gamme.name, brandId: brands[0]?.id }) // TODO barndID must be dunamic
             .execute()
             .then(data => data.raw.insertId)
             .catch(e => {
               throw new InternalServerErrorException(e);
-            }));
-        delete value.gamme;
+            });
+          delete value.gamme;
+        }
       }
       if (value.new_products && value.new_products.length) {
         if (!value.product_ids) value['product_ids'] = [];

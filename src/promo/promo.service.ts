@@ -71,20 +71,6 @@ export class PromoService {
       await this.validPromoType('MEA', promoId);
       if (isNotEmptyArray(promo.promo_mea_emplacements)) {
         // validate if the promo mea emplacement are the same   in Remuneration product unity fixed amount has emplacement
-        if (
-          promo.remuneration_fixed_details &&
-          promo.remuneration_fixed_details.has_emplacement &&
-          !arrayEquals(
-            promo.remuneration_fixed_details.data_emplacement.map(
-              item => item.emplacement_type_id,
-            ),
-            promo.promo_mea_emplacements.map(item => item.emplacement_type_id),
-          )
-        ) {
-          throw new BadRequestException(
-            `Remuneration emplacement should be the same emplacement you select in the Emplacement details in the previous step`,
-          );
-        }
         const emplacementList = promo.promo_mea_emplacements.map(
           (item: PromoMeaEmplacementDto): PromoMeaEmplacement => ({
             promoId,

@@ -56,7 +56,6 @@ import { StoreAdminGuard } from 'src/auth/guards/store-admin.guard';
 import { multerOptions, meaS3MulterOptions } from 'src/common/multer';
 import { DAYS_AFTER_END_DATE } from 'src/common/const';
 
-
 import { UserReq } from '../auth/get-user.decorator';
 import { Promo } from '../entities/Promo';
 import { StorePromoMea } from '../entities/StorePromoMea';
@@ -84,6 +83,7 @@ import { PromoMeaDto } from './dto/promo-mea.dto';
 import { PromoAchatDto } from './dto/promo.achat.dto';
 import { SavePromoTypeDto } from './dto/save-promo-types.dto';
 import { SaveSelectedDto } from './dto/save-selected.dto';
+import { PromoMeaEmplacementValidationPipe } from '../common/pipes/promo/promo-mea-emplacment.pipe';
 const multerOptionsForMeaExcel: MulterOptions = multerOptions(
   /xlsm|xlsx|xlsb|xls|xla|xlml|ods|csv|.xlsx|csv/,
   `${__dirname}/../uploads/mea-state/`,
@@ -528,6 +528,7 @@ export class PromoController {
   @ApiTags('Promo-form')
   @Post(':promoId/mea')
   @UseGuards(AuthGuard(), AdminGuard)
+  @UsePipes(new PromoMeaEmplacementValidationPipe())
   async savePromoMea(@Param() param: PromoIdDto, @Body() body: PromoMeaDto) {
     const meaPromo = await this.promoService.saveMeaPromo(param.promoId, body);
     return meaPromo;
