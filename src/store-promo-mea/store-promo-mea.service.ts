@@ -65,10 +65,6 @@ export class StorePromoMeaService {
         throw new InternalServerErrorException(e);
       }
     });
-    // this.handleCron(); // TODO you may have to remove this
-    // this.storePromoMeaRepository
-    //   .findExpiredPromo(1)
-    //   .then(tes => console.log(tes));
   }
 
   private logger = new Logger(StorePromoMeaService.name);
@@ -178,10 +174,9 @@ export class StorePromoMeaService {
   ): Promise<any> {
     const sqlQueryForSelect = this.storePromoMeaRepository
       .createQueryBuilder('sp')
-      // .select(filter.v2 ? null : selectedColumnForMobile)
       .select()
-      .leftJoinAndSelect('sp.promo', 'promo') //, 'promo.id = sp.promo_id')
-      .leftJoinAndSelect('sp.store', 'store') //, 'store.cip = sp.store_id')
+      .leftJoinAndSelect('sp.promo', 'promo') 
+      .leftJoinAndSelect('sp.store', 'store') 
       .leftJoinAndSelect('promo.gamme', 'gamme')
       .leftJoinAndSelect('gamme.brand', 'brand')
       .leftJoinAndSelect('brand.laboratory', 'laboratory')
@@ -199,7 +194,6 @@ export class StorePromoMeaService {
         'emplacementType',
       )
       .leftJoinAndSelect('sp.stateType', 'stateType')
-      // .leftJoinAndSelect('promo.laboratory', 'laboratory')
       .leftJoinAndSelect('promo.promoConcernType', 'promoConcernType')
       .leftJoinAndSelect('promo.promoType', 'promoType')
       .leftJoinAndSelect('promoType.operationType', 'operationType')
@@ -226,7 +220,6 @@ export class StorePromoMeaService {
       .leftJoinAndSelect('sp.store', 'store', 'store.cip = sp.store_id')
       .leftJoinAndSelect('promo.gamme', 'gamme')
       .leftJoinAndSelect('sp.stateType', 'stateType')
-      // .leftJoinAndSelect('promo.laboratory', 'laboratory')
       .leftJoinAndSelect('promo.promoType', 'promoType')
       .leftJoinAndSelect('promoType.operationType', 'operationType')
       .leftJoinAndSelect('store.clusters', 'clusters')
@@ -250,7 +243,6 @@ export class StorePromoMeaService {
       sqlQuery.leftJoinAndSelect(
         'store.owner',
         'owner',
-        //          'owner.store_id=store.cip && is_owner=true',
       );
 
     if (filter.start_date && filter.end_date)
@@ -288,9 +280,9 @@ export class StorePromoMeaService {
       }); // TODO  make it by promoCluster table
     }
     if (filter.lab) {
-      sqlQuery.andWhere('clusters.name = :clusters', {
-        clusters: filter.clusters,
-      }); // TODO  make it by promoCluster table
+      sqlQuery.andWhere('laboratory.name = :laboratory', {
+        laboratory: filter.lab,
+      });
     }
 
     if (typeof filter.active === 'string')

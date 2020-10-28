@@ -546,13 +546,17 @@ export class PromoController {
   @UseGuards(AuthGuard(), AdminGuard)
   async updatePromoStatus(
     @Param() param: PromoIdDto,
-    @Body('status') status: number,
+    @Body('status_id') statusId: number,
   ) {
     return await this.promoService
-      .updatePromo(param.promoId, status)
+      .updatePromo(param.promoId, statusId)
       .then(data => {
-        if (data.raw.changedRows)
+        if (data.raw.changedRows && statusId === 1) {
+          this.logger.setContext(
+            `fetching store promo mea for promo ${param.promoId}`,
+          );
           this.emitter.emit('promoCreated', param.promoId);
+        }
         return data;
       });
   }
