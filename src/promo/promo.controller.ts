@@ -588,6 +588,12 @@ export class PromoController {
   @Get('/')
   @UseGuards(AuthGuard()) // , AdminGuard)
   async findAll(@Query() getPromoDto: GetPromoDto, @UserReq() user: User) {
-    return await this.promoService.getPromos(getPromoDto, user);
+    const promos = await this.promoService.getPromos(getPromoDto, user);
+    if (getPromoDto.forCalendar)
+      return this.pdfCalendarGeneratorService.promoKeysCorrespondant(
+        promos,
+        getPromoDto.type_off ?? 'MEA',
+      );
+    return promos;
   }
 }

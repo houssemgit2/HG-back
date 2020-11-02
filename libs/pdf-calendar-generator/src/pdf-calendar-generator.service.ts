@@ -124,9 +124,13 @@ export class PdfCalendarGeneratorService {
       const promo = {
         ...item,
         ID: item.id,
+        type_off: item.promoType
+          ?.map(el => el?.operationType?.name)
+          .join(' + '),
         laboratoire: item.gamme?.brand?.laboratory?.name, // item.laboratory?.name
         lab: item.gamme?.brand?.name,
         gamme: item.gamme?.name,
+        libelle: item?.promoProducts[0]?.name,
         ean: item.promoProducts[0]?.ean,
         achat_vente: 'achat vente',
         detail_comp: item.promoAchat?.achatAdvantageDiscountDetails?.data,
@@ -139,6 +143,9 @@ export class PdfCalendarGeneratorService {
         contenance: item.promoProducts[0]?.measureValue,
         lot_phys: item.promoConso?.physicalLot,
         qte_lot: item.promoConso?.quantityLot,
+        justif: item?.promoMea?.documentProvideTypes
+          ?.map(el => el.name)
+          .join(' '),
       };
       if (promoType === 'MEA') {
         promo[
@@ -150,6 +157,18 @@ export class PdfCalendarGeneratorService {
               `${item.equal_condition_type_id} ${item.value_max} ${item.value_min}`,
           )
           .join(' ')}`;
+        promo[
+          'det_mec'
+        ] = `commandes solaires ont été livrées avec des UG permettant de prendre en charge cette opération (CONSO det_mec statique)`;
+        promo['zone_mis'] = item?.promoMea?.promoMeaEmplacements?.map(
+          el =>
+            `${el.emplacementType?.name} ${
+              el?.details ? `(${el.details})` : ''
+            }`,
+        );
+        promo['det_mis'] = `5 étagères de 66cm (OP CONSO fake data)`;
+        promo['det_ren'] = item?.promoMea?.remunerationOtherDetails || '';
+        promo['circuit_vers'] = item?.promoMea?.repaymentCircuitType?.name || ''; 
       } else if (promoType === 'OP ACHAT' && promo?.promoAchat) {
         promo['det_mec'] = `38% de remise pour 480 unités
 34% de remise pour 192 unités (données statique pour test, no db column exist)`;
