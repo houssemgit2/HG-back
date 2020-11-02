@@ -119,27 +119,62 @@ export class PdfCalendarGeneratorService {
       return promoObj;
     });
   }
-  promoKeysCorrespondant(promos: Promo[]) {
-    return promos.map(item => ({
-      ...item,
-      ID: item.id,
-      laboratoire: item.gamme?.brand?.laboratory?.name, // item.laboratory?.name
-      lab: item.gamme?.brand?.name,
-      gamme: item.gamme?.name,
-      ean: item.promoProducts[0]?.ean,
-      cond_el: item.promoAchat?.eligibilityAdditionalInformation,
-      det_mec: item.promoConso?.microType.name,
-      achat_vente: item.promoAchat?.eligibilityOther,
-      detail_comp: item.promoAchat?.achatAdvantageDiscountDetails?.data,
-      circ_rev: item.promoConso?.remunerationBase?.name,
-      per_cont_comp: item.promoConso?.circuitType?.name,
-      micro_type: item.promoConso?.microType?.name,
-      macro_type: item.promoConso?.microType?.macroType?.name,
-      price: item.promoConso?.price,
-      mes_unit: item.promoProducts[0]?.measureType?.name,
-      contenance: item.promoProducts[0]?.measureValue,
-      lot_phys: item.promoConso?.physicalLot,
-      qte_lot: item.promoConso?.quantityLot,
-    }));
+  promoKeysCorrespondant(promos: Promo[], promoType?: string) {
+    return promos.map(item => {
+      const promo = {
+        ...item,
+        ID: item.id,
+        laboratoire: item.gamme?.brand?.laboratory?.name, // item.laboratory?.name
+        lab: item.gamme?.brand?.name,
+        gamme: item.gamme?.name,
+        ean: item.promoProducts[0]?.ean,
+        achat_vente: 'achat vente',
+        detail_comp: item.promoAchat?.achatAdvantageDiscountDetails?.data,
+        circ_rev: '',
+        per_cont_comp: item.promoConso?.circuitType?.name,
+        micro_type: item.promoConso?.microType?.name,
+        macro_type: item.promoConso?.microType?.macroType?.name,
+        price: item.promoConso?.price,
+        mes_unit: item.promoProducts[0]?.measureType?.name,
+        contenance: item.promoProducts[0]?.measureValue,
+        lot_phys: item.promoConso?.physicalLot,
+        qte_lot: item.promoConso?.quantityLot,
+      };
+      if (promoType === 'MEA') {
+        promo[
+          'circ_rev'
+        ] = `${item?.promoMea?.remunerationOtherDetails} ${item?.promoMea?.remunerationFixedDetails?.data_emplacement?.comment}`;
+        promo['cond_el'] = `${item.promoMea?.eligibilityCaRangeDetails
+          ?.map(
+            item =>
+              `${item.equal_condition_type_id} ${item.value_max} ${item.value_min}`,
+          )
+          .join(' ')}`;
+      } else if (promoType === 'OP ACHAT' && promo?.promoAchat) {
+        promo['det_mec'] = `38% de remise pour 480 unités
+34% de remise pour 192 unités (données statique pour test, no db column exist)`;
+        promo['cond_el'] = `${promo?.promoAchat?.eligibilityCaDetails?.map(
+          (item, index) =>
+            `${index} ${item.equal_condition_type_id} ${item.value_max} ${item.value_min}`,
+        )}
+${promo?.promoAchat?.eligibilityAdditionalInformation || ''}
+${promo?.promoAchat?.eligibilityOther || ''}
+${
+  promo?.promoAchat?.eligibilityFranco?.value ? 'eligibilté franco' : ''
+} ${promo?.promoAchat?.eligibilityFranco?.value || ''}
+ ${
+   promo?.promoAchat?.eligibilityVolume?.value_max
+     ? 'valuer max ' + promo?.promoAchat?.eligibilityVolume?.value_max
+     : ''
+ }
+ ${
+   promo?.promoAchat?.eligibilityVolume?.value_min
+     ? 'valuer min ' + promo?.promoAchat?.eligibilityVolume?.value_min
+     : ''
+ }
+`;
+      }
+      return promo;
+    });
   }
 }

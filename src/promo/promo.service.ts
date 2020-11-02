@@ -116,29 +116,24 @@ export class PromoService {
       throw new InternalServerErrorException(e);
     }
   }
-  async createPromoType(typeIds: number[]) {
-    let promoId: number;
-    return this.promoRepository
-      .save({ gammeId: null })
-      .then(promo => {
-        promoId = promo.id;
-        const promoTypes = typeIds.map(item => ({
-          operationTypeId: item,
-          promoId: promo.id,
-        }));
-        return this.promoOperationTypeRepository
-          .save(promoTypes)
-          .catch(e => {
-            throw new InternalServerErrorException(e);
-          })
-          .then(data => ({
-            promoId,
-            promoOperationTypeId: data.map(item => item.operationTypeId),
-          }));
-      })
-      .catch(e => {
-        throw new InternalServerErrorException(e);
-      });
+  async createPromoType(typeIds: number[], promoId?: number) {
+    try {
+      if (!promoId)
+        await this.promoRepository.save({ gammeId: null }).then(promo => {
+          promoId = promo.id;
+        });
+      else await this.promoOperationTypeRepository.delete({ promoId });
+      const promoTypes = typeIds.map(item => ({
+        operationTypeId: item,
+        promoId,
+      }));
+      return this.promoOperationTypeRepository.save(promoTypes).then(data => ({
+        promoId,
+        promoOperationTypeId: data.map(item => item.operationTypeId),
+      }));
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
   }
 
   async updatePromo(promoId: number, status: number) {

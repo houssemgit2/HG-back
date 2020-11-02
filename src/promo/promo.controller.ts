@@ -115,6 +115,7 @@ export class PromoController {
     const promos = await this.promoService.getPromos({ idList }, user);
     const v1PromosKeys = this.pdfCalendarGeneratorService.promoKeysCorrespondant(
       promos,
+      'MEA',
     );
 
     const filePath = await this.pdfCalendarGeneratorService.generateCsvCalendar(
@@ -137,6 +138,7 @@ export class PromoController {
     const promos = await this.promoService.getPromos({ idList }, user);
     const v1PromosKeys = this.pdfCalendarGeneratorService.promoKeysCorrespondant(
       promos,
+      'MEA',
     );
 
     const filePath = await this.pdfCalendarGeneratorService.generate(
@@ -155,6 +157,7 @@ export class PromoController {
     const promos: Promo[] = await this.promoService.getPromos(query, user);
     const v1PromosKeys = this.pdfCalendarGeneratorService.promoKeysCorrespondant(
       promos,
+      query.type_off,
     );
     this.logger.debug(`${promos.length} promos found * _ *`);
     if (query.toDownloadPdf === false) {
@@ -266,7 +269,11 @@ export class PromoController {
   @Post('/types')
   @UseGuards(AuthGuard(), AdminGuard)
   async setPromoType(@Body() body: SavePromoTypeDto) {
-    return await this.promoService.createPromoType(body.type_ids);
+    console.log('creating or updating promo type');
+    return await this.promoService.createPromoType(
+      body.type_ids,
+      body.promo_id,
+    );
   }
   // store promo mea
   @ApiOperation({ summary: 'Download mea list' })

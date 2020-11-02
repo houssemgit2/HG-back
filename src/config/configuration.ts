@@ -1,9 +1,23 @@
-export default () => ({
+export default (): {environement:string,
+  port: number,
+  database: {
+    host: string,
+    port: number,
+    user: string,
+    name: string,
+    password: string,
+    logging: boolean,
+  },
+  mailTo: string,
+  mailBcc:string,
+  mailSource: string,
+  awsS3BaseUrl: string,
+  bucket: string} => ({
   environement: process.env.NODE_ENV,
   port: parseInt(process.env.PORT, 10),
   database: {
     host: process.env.DATABASE_HOST,
-    port: parseInt(process.env.DB_PORT, 10) || 3306,
+    port: parseInt(process.env.DB_PORT,10),
     user: process.env.DB_USER,
     name: process.env.DB_DATABASE,
     password: process.env.DB_PASSWORD,

@@ -18,6 +18,10 @@ export class IsExistConstraint implements ValidatorConstraintInterface {
   }
   async validate(value: number, args: ValidationArguments) {
     try {
+      console.log(
+        '------------------------------> we are looking if this id is exist',
+        value,
+      );
       const isExist = await getConnection()
         .createQueryBuilder()
         .select(this.repository.entityName) // table, Entity, key
