@@ -52,5 +52,5 @@ export class GetPromoDto extends PaginationDto {
   @ApiProperty({ required: false })
   // @Type(() => Boolean)
   @Transform(value => JSON.parse(value))
-  forCalendar = true;
+  forCalendar = false;
 }
