@@ -252,6 +252,7 @@ export class PromoService {
     body: PromoGeneralPromoDto,
   ): Promise<Promo> {
     try {
+      // TODO add transaction
       const promoClusters: PromoCluster[] = body.clusters_id.map(item => {
         const promoCluster = new PromoCluster();
         promoCluster.promoId = promoId;

@@ -22,6 +22,7 @@ export class IsExistConstraint implements ValidatorConstraintInterface {
         '------------------------------> we are looking if this id is exist',
         value,
       );
+      if (!value) return false;
       const isExist = await getConnection()
         .createQueryBuilder()
         .select(this.repository.entityName) // table, Entity, key
