@@ -8,11 +8,13 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
   BaseEntity,
+  DeleteDateColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 import { Emplacement } from './Emplacement';
 import { Gamme } from './Gamme';
-import { Laboratory } from './Laboratory';
 import { Product } from './Product';
 import { ProductConcernType } from './ProductConcernType';
 import { PromoAchat } from './PromoAchat';
@@ -62,19 +64,25 @@ export class Promo extends BaseEntity {
   @Column('text', { name: 'comment', nullable: true })
   comment: string;
 
-  @Column('datetime', {
+  @CreateDateColumn({
     name: 'created_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
   })
   createdAt: Date | null;
 
-  @Column('datetime', {
+  @UpdateDateColumn({
     name: 'updated_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
   })
   updatedAt: Date | null;
+
+  @DeleteDateColumn({
+    name: 'deleted_at',
+    nullable: true,
+  })
+  deletedAt?: Date;
 
   // @OneToMany(
   //   () => EligibilityCondition,

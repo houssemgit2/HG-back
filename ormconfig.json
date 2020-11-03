@@ -4,7 +4,7 @@
     "port": 3306,
     "username": "hgbetaUser",
     "password": "AZcLpafyKMG6HPxs",
-    "database": "hg_promo_beta",
+    "database": "hg_promo_beta_new",
     "synchronize": false,
     "logging": true,
     "entities": [

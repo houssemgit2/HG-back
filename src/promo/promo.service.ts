@@ -287,17 +287,17 @@ export class PromoService {
   async delete(id: number) {
     try {
       // TODO  to do we need transaction here
-      await this.promoClusterRepository.delete({ promoId: id });
-      await this.promoMeaEmplacementRepository.delete({ promoId: id });
-      await this.promoMeaDocumentProvide.delete({ promoId: id });
+      // await this.promoClusterRepository.delete({ promoId: id });
+      // await this.promoMeaEmplacementRepository.delete({ promoId: id });
+      // await this.promoMeaDocumentProvide.delete({ promoId: id });
 
-      await this.promoConsoRepository.delete(id);
-      await this.promoAchatRepository.delete(id);
-      await this.promoMeaRepository.delete(id);
+      // await this.promoConsoRepository.delete(id);
+      // await this.promoAchatRepository.delete(id);
+      // await this.promoMeaRepository.delete(id);
 
-      await this.promoOperationTypeRepository.delete({ promoId: id });
+      // await this.promoOperationTypeRepository.delete({ promoId: id });
 
-      return await this.promoRepository.delete(id);
+      return await this.promoRepository.softDelete(id);
     } catch (err) {
       throw new InternalServerErrorException(err);
     }

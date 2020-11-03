@@ -543,8 +543,13 @@ export class PromoController {
   @ApiTags('Promo-form')
   @Post(':promoId')
   @UseGuards(AuthGuard(), AdminGuard)
-  async DuplicatePromo(@Param() param: PromoIdDto) {
-    return await this.promoService.duplicatePromo(param.promoId);
+  async DuplicatePromo(@Param() param: PromoIdDto, @UserReq() user: User) {
+    return await this.promoService.duplicatePromo(param.promoId).then(promo => {
+      return this.promoService.getPromos({}, user, promo.id).then(data => {
+        if (data) return data;
+        else return {};
+      });
+    });
   }
   // *****
 
