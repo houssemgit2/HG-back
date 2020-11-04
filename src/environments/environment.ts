@@ -1,7 +1,7 @@
 export const config = {
   port: 3000,
   environment: 'development',
-  dbLogging: true,
+  dbLogging: process.env.DB_LOGGING === 'true' ? true : false,
   dbHost:
     'hg-referentiel-dev-instance-1.ceia1tvbrwoq.eu-west-3.rds.amazonaws.com',
   dbPort: 3306,
