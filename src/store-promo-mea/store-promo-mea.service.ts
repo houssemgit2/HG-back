@@ -175,8 +175,8 @@ export class StorePromoMeaService {
     const sqlQueryForSelect = this.storePromoMeaRepository
       .createQueryBuilder('sp')
       .select()
-      .leftJoinAndSelect('sp.promo', 'promo') 
-      .leftJoinAndSelect('sp.store', 'store') 
+      .leftJoinAndSelect('sp.promo', 'promo')
+      .leftJoinAndSelect('sp.store', 'store')
       .leftJoinAndSelect('promo.gamme', 'gamme')
       .leftJoinAndSelect('gamme.brand', 'brand')
       .leftJoinAndSelect('brand.laboratory', 'laboratory')
@@ -240,10 +240,7 @@ export class StorePromoMeaService {
         ]);
     // TODO  check the front resp
     else if (user && user.userRoleId === 1)
-      sqlQuery.leftJoinAndSelect(
-        'store.owner',
-        'owner',
-      );
+      sqlQuery.leftJoinAndSelect('store.owner', 'owner');
 
     if (filter.start_date && filter.end_date)
       sqlQuery.where(
@@ -771,14 +768,17 @@ export class StorePromoMeaService {
           : '',
       lab: promo.promo.gamme.brand.laboratory.name,
       laboratoire: promo.promo.gamme.brand.laboratory.name,
-      detMis: 'det_mis',
-      detRen: 'det_ren',
+      detMis: promo.promo?.promoMea?.promoMeaEmplacements
+        .map((item: PromoMeaEmplacement) => {
+          return `${!item.details || `(${item.details})`}`;
+        })
+        .join('↵'),
+      detRen: promo?.promo?.promoMea?.remunerationOtherDetails,
       zoneMis: promo.promo?.promoMea?.promoMeaEmplacements
         .map((item: PromoMeaEmplacement) => {
-          return `${item.emplacementType.name} ${!item.details ||
-            `(${item.details})`} \n`;
+          return `${item.emplacementType.name}`;
         })
-        .join(','),
+        .join('↵'),
     };
 
     return newPromo;
