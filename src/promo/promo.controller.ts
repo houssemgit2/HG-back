@@ -594,7 +594,7 @@ export class PromoController {
   @UseGuards(AuthGuard()) // , AdminGuard)
   async findAll(@Query() getPromoDto: GetPromoDto, @UserReq() user: User) {
     const promos = await this.promoService.getPromos(getPromoDto, user);
-    if (getPromoDto.forCalendar)
+    if (getPromoDto.for_calendar)
       return this.pdfCalendarGeneratorService.promoKeysCorrespondant(
         promos,
         getPromoDto.type_off ?? 'MEA',
