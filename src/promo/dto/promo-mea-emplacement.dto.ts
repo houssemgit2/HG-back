@@ -6,10 +6,10 @@ import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class PromoMeaEmplacementDto {
   @ApiProperty()
-  @IsNotEmpty()
   @Type(() => Number)
+  @IsNotEmpty()
   @IsNumber()
-  public emplacement_type_id: number; // TODO  validation isnUmber must be fixed
+  public emplacement_type_id: number; //  validation isnUmber
 
   @ApiProperty()
   @Type(() => String)

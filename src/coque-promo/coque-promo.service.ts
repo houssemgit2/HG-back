@@ -22,7 +22,7 @@ import { CoquePromoRepository } from './coque-promo.repository';
 
 import { CoqueFileIdDto } from './dto/coqueFileId.dto';
 import { CreateCoqueDto } from './dto/create-coque.dto';
-import { ListMeaDto } from './dto/list-coque.dto';
+import { ListCoqueDto } from './dto/list-coque.dto';
 import { GetFilesDto } from './dto/list-files.dto';
 import { UpdateCoqueFileDto } from './dto/update-file.dto';
 import { UpdateCoqueDto } from './dto/update.dto';
@@ -105,7 +105,7 @@ export class CoquePromoService {
     }
   }
 
-  async listAll(filter: ListMeaDto) {
+  async listAll(filter: ListCoqueDto) {
     return await this.coquePromoRepository.findCoque(
       filter.coque_status,
       filter.file_status,

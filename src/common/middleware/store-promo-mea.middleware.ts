@@ -7,6 +7,8 @@ import { StorePromoMeaService } from '../../store-promo-mea/store-promo-mea.serv
 @Injectable()
 export class StorePromoMeaMiddleware implements NestMiddleware {
   // TODO we need user here but Guards are executed after each middleware, but before any interceptor or pipe.
+  // ofor the moment the validation is in the controller fo rthis step
+
   constructor(private service: StorePromoMeaService) {}
   use(req: Request, res: Response, next: Function) {
     // this.service.validatePromoState(parseInt(req.params.id), 21);

@@ -83,7 +83,7 @@ export class PromoRepository extends Repository<Promo> {
         ` JSON_CONTAINS(JSON_EXTRACT(promoAchat.achat_advantage_discount_details,"$[*].achat_advantage_sub_discount_type_id"),CONVERT(achat_sub_advantage_discount_type.id,CHAR),"$") OR
         JSON_CONTAINS(JSON_EXTRACT(promoAchat.achat_advantage_discount_details,"$.achat_advantage_sub_discount_type_id"),CONVERT(achat_sub_advantage_discount_type.id,CHAR),"$")
       `,
-      ) // TODO  fix saving the achat_discount
+      )
       .leftJoinAndMapMany(
         'promoMea.eligibilityCaRangeEqualCondition',
         'equal_condition_type',

@@ -198,8 +198,6 @@ export class StorePromoMeaRepository extends Repository<StorePromoMea> {
           .execute();
       else
         this.logger.warn(`promo to remove length is ${promoToRemove.length}`);
-      // TODO  remove this and make the promoId and storeId a primary key after removing the id in StorePromoMea
-      // and use save with onDuplicate : ignore
       return await this.save(promoStoreToInsert);
     } catch (e) {
       throw new InternalServerErrorException(e);

@@ -31,6 +31,7 @@ import { PromoGeneralPromoDto } from './dto/promo-general.dto';
 import { PromoMeaEmplacementDto } from './dto/promo-mea-emplacement.dto';
 import { PromoMeaDto } from './dto/promo-mea.dto';
 import { PromoAchatDto } from './dto/promo.achat.dto';
+import { StorePromoMea } from '../entities/StorePromoMea';
 // DTO
 @Injectable()
 export class PromoService {
@@ -47,6 +48,8 @@ export class PromoService {
     private promoConsoRepository: Repository<PromoConso>,
     @InjectRepository(PromoMea)
     private promoMeaRepository: Repository<PromoMea>,
+    @InjectRepository(StorePromoMea)
+    private storePromoMeaRepository: Repository<StorePromoMea>,
     @InjectRepository(PromoMeaEmplacement)
     private promoMeaEmplacementRepository: Repository<PromoMeaEmplacement>,
 
@@ -68,6 +71,7 @@ export class PromoService {
   }
   async saveMeaPromo(promoId: number, promo: PromoMeaDto): Promise<any> {
     try {
+      // TODO transaction is required here
       await this.validPromoType('MEA', promoId);
       if (isNotEmptyArray(promo.promo_mea_emplacements)) {
         // validate if the promo mea emplacement are the same   in Remuneration product unity fixed amount has emplacement
@@ -77,6 +81,9 @@ export class PromoService {
             ...convertToCamelCase(item),
           }),
         );
+        this.logger.verbose('promoMEa emplacment list ==> ');
+        console.log(emplacementList);
+        await this.promoMeaEmplacementRepository.delete({ promoId });
         await this.promoMeaEmplacementRepository.save(emplacementList);
       }
       if (promo.document_provide_types) {
@@ -287,16 +294,8 @@ export class PromoService {
   async delete(id: number) {
     try {
       // TODO  to do we need transaction here
-      // await this.promoClusterRepository.delete({ promoId: id });
-      // await this.promoMeaEmplacementRepository.delete({ promoId: id });
-      // await this.promoMeaDocumentProvide.delete({ promoId: id });
 
-      // await this.promoConsoRepository.delete(id);
-      // await this.promoAchatRepository.delete(id);
-      // await this.promoMeaRepository.delete(id);
-
-      // await this.promoOperationTypeRepository.delete({ promoId: id });
-
+      await this.storePromoMeaRepository.softDelete({ promoId: id });
       return await this.promoRepository.softDelete(id);
     } catch (err) {
       throw new InternalServerErrorException(err);

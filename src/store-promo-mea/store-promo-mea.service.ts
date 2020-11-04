@@ -71,7 +71,6 @@ export class StorePromoMeaService {
 
   @Cron('0 0 * * *')
   async handleCron() {
-    // TODO fix this cron after the bug in the v1
     this.logger.debug('this task run every 00:00:00');
     const expiredEndDate = moment()
       .subtract(DAYS_AFTER_END_DATE, 'days')
@@ -152,7 +151,7 @@ export class StorePromoMeaService {
           return this.storePromoMeaRepository
             .update(promo, {
               stateId: PROMO_STATE_ID.REJECTED,
-              rejectionNumber: 1, // TODO check this
+              rejectionNumber: 1,
             })
             .then(() => {
               return resolve(true);
@@ -163,7 +162,6 @@ export class StorePromoMeaService {
       }
     });
   }
-  // TODO  optimize this
 
   async findPromos(
     filter?: ListMeaDto,
@@ -776,7 +774,7 @@ export class StorePromoMeaService {
       detRen: promo?.promo?.promoMea?.remunerationOtherDetails,
       zoneMis: promo.promo?.promoMea?.promoMeaEmplacements
         .map((item: PromoMeaEmplacement) => {
-          return `${item.emplacementType.name}`;
+          return `${item?.emplacementType?.name}`;
         })
         .join('↵'),
     };

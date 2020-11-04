@@ -5,7 +5,7 @@ import { PeriodsDto } from './periods.dto';
 import { ClusterIdDto } from './clusters.dto';
 import { IsBooleanNumber } from '../../common/decorators/isBooleanNumber.decorator';
 
-export class ListMeaDto {
+export class ListCoqueDto {
   @ApiProperty({ required: false })
   @IsBooleanNumber({ message: 'must be boolean or 1/0' })
   @IsOptional()

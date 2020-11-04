@@ -44,7 +44,7 @@ import { CoquePromoService } from './coque-promo.service';
 import { CoqueFileIdDto } from './dto/coqueFileId.dto';
 import { CoqueIdDto } from './dto/coqueId.dto';
 import { CreateCoqueDto } from './dto/create-coque.dto';
-import { ListMeaDto } from './dto/list-coque.dto';
+import { ListCoqueDto } from './dto/list-coque.dto';
 import { GetFilesDto } from './dto/list-files.dto';
 import { UpdateCoqueFileDto } from './dto/update-file.dto';
 import { UpdateCoqueDto } from './dto/update.dto';
@@ -64,8 +64,7 @@ export class CoquePromoController {
   @UsePipes(new JSONArrayValidation())
   @UsePipes(new JsonValidationPipe())
   @UseGuards(AuthGuard())
-  async getCoquePromo(@Query() filter: ListMeaDto, @UserReq() user: User) {
-    // TODO fix this dto name
+  async getCoquePromo(@Query() filter: ListCoqueDto, @UserReq() user: User) {
     if (user.userRoleId !== 1) {
       filter.coque_status = true;
       filter.file_status = true;

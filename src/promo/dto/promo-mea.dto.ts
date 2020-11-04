@@ -85,6 +85,7 @@ export class PromoMeaDto {
     ],
   })
   @Type(() => PromoMeaEmplacementDto)
+@ValidateNested({each:true})
   promo_mea_emplacements: PromoMeaEmplacementDto[];
 
   @ApiProperty()

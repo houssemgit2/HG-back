@@ -5,7 +5,7 @@ import { IsNumberString, IsNumber } from 'class-validator';
 
 import { PROMO_STATE } from 'src/common/enum/enum-types';
 
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
@@ -41,10 +41,10 @@ export class ListMeaDto extends PaginationDto {
   clusters: string;
 
   @ApiProperty({ required: false })
-  @Type(() => Boolean)
+  @Transform(value => JSON.parse(value))
   @IsOptional()
   @IsBoolean()
-  public active: boolean; // TODO fix it it's alwys true
+  public active: boolean;
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()

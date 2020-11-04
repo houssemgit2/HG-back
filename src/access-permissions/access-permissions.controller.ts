@@ -81,9 +81,8 @@ export class AccessPermissionsController {
     // .then(data=> data.map(item=>this.accessPermissionsService.accessPermissionV1Keys(item)))
   }
 
-  // TODO  is why we didn't use the storeId from the Req.user
   @ApiOperation({ summary: 'update a store access permissions' })
-  @ApiResponse({ status: 200, description: 'updated store access permissions' })
+  @ApiResponse({ status: 200, description: 'Updated store access permissions' })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @UseGuards(AuthGuard())
   @Put(':storeId')
@@ -92,7 +91,18 @@ export class AccessPermissionsController {
     @Body() updateAccessPermissionDto: UpdateAccessPermissionDto,
     @UserReq() user: User,
   ): Promise<StorePermission> {
-    // console.log(request);
+    if (!storeId) user.storeId;
+    console.log(`
+      ...                   
+  .,ok000Oxc.     'oxo,  .' 
+ ,kWMMMMMMMMXo;. ;KMWMX: lK,
+,0MMMMMMMMMMMWNd'xMMMMMO;xWl
+lWMMMMMMMMMMMMM0lOMMMMMKoOMo
+cNMMMMMMMMMMMMMk:OMMMMM0lkWl
+.dNMMMMMMMMMMKx; lWMMMWd.dN:
+  ;kXWMMMMWKd'   .oXWXx. ;o.
+    .;ccc:,.       .,.      
+`);
     return this.accessPermissionsService.update(
       storeId,
       updateAccessPermissionDto,
