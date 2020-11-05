@@ -8,6 +8,7 @@ beta-build:
   script:
     - yarn
     - yarn  build
+    - yarn copy-assets
     - rm -rf beta-v2.api.healthygroup.smala.co ; mv dist beta-v2.api.healthygroup.smala.co
     - cp .env.beta beta-v2.api.healthygroup.smala.co/.env
     - cp package.json beta-v2.api.healthygroup.smala.co/package.json
