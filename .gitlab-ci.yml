@@ -41,3 +41,43 @@ beta-deploy:
   only:
     - beta
   environment: beta
+
+recette-build:
+  image: node:10
+  stage: build
+  script:
+    - yarn
+    - yarn  build
+    - yarn copy-assets
+    - rm -rf recette-v2.api.healthygroup.smala.co ; mv dist recette-v2.api.healthygroup.smala.co
+    - cp .env.recette recette-v2.api.healthygroup.smala.co/.env
+    - cp package.json recette-v2.api.healthygroup.smala.co/package.json
+  artifacts:
+    paths:
+      - recette-v2.api.healthygroup.smala.co
+    expire_in: 1 day
+  cache:
+    key: "$CI_PROJECT_ID"
+    paths:
+      - node_modules
+  only:
+    - recette
+  environment: recette
+
+recette-deploy:
+  image: alpine:3.7
+  stage: deploy
+  script:
+    - "which ssh-agent || ( apk --update add openssh-client )"
+    # run ssh-agent (inside the build environment)
+    - eval $(ssh-agent -s)
+    # add the ssh key stored in SSH_PRIVATE_KEY variable to the agent store
+    - echo "$SSH_PRIVATE_KEY" | ssh-add -
+    - mkdir -p ~/.ssh
+    - 'echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    - tar cvzf recette.tar.gz recette-v2.api.healthygroup.smala.co
+    - scp recette.tar.gz ubuntu@15.188.41.130:/home/ubuntu/websites
+    - ssh  -o StrictHostKeyChecking=no  -tt ubuntu@15.188.41.130 'bash  -i -c "cd ~/websites && rm -rf recette-v2.api.healthygroup.smala.co  && tar xvf recette.tar.gz && rm  recette.tar.gz;nvm use 10 && cd recette-v2.api.healthygroup.smala.co && yarn && yarn deploy:recette"'
+  only:
+    - recette
+  environment: recette
