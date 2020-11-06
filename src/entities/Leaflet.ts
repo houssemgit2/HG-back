@@ -5,7 +5,8 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
-  BaseEntity
+  BaseEntity,
+  UpdateDateColumn
 } from "typeorm";
 import { LeafletPeriod } from "./LeafletPeriod";
 
@@ -51,8 +52,9 @@ export class Leaflet extends BaseEntity {
   })
   createdAt: Date;
 
-  @Column('datetime', {
+  @UpdateDateColumn({
     name: 'updated_at',
+    nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
   })
   updatedAt: Date;

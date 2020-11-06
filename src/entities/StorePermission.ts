@@ -6,6 +6,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   BaseEntity,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Store } from './Store';
 import { Resource } from './Resource';
@@ -33,7 +34,7 @@ export class StorePermission extends BaseEntity {
   })
   createdAt: Date | null;
 
-  @Column('datetime', {
+@UpdateDateColumn({
     name: 'updated_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',

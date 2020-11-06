@@ -1,12 +1,12 @@
 export const config = {
   port: 3000,
   environment: 'development',
-  dbLogging: process.env.DB_LOGGING === 'true' ? true : false,
+  dbLogging: true,
   dbHost:
     'hg-referentiel-dev-instance-1.ceia1tvbrwoq.eu-west-3.rds.amazonaws.com',
   dbPort: 3306,
   dbUser: 'hgbetaUser',
-  database: 'hg_promo_beta_new',
+  database: 'hg_promo_dev',
   dbPassword: 'AZcLpafyKMG6HPxs',
   dbType: 'mysql',
 };

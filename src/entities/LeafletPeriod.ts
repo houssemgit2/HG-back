@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn, BaseEntity } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn, BaseEntity, UpdateDateColumn } from "typeorm";
 import { Leaflet } from "./Leaflet";
 
 @Entity('leaflet_period', { schema: 'hg_promo_beta' })
@@ -21,8 +21,9 @@ export class LeafletPeriod extends BaseEntity {
   })
   createdAt: Date;
 
-  @Column('datetime', {
+  @UpdateDateColumn({
     name: 'updated_at',
+    nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
   })
   updatedAt: Date;

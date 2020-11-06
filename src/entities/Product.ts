@@ -6,10 +6,11 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   BaseEntity,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Gamme } from './Gamme';
 import { MeasureType } from './MeasureType';
-import { ManyToMany, OneToMany } from 'typeorm';
+import { OneToMany } from 'typeorm';
 import { Promo } from './Promo';
 
 @Index('product_gamme_id_fk', ['gammeId'], {})
@@ -47,7 +48,7 @@ export class Product extends BaseEntity {
   })
   createdAt: Date | null;
 
-  @Column('datetime', {
+  @UpdateDateColumn({
     name: 'updated_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',

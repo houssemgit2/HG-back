@@ -8,6 +8,7 @@ import {
   PrimaryGeneratedColumn,
   BaseEntity,
   OneToOne,
+  UpdateDateColumn,
 } from 'typeorm';
 
 import { Cluster } from './Cluster';
@@ -38,7 +39,7 @@ export class Store extends BaseEntity {
   })
   createdAt: Date | null;
 
-  @Column('datetime', {
+  @UpdateDateColumn({
     name: 'updated_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',

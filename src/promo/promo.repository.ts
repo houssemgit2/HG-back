@@ -155,7 +155,6 @@ export class PromoRepository extends Repository<Promo> {
           },
         );
       if (filter.include_av_cli)
-        // TODO to update, separate it to
         sqlQuery.andWhere(
           'promoMea.has_promo_achat_linked=:isInclude and promoMea.has_promo_conso_linked=:isInclude',
           { isInclude: filter.include_av_cli },
