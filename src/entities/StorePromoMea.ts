@@ -6,10 +6,11 @@ import {
   ManyToOne,
   BaseEntity,
   AfterLoad,
+  DeleteDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 import { Promo } from './Promo';
-import { PromoMea } from './PromoMea';
 import { RejectionReason } from './RejectionReason';
 import { Store } from './Store';
 import { StorePromoMeaStateType } from './StorePromoMeaStateType';
@@ -70,8 +71,9 @@ export class StorePromoMea extends BaseEntity {
   @Column('datetime', { name: 'uploaded_at', nullable: true })
   uploadedAt: Date | null;
 
-  @Column('datetime', {
+  @UpdateDateColumn({
     name: 'updated_at',
+    nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
   })
   updatedAt: Date;
@@ -81,6 +83,12 @@ export class StorePromoMea extends BaseEntity {
     default: () => 'CURRENT_TIMESTAMP',
   })
   createdAt: Date;
+
+  @DeleteDateColumn({
+    name: 'deleted_at',
+    nullable: true,
+  })
+  deletedAt?: Date;
 
   @AfterLoad()
   public loaded() {

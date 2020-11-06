@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { CoquePromo } from './CoquePromo';
 
@@ -24,13 +25,14 @@ export class CoquePromoPeriods {
   year: number;
 
   @Column('timestamp', {
-    name: 'createdAt',
+    name: 'created_at',
     default: () => 'CURRENT_TIMESTAMP',
   })
   createdAt: Date;
 
-  @Column('timestamp', {
-    name: 'updatedAt',
+  @UpdateDateColumn({
+    name: 'updated_at',
+    nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
   })
   updatedAt: Date;

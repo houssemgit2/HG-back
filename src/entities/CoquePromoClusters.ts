@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Cluster } from './Cluster';
 import { CoquePromo } from './CoquePromo';
@@ -23,13 +24,14 @@ export class CoquePromoClusters {
   clusterId: number;
 
   @Column('timestamp', {
-    name: 'createdAt',
+    name: 'created_at',
     default: () => 'CURRENT_TIMESTAMP',
   })
   createdAt: Date;
 
-  @Column('timestamp', {
-    name: 'updatedAt',
+  @UpdateDateColumn({
+    name: 'updated_at',
+    nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
   })
   updatedAt: Date;
@@ -38,7 +40,6 @@ export class CoquePromoClusters {
     () => Cluster,
     cluster => cluster.coquePromoClusters,
     { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
-
   )
   @JoinColumn([{ name: 'cluster_id', referencedColumnName: 'id' }])
   cluster: Cluster;
@@ -47,7 +48,6 @@ export class CoquePromoClusters {
     () => CoquePromo,
     coquePromo => coquePromo.coquePromoClusters,
     { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
-
   )
   @JoinColumn([{ name: 'coque_promo_id', referencedColumnName: 'id' }])
   coquePromo: CoquePromo;

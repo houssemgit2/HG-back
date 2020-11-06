@@ -8,6 +8,7 @@ import {
   PrimaryGeneratedColumn,
   BaseEntity,
   OneToOne,
+  UpdateDateColumn,
 } from 'typeorm';
 
 import * as bcrypt from 'bcrypt';
@@ -60,7 +61,7 @@ export class User extends BaseEntity {
   })
   createdAt: Date | null;
 
-  @Column('datetime', {
+  @UpdateDateColumn({
     name: 'updated_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
