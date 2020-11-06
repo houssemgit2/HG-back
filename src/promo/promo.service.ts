@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { Repository } from 'typeorm';
+import { Repository, Transaction, TransactionRepository } from 'typeorm';
 
 import { User } from 'src/entities/User';
 
@@ -18,11 +18,7 @@ import { PromoMea } from '../entities/PromoMea';
 import { PromoMeaDocumentProvide } from '../entities/PromoMeaDocumentProvide';
 import { PromoMeaEmplacement } from '../entities/PromoMeaEmplacement';
 import { PromoOperationType } from '../entities/PromoType';
-import {
-  convertToCamelCase,
-  arrayEquals,
-  isNotEmptyArray,
-} from '../common/utils/helpers';
+import { convertToCamelCase, isNotEmptyArray } from '../common/utils/helpers';
 import { filterObjectProperty } from '../common/utils/helpers';
 
 import { PromoRepository } from './promo.repository';
@@ -69,9 +65,15 @@ export class PromoService {
       );
     return true;
   }
-  async saveMeaPromo(promoId: number, promo: PromoMeaDto): Promise<any> {
+  @Transaction({ isolation: 'SERIALIZABLE' })
+  async saveMeaPromo(
+    promoId: number,
+    promo: PromoMeaDto,
+    @TransactionRepository(PromoMea) promoMeaRepository?: Repository<PromoMea>,
+    @TransactionRepository(PromoMeaEmplacement)
+    promoMeaEmplacementRepository?: Repository<PromoMeaEmplacement>,
+  ): Promise<any> {
     try {
-      // TODO transaction is required here
       await this.validPromoType('MEA', promoId);
       if (isNotEmptyArray(promo.promo_mea_emplacements)) {
         // validate if the promo mea emplacement are the same   in Remuneration product unity fixed amount has emplacement
@@ -83,8 +85,8 @@ export class PromoService {
         );
         this.logger.verbose('promoMEa emplacment list ==> ');
         console.log(emplacementList);
-        await this.promoMeaEmplacementRepository.delete({ promoId });
-        await this.promoMeaEmplacementRepository.save(emplacementList);
+        await promoMeaEmplacementRepository.delete({ promoId });
+        await promoMeaEmplacementRepository.save(emplacementList);
       }
       if (promo.document_provide_types) {
         // const test = await this.promoMeaDocumentProvide.delete({ promoId });
@@ -102,7 +104,7 @@ export class PromoService {
       console.log(promo);
       const camelPromo = convertToCamelCase(promo);
       console.log(camelPromo);
-      const created = await this.promoMeaRepository.save({
+      const created = await promoMeaRepository.save({
         promoId,
         ...camelPromo,
       });
@@ -123,18 +125,26 @@ export class PromoService {
       throw new InternalServerErrorException(e);
     }
   }
-  async createPromoType(typeIds: number[], promoId?: number) {
+  @Transaction({ isolation: 'SERIALIZABLE' })
+  async createPromoType(
+    typeIds: number[],
+    promoId?: number,
+    @TransactionRepository(Promo) promoRepository?: Repository<Promo>,
+
+    @TransactionRepository(PromoOperationType)
+    promoOperationTypeRepository?: Repository<PromoOperationType>,
+  ) {
     try {
       if (!promoId)
-        await this.promoRepository.save({ gammeId: null }).then(promo => {
+        await promoRepository.save({ gammeId: null }).then(promo => {
           promoId = promo.id;
         });
-      else await this.promoOperationTypeRepository.delete({ promoId });
+      else await promoOperationTypeRepository.delete({ promoId });
       const promoTypes = typeIds.map(item => ({
         operationTypeId: item,
         promoId,
       }));
-      return this.promoOperationTypeRepository.save(promoTypes).then(data => ({
+      return promoOperationTypeRepository.save(promoTypes).then(data => ({
         promoId,
         promoOperationTypeId: data.map(item => item.operationTypeId),
       }));
@@ -171,14 +181,28 @@ export class PromoService {
       throw new InternalServerErrorException(e);
     }
   }
-  async duplicatePromo(promoId: number) {
+  @Transaction({ isolation: 'SERIALIZABLE' })
+  async duplicatePromo(
+    promoId: number,
+    @TransactionRepository(Promo) promoRepository?: Repository<Promo>,
+    @TransactionRepository(PromoAchat)
+    promoAchatRepository?: Repository<PromoAchat>,
+    @TransactionRepository(PromoMea) promoMeaRepository?: Repository<PromoMea>,
+    @TransactionRepository(PromoMeaEmplacement)
+    promoMeaEmplacementRepository?: Repository<PromoMeaEmplacement>,
+    @TransactionRepository(PromoConso)
+    promoConsoRepository?: Repository<PromoConso>,
+    @TransactionRepository(PromoOperationType)
+    promoOperationTypeRepository?: Repository<PromoOperationType>,
+    @TransactionRepository(PromoCluster)
+    promoClusterRepository?: Repository<PromoCluster>,
+  ) {
     try {
-      // TODO  we need transaction here
       const promo = await this.getPromoById(promoId, false);
       delete promo.id;
       delete promo.createdAt;
       delete promo.updatedAt;
-
+      delete promo.statusId;
       const promoAchat: PromoAchat = promo.promoAchat;
       delete promo.promoAchat;
 
@@ -187,26 +211,23 @@ export class PromoService {
 
       const promoMea: PromoMea = promo.promoMea;
       delete promo.promoMea;
-      const promoMeaEmplacements: PromoMeaEmplacement[] = promoMea
-        ? promoMea.promoMeaEmplacements
-        : undefined;
-      if (promoMea) delete promoMea.promoMeaEmplacements;
+      const promoMeaEmplacements: PromoMeaEmplacement[] =
+        promoMea?.promoMeaEmplacements;
+
+      delete promoMea?.promoMeaEmplacements;
       const promoType: PromoOperationType[] = promo.promoType;
       delete promo.promoType;
 
       const promoClusters: PromoCluster[] = promo.promoClusters;
       delete promo.promoClusters;
-      // const storePromoMeas: StorePromoMea[] = promo.storePromoMeas;
-      // delete promo.storePromoMeas;
-
-      const duplicatedPromo = await this.promoRepository.save(promo);
+      const duplicatedPromo = await promoRepository.save(promo);
       if (promoAchat)
-        await this.promoAchatRepository.save({
+        await promoAchatRepository.save({
           ...promoAchat,
           promoId: duplicatedPromo.id,
         });
       if (promoMea)
-        await this.promoMeaRepository.save({
+        await promoMeaRepository.save({
           ...promoMea,
           promoId: duplicatedPromo.id,
         });
@@ -214,15 +235,15 @@ export class PromoService {
         promoMeaEmplacements.forEach(
           item => (item.promoId = duplicatedPromo.id),
         );
-        await this.promoMeaEmplacementRepository.save(promoMeaEmplacements);
+        await promoMeaEmplacementRepository.save(promoMeaEmplacements);
       }
       if (promoConso)
-        await this.promoConsoRepository.save({
+        await promoConsoRepository.save({
           ...promoConso,
           promoId: duplicatedPromo.id,
         });
       if (isNotEmptyArray(promoType))
-        await this.promoOperationTypeRepository.save(
+        await promoOperationTypeRepository.save(
           promoType.map(
             (item): PromoOperationType => {
               item.promoId = duplicatedPromo.id;
@@ -232,7 +253,7 @@ export class PromoService {
         );
 
       if (isNotEmptyArray(promoClusters))
-        await this.promoClusterRepository.save(
+        await promoClusterRepository.save(
           promoClusters.map(
             (item): PromoCluster => {
               item.promoId = duplicatedPromo.id;
@@ -253,13 +274,15 @@ export class PromoService {
       throw new InternalServerErrorException(e);
     }
   }
-
+  @Transaction({ isolation: 'SERIALIZABLE' })
   async saveGeneralParams(
     promoId: number,
     body: PromoGeneralPromoDto,
+    @TransactionRepository(Promo) promoRepository?: Repository<Promo>,
+    @TransactionRepository(PromoCluster)
+    promoClusterRepository?: Repository<PromoCluster>,
   ): Promise<Promo> {
     try {
-      // TODO add transaction
       const promoClusters: PromoCluster[] = body.clusters_id.map(item => {
         const promoCluster = new PromoCluster();
         promoCluster.promoId = promoId;
@@ -267,7 +290,7 @@ export class PromoService {
         return promoCluster;
       });
 
-      await this.promoClusterRepository.save(promoClusters);
+      await promoClusterRepository.save(promoClusters);
       const promo = {
         id: promoId,
         ...convertToCamelCase(body),
@@ -276,7 +299,7 @@ export class PromoService {
         item => item.propertyName,
       );
       filterObjectProperty(promo, promoColumnsNames);
-      return await this.promoRepository.save(promo);
+      return await promoRepository.save(promo);
     } catch (e) {
       throw new InternalServerErrorException(e);
     }
@@ -290,13 +313,16 @@ export class PromoService {
       throw new InternalServerErrorException(e);
     }
   }
-
-  async delete(id: number) {
+  @Transaction({ isolation: 'SERIALIZABLE' })
+  async delete(
+    id: number,
+    @TransactionRepository(Promo) promoRepository?: Repository<Promo>,
+    @TransactionRepository(StorePromoMea)
+    storePromoMeaRepository?: Repository<StorePromoMea>,
+  ) {
     try {
-      // TODO  to do we need transaction here
-
-      await this.storePromoMeaRepository.softDelete({ promoId: id });
-      return await this.promoRepository.softDelete(id);
+      await storePromoMeaRepository.softDelete({ promoId: id });
+      return await promoRepository.softDelete(id);
     } catch (err) {
       throw new InternalServerErrorException(err);
     }
