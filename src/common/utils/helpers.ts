@@ -16,7 +16,7 @@ import * as rimraf from 'rimraf';
 
 import * as moment from 'moment';
 import { getConnection } from 'typeorm';
-import { Actions } from '../../entities/Actions';
+import { Actions } from 'src/entities/Actions';
 
 const fsPromises = fs.promises;
 export const isNotEmptyArray = (array: any): boolean =>
