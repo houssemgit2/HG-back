@@ -3,7 +3,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 export class ProductTableIndex1599063529859 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<any> {
     await queryRunner.query(
-      'ALTER TABLE `hg_promo_beta`.`product` ADD INDEX `product_measure_type_id_fk` (`measure_type_id`);',
+      'ALTER TABLE `product` ADD INDEX `product_measure_type_id_fk` (`measure_type_id`);',
     );
   }
 
