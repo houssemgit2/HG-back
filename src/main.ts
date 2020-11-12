@@ -49,14 +49,14 @@ async function bootstrap() {
   const port = process.env.PORT || config.port;
   await app.listen(port);
   console.log(`
-  .       .       
-  \`-"'"-'/       
-   } 6 6 {        
-  ==. Y ,==       
-    /^^^\  .      
-   /     \  )     
-  (  )-(  )/     _
-  -""---""-
+  .       .         .       .       
+  \`-"'"-'/         \`-"'"-'/       
+   } 6 6 {           } 9 9 {        
+  ==. Y ,==         ==. y ,==  .     
+    /^^^\  .          /^^^\   (     
+   /     \  )        /     \  )     
+  (  )-(  )/     _  (  )-(  )/     _
+  -""---""-         -""---""-
 `);
   logger.verbose(`Application listening in port ${port}`);
 }

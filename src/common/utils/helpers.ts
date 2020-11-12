@@ -15,6 +15,8 @@ import * as archiver from 'archiver';
 import * as rimraf from 'rimraf';
 
 import * as moment from 'moment';
+import { getConnection } from 'typeorm';
+import { Actions } from '../../entities/Actions';
 
 const fsPromises = fs.promises;
 export const isNotEmptyArray = (array: any): boolean =>
@@ -30,7 +32,7 @@ export function arrayEquals(arr1: any[], arr2: any[]): boolean {
 }
 export function convertToSnakeCase(result) {
   const { isObject, isArray } = _;
-  if (isArray(result) && result.every(item=>isObject(item))) {
+  if (isArray(result) && result.every(item => isObject(item))) {
     return result.map(innerObj => snakeCaseKeys(innerObj));
   } else if (isObject(result)) {
     return snakeCaseKeys(result);
@@ -141,4 +143,19 @@ export function objectCorresp(
     originalObject[newKeys[index]] = originalObject[oldKeys[index]];
   });
   return originalObject;
+}
+export async function recordAction(req, actionType: string) {
+  const action: any = {};
+  action.userId = req.user.id;
+  action.actionType = actionType;
+  action.browser = req.headers['user-agent'];
+  action.ip =
+    req.headers['x-forwarded-for'] || req.ip || req.connection.remoteAddress;
+  return await getConnection()
+    .getRepository(Actions)
+    .save(action)
+    .catch(e => {
+      console.error('error on recording action ', actionType);
+      console.error(e);
+    });
 }

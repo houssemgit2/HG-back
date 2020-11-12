@@ -52,6 +52,7 @@ import { Support } from './Support';
 import { SupportFile } from './SupportFile';
 import { User } from './User';
 import { UserRole } from './UserRole';
+import { Actions } from './Actions';
 
 const entities = [
   Brand,
@@ -108,5 +109,6 @@ const entities = [
   MeasureType,
   PromoMeaDocumentProvide,
   StorePromoMeaStateType,
+  Actions,
 ];
 export default entities;

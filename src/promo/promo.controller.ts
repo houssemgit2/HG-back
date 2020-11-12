@@ -84,6 +84,7 @@ import { PromoAchatDto } from './dto/promo.achat.dto';
 import { SavePromoTypeDto } from './dto/save-promo-types.dto';
 import { SaveSelectedDto } from './dto/save-selected.dto';
 import { PromoMeaEmplacementValidationPipe } from '../common/pipes/promo/promo-mea-emplacment.pipe';
+import { recordAction } from 'src/common/utils/helpers';
 const multerOptionsForMeaExcel: MulterOptions = multerOptions(
   /xlsm|xlsx|xlsb|xls|xla|xlml|ods|csv|.xlsx|csv/,
   `${__dirname}/../uploads/mea-state/`,
@@ -190,10 +191,16 @@ export class PromoController {
   @Post('generate/promos')
   @Header('Content-Type', 'image/pdf')
   @Header('Content-Disposition', 'attachment; filename=promos.pdf')
-  async generatePromos(@Body() body: GeneratePdfPromosDto, @Res() response) {
+  async generatePromos(
+    @Body() body: GeneratePdfPromosDto,
+    @Res() response,
+    @Req() req: any,
+    @UserReq() user: User,
+  ) {
     const file: string = await this.pdfPromoGeneratorService.generatePDF(
       body.promos,
     );
+    recordAction({ ...req, user }, 'ticket');
     return fs.createReadStream(file).pipe(response);
   }
 

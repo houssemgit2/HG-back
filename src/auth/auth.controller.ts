@@ -4,7 +4,6 @@ import {
   Body,
   UseGuards,
   Req,
-  Next,
   Logger,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -22,6 +21,9 @@ import {
 } from '@nestjs/swagger';
 import { UserReq } from './get-user.decorator';
 import { AdminGuard } from './guards/admin.guard';
+import { Actions } from '../entities/Actions';
+import { getConnection } from 'typeorm';
+import { recordAction } from 'src/common/utils/helpers';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -31,6 +33,7 @@ export class AuthController {
 
   @ApiOperation({ summary: 'Register new user' })
   @ApiResponse({ status: 200, description: 'Return the new user parameters' })
+  @UseGuards(AuthGuard(), AdminGuard)
   @Post('register')
   async register(@Body() userCredentialDto: UserCredentialDto): Promise<User> {
     this.logger.verbose(
@@ -50,9 +53,14 @@ export class AuthController {
   @Post('login')
   signIn(
     @Body() loginCredentialDto: LoginCredentialDto,
+    @Req() req: any,
   ): Promise<{ accessToken: string }> {
     this.logger.verbose(`user is connecting... ${loginCredentialDto.email}`);
-    return this.authService.login(loginCredentialDto);
+    return this.authService.login(loginCredentialDto).then(data => {
+      const action = recordAction({ ...req, user: data.user }, 'login');
+      console.log(action);
+      return data;
+    });
   }
 
   @ApiBearerAuth()
