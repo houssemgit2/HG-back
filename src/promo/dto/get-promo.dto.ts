@@ -45,11 +45,11 @@ export class GetPromoDto extends PaginationDto {
   @Transform(value => JSON.parse(value))
   toDownloadPdf: boolean;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, type: Boolean })
   // @Type(() => Boolean)
   @Transform(value => JSON.parse(value))
   csv = false;
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, type: Boolean })
   // @Type(() => Boolean)
   @Transform(value => JSON.parse(value))
   for_calendar = false;
