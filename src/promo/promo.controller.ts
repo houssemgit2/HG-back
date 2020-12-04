@@ -403,7 +403,7 @@ export class PromoController {
   @ApiTags('Store-Promo-Mea')
   @Post('promo-mea/:id')
   @UseInterceptors(FileInterceptor('justif', meaS3MulterOptions))
-  @ApiFile('justif')
+  @ApiFile('justif') // TODO make sure 400 not 500 in bad file type
   @UseGuards(AuthGuard(), StorePromoMeaGuard, StoreAdminGuard)
   async uploadPromoMeaProofImage(
     @UploadedFile() file,

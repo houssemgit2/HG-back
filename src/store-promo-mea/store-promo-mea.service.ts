@@ -289,6 +289,9 @@ export class StorePromoMeaService {
     if (filter.store_id) {
       sqlQuery.andWhere('sp.storeId = :storeId', { storeId: filter.store_id });
     }
+    if (filter.promo_id) {
+      sqlQuery.andWhere('sp.promoId = :promoId', { promoId: filter.promo_id });
+    }
     if (filter.circuit_vers) {
       sqlQuery.andWhere(
         'repaymentCircuitType.name = :repaymentCircuit or repaymentCircuitType.id = :repaymentCircuitId',
@@ -301,6 +304,7 @@ export class StorePromoMeaService {
     if (filter.perPage && filter.page) {
       sqlQuery.skip(filter.perPage * (filter.page - 1)).take(filter.perPage);
     }
+    
     try {
       // return await this.storePromoMeaRepository.find();
       if (promoId)
@@ -319,6 +323,7 @@ export class StorePromoMeaService {
       //   throw new NotFoundException('there is no promos with this filters');
       if (withTotalItem) return { data: promos, totalItem };
       return promos;
+
     } catch (e) {
       throw new InternalServerErrorException(e, 'error during fetch promos');
     }

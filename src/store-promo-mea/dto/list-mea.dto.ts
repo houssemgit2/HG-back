@@ -65,6 +65,13 @@ export class ListMeaDto extends PaginationDto {
   @IsNumber()
   store_id?: number;
 
+  @ApiProperty({ required: false })
+  @Type(() => Number)
+  @IsOptional()
+  @IsNumber()
+  promo_id?: number;
+
+
   @ApiProperty({ required: false, type: Boolean })
   @Type(() => Boolean)
   @IsOptional()
