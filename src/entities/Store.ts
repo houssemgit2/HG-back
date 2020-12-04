@@ -20,11 +20,14 @@ import { User } from './User';
 @Index('store_cluster_id_fk', ['clusterId'], {})
 @Entity('store', { schema: 'hg_promo_beta' })
 export class Store extends BaseEntity {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'cip' })
-  cip: number;
+  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
+  id: number;
 
   @Column('int', { name: 'cluster_id' })
   clusterId: number;
+
+  @Column('int', { name: 'cip' })
+  cip: number;
 
   // @Column('int', { name: 'owner_id' })
   // ownerId: number;
