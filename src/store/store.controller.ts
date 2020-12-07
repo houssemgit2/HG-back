@@ -45,7 +45,7 @@ export class StoreController {
     const addedStore = await this.storeService
       .createOne(store, owner, permissions)
       .then(newStore => {
-        this.emitter.emit('storeCreated', newStore.clusterId, newStore.cip);
+        this.emitter.emit('storeCreated', newStore.clusterId, newStore.id);
         return this.storeService.storeV1Key(newStore);
       });
     // console.log('-*-*-*-*-*-*-*-*-*>', addedStore);

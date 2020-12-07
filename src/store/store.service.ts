@@ -67,7 +67,7 @@ export class StoreService implements OnModuleInit {
     store.cip = addStore.cip;
     store.name = addStore.descr;
     const newOwner: User = new User();
-    newOwner.storeId = addStore.cip;
+    newOwner.storeId = addStore.id;
     newOwner.firstName = owner.fst_name;
     newOwner.lastName = owner.lst_name;
     newOwner.email = owner.email;
@@ -96,7 +96,7 @@ export class StoreService implements OnModuleInit {
       console.log('resource ', resourceId);
       permis.resourceId = resourceId.id;
       permis.allow = item.allow;
-      permis.storeId = store.cip;
+      permis.storeId = store.id;
       return permis;
     });
     const result = await this.storeRepository.add(

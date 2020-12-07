@@ -141,7 +141,7 @@ export class StorePromoMea extends BaseEntity {
     store => store.storePromoMeas,
     { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
   )
-  @JoinColumn([{ name: 'store_id', referencedColumnName: 'cip' }])
+  @JoinColumn([{ name: 'store_id', referencedColumnName: 'id' }])
   store: Store;
 
   @ManyToOne(

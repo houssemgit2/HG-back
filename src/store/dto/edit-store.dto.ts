@@ -10,7 +10,6 @@ export class EditStoreDto {
   @IsNumber()
   @IsOptional()
   clu_id: number;
-
   @ApiProperty({ required: true })
   @MaxLength(255)
   @IsOptional()

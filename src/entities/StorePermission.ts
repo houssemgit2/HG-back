@@ -46,7 +46,7 @@ export class StorePermission extends BaseEntity {
     store => store.storePermissions,
     { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
   )
-  @JoinColumn([{ name: 'store_id', referencedColumnName: 'cip' }])
+  @JoinColumn([{ name: 'store_id', referencedColumnName: 'id' }])
   store: Store;
 
   @ManyToOne(

@@ -13,7 +13,10 @@ export class AddStoreDto {
     { entityName: 'store', entity: Store, key: 'cip' },
   )
   public cip: number;
-
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsNumber()
+  public id: number;
   @ApiProperty()
   @IsNotEmpty()
   @IsNumber()

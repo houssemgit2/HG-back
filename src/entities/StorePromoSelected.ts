@@ -56,6 +56,6 @@ export class StorePromoSelected extends BaseEntity {
     store => store.storePromoSelecteds,
     { onDelete: 'NO ACTION', onUpdate: 'RESTRICT' },
   )
-  @JoinColumn([{ name: 'store_id', referencedColumnName: 'cip' }])
+  @JoinColumn([{ name: 'store_id', referencedColumnName: 'id' }])
   store: Store;
 }

@@ -42,7 +42,7 @@ export class StorePromoMeaRepository extends Repository<StorePromoMea> {
       throw new Error('you must provide a promo_id or store_id or clusterId');
     const searchQuery = getConnection()
       .createQueryBuilder()
-      .select(['store.cip as storeId', 'promoClusters.promoId as promoId'])
+      .select(['store.id as storeId', 'promoClusters.promoId as promoId'])
       .from(Store, 'store')
       .leftJoin('store.clusters', 'clusters')
       .leftJoin('clusters.promoClusters', 'promoClusters')
@@ -54,8 +54,8 @@ export class StorePromoMeaRepository extends Repository<StorePromoMea> {
     try {
       if (storeId) {
         this.logger.verbose('fetching store concerned for the store' + storeId);
-        const byStore = searchQuery.andWhere('store.cip = :cip', {
-          cip: storeId,
+        const byStore = searchQuery.andWhere('store.id = :storeId', {
+          storeId
         });
         const stores = await byStore.getRawMany();
         console.log('stores', stores);
