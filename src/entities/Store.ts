@@ -35,6 +35,25 @@ export class Store extends BaseEntity {
   @Column('varchar', { name: 'name', length: 132 })
   name: string;
 
+  @Column('varchar', { name: 'address', length: 132 })
+  address: string;
+
+  @Column('int', { name: 'vit'})
+  vit: number;
+
+  @Column('varchar', { name: 'rcs', length: 132 })
+  rcs: string;
+
+  @Column('int', { name: 'siret'})
+  siret: number;
+
+  @Column('varchar', { name: 'bank_home', length: 132 })
+  bank_home: string;
+
+  @Column('varchar', { name: 'bank_iban', length: 132 })
+  bank_iban: string;
+
+
   @Column('datetime', {
     name: 'created_at',
     nullable: true,
